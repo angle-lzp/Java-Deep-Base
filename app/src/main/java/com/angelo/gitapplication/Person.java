@@ -10,5 +10,8 @@ public class Person {
 
         System.out.println("everything is ok");
 
+        System.out.println("you are right");
+        System.out.println("you are right after add");
+
     }
 }
