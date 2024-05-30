@@ -24,16 +24,23 @@ public class SocketServerMultipleThread {
     }
 
     private static void handle(Socket socket) throws IOException {
-        //读取通道中的数据
-        InputStream inputStream = socket.getInputStream();
-        byte[] bytes = new byte[1024];
-        int len = inputStream.read(bytes);//读取数据也会被阻塞
-        System.out.println("客户端发送的数据：" + new String(bytes, 0, len));
-        //给客户端发送数据
-        OutputStream outputStream = socket.getOutputStream();
-        outputStream.write("I`m BIO send info!".getBytes());
-        outputStream.flush();
-        inputStream.close();
-        outputStream.close();
+        new Thread(() -> {
+            try {
+                //读取通道中的数据
+                InputStream inputStream = socket.getInputStream();
+                byte[] bytes = new byte[1024];
+                int len = inputStream.read(bytes);//读取数据也会被阻塞
+                System.out.println("客户端发送的数据：" + new String(bytes, 0, len));
+                //给客户端发送数据
+                OutputStream outputStream = socket.getOutputStream();
+                outputStream.write("I`m BIO send info!".getBytes());
+                outputStream.flush();
+                inputStream.close();
+                outputStream.close();
+                System.out.println(Thread.currentThread().getName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }
