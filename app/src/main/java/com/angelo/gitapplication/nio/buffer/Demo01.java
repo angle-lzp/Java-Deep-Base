@@ -19,5 +19,18 @@ public class Demo01 {
         //修改子缓冲区的数据父缓冲也会被影响
         slice.put(0, (byte) 40);
         System.out.println(Arrays.toString(buffer.array()));
+
+        //System.out.println(Optional.empty().get());//NoSuchElementException:No value present
+        //System.out.println(Optional.of(null).get());//NullPointerException
+        //System.out.println(Optional.ofNullable(null).get());//NoSuchElementException:No value present
+
+        //Optional.ofNullable("string").map(String::toUpperCase);
+        //System.out.println(Optional.ofNullable("string").flatMap(value -> Optional.ofNullable(value.toUpperCase())).orElse("No such value"));
+
+        //如果为null不存在（isPresent()=false）,就不会执行map里边的接口函数；以及返回原来的值；
+/*        System.out.println(Optional.ofNullable(null).map(item -> {
+            System.out.println("111");
+            return "CCC";
+        }));*/
     }
 }
