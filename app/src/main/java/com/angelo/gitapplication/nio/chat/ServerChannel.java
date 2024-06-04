@@ -27,9 +27,8 @@ public class ServerChannel {
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);//这个多个客户端连接了，只注册了一次；搞不懂；
         while (true) {
             //等待客户端连接
-            System.out.println("等待客户端连接......");
             int select = selector.select();
-            if (select <= 0) {
+            if (select == 0) {
                 System.out.println("没有客户端连接！");
                 continue;
             }
@@ -43,6 +42,7 @@ public class ServerChannel {
                 if (key.isReadable()) {
                     handleRead(key);
                 }
+                iterator.remove();
             }
         }
     }
@@ -61,10 +61,11 @@ public class ServerChannel {
                 msg += new String(buffer.array(), 0, len, StandardCharsets.UTF_8);
                 buffer.clear();
             }
-            System.out.println("message:" + msg);
+            System.out.println(socketChannel.getRemoteAddress() + " - message:" + msg);
             //将当前数据进行广播
             handleBroadcast(key, msg);
-
+            //将channel再次注册到selector上，让selector对read感兴趣
+            socketChannel.register(selector, SelectionKey.OP_READ);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -76,9 +77,9 @@ public class ServerChannel {
      * @param key
      */
     private static void handleBroadcast(SelectionKey key, String msg) {
-        System.out.println("已有客户端连接");
         Selector selector = key.selector();
-        Set<SelectionKey> selectionKeys = selector.selectedKeys();
+        Set<SelectionKey> selectionKeys = selector.keys();//获取所有的通道
+        //selector.selectedKeys()//获取所有的被监听的channel，如果已经被移除了就不存在了，所以如果需要获取所有的channel需要使用keys()方法；
         Iterator<SelectionKey> iterator = selectionKeys.iterator();
         try {
             while (iterator.hasNext()) {
