@@ -20,6 +20,8 @@ public class Demo04 {
         File file = new File("5.txt");
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
         FileChannel channel = randomAccessFile.getChannel();
+        //通过channel获取文件的大小单位：字节Byte
+        long size = channel.size();
         //此时已经读取到了文件中的数据了
         MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, file.length());
 
