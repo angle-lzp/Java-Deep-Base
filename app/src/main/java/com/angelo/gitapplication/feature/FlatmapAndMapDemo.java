@@ -23,12 +23,14 @@ public class FlatmapAndMapDemo {
 
         //这里需要注意下：
         //flatMap：直接返回的是值，不会对数据进行封装（在Function中返回什么就是什么）
+        //flatMap:函数值接口的Function的入参就是这个Optional中的value
         Optional<City> city2 = angelo.flatMap(Nation::getCity);
         //map：返回的是Optional中，会对数据进行封装
+        //map:函数值接口的Function的入参就是这个Optional中的value(同上)
         Optional<Optional<City>> city1 = angelo.map(Nation::getCity);
 
         System.out.println(DateFormat.getDateInstance().format(new Date()));
-        Calendar calendar =  Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
     }
