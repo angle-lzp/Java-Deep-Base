@@ -2,6 +2,7 @@ package com.angelo.gitapplication.feature;
 
 import android.annotation.SuppressLint;
 
+import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ForkAndJoinDemo {
     public static void main(String[] args) {
+        println();
         int[] arr = new int[400];
         for (int i = 0; i < 400; i++) {
             arr[i] = i + 1;
@@ -24,11 +26,21 @@ public class ForkAndJoinDemo {
         long endTime = System.currentTimeMillis();
         System.out.printf("result：%s，time spend：%s%n", result, endTime - beginTime);
 
-        System.out.println("------------------------------------------------------");
+        println();
         ForkJoinPool forkJoinPool2 = new ForkJoinPool();
         Fibonacci task = new Fibonacci(3);
         int result2 = forkJoinPool2.invoke(task);
         System.out.println("斐波那契数列的第10项为： " + result2);
+        println();
+
+        System.out.println(UUID.randomUUID().toString());
+    }
+
+    public static void println() {
+        for (int i = 0; i < 30; i++) {
+            System.out.print("\ud83c\udf47");
+        }
+        System.out.println();
     }
 }
 
@@ -87,10 +99,10 @@ class Fibonacci extends RecursiveTask<Integer> {
             return n;
         }
         Fibonacci f1 = new Fibonacci(n - 1);
-        System.out.printf("f1 = %d%n",n-1);
+        System.out.printf("f1 = %d%n", n - 1);
         f1.fork();
         Fibonacci f2 = new Fibonacci(n - 2);
-        System.out.printf("f2 = %d%n",n-2);
+        System.out.printf("f2 = %d%n", n - 2);
         return f2.compute() + f1.join();
     }
 }
