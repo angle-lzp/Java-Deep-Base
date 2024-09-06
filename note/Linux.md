@@ -90,9 +90,9 @@ whereis command
 ```linux
 #找到文件/目录位置：cd
 
-#切换当上一个工作目录：cd -
+#切换当上一个工作目录：cd - or cd ..
 
-#切换当home目录：cd or cd ~
+#切换到home目录：cd or cd ~
 
 #显示当前目录：pwd
 
@@ -161,8 +161,18 @@ tail -f a.log
 
 #### 2.6，查找文件内容
 ```linux
-#查找文件内容，有数据就返回一样的，没有就不返回
-grap 'luo' a.log
+#查找文件内容，有数据就返回一样的，有几行返回几行，没有就不返回
+grep 'luo' a.log
+#返回数据在文件中出现的行数
+grep -n "luo" a.log
+
+#查找文件夹中指定内容所在的所有文件，列出所有的文件包括内容在各个文件中的行数
+# r：递归文件夹
+# n：显示数据出现的行数
+grep -rn 'luo' /root #(/root可以换成自己指定的文件夹目录)
+> /root/a.log:5:luo
+  /root/b.log:6:luo
+  /root/b.log:7:luo
 ```
 
 #### 2.7，文件与目录权限修改
@@ -177,16 +187,263 @@ grap 'luo' a.log
 ```
 #### 2.8，给文件增加别名
 ```linux
-#创建符号软链接/硬链接
+#创建符号软链接(软链接)/硬链接
+#模板
+ln [选项] 源文件 目标文件    #源文件：实际存在的文件；目标文件：创建链接的文件
 
-#硬链接，删除一个，将仍能找到
-ln cc ccAgain
+#硬链接，删除一个，将仍能找到；删除了源文件，链接文件不受影响，更改任意一个链接文件，其他的链接文件也会被修改，但是源文件不会恢复；
+ln cc ccAgain   #硬链接 ccAgain是一个单独的文件
+ln 源文件.txt 链接文件.txt
 
-#符号链接(软链接)；删除源，另外一个无法使用
-ln -s cc ccTo
+#符号链接(软链接)；删除源文件，其他的链接文件也会跟着删除；重新创建相同名字的链接文件会自动生成对应的源文件，只是是全新的没有数据；
+ln -s cc ccTo   #软链接格式：ccTo->cc
+ln -s 源文件.txt 链接文件.txt
 ```
 #### 2.9，管道和重定向
 >1）批处理命令连接执行，使用 |  
     2）串联：使用分号;  
     3）前面成功，则执行后面一条，否则，不执行：&&  
     4）前面失败，则执行后一条：||  
+```linux
+#&&、||
+#查看proc文件夹中的列表，存在返回suss信息，不存在返回fail信息；逻辑运算符的顺序和Java开发中是一样的 && > ||
+ls /proc && echo suss!! || echo fail!!  
+
+#同理
+if ls /proc; then echo suss; else echo fail; fi
+```
+```linux
+#重定向
+
+#模板：
+#shell指令 > 标准正确输出文件 2> 标准错误输出文件 (2>：是这种写法)
+
+#示例：将ls -al /roots 的列表输出,正确的话写入list文件中，错误的写入到error文件中
+ls -al /root2 > list 2> error
+
+#注：如果需要将标准输出和标准错误输出都写入到list中，使用 2>$1 (&后面的是1(数字1，不是字母L)，并且它们是一体的，中间不能有空格)
+ls -al /root2 > list 2>&1
+#等价：
+ls -al /root2 &> list
+```
+```linux
+#清空文件
+:> a.txt
+```
+```linux
+#重定向(将数据换行追加到文件末尾)
+echo aa >> a.txt
+
+#覆盖文件中原有的数据
+ehco cc > a.txt
+```
+#### 2.10，设置环境变量
+#### 2.11，Bash快捷输入或删除
+###### 快捷键
+> Ctl-U   删除光标到行首的所有字符,在某些设置下,删除全行  
+Ctl-W   删除当前光标到前边的最近一个空格之间的字符  
+Ctl-H   backspace,删除光标前边的字符  
+Ctl-R   匹配最相近的一个文件，然后输出  
+#### 2.12，综合应用
+```linux
+#找到a.txt中每行包含sql，单不好含mysql的记录行的总数
+cat -v a.txt | grep sql | grep -v mysql | wc -l
+
+#cat -v 中的-v表示 "show nonprinting characters"，即显示文件中的非打印字符(类似于换行这些)
+#grep -v 中的-v表示 "invert match"，即反转匹配，就是不匹配后面的数据
+```
+### 3，文本处理
+#### 3.1，find文件查找
+```linux
+#查找txt和pdf类型的文件
+
+find . \( -name "*.txt" -o -name "*.pdf" \) -print
+
+#注：.：表示当前目录下以及子目录
+    "\("、"\)"：是一体的不要和其他的指令连着写，否者无效
+    -print：使用print函数打印出目录，不使用也是可以的，也一样会打印
+```
+```linux
+#使用正则表达式查找.txt和.pdf文件
+
+find . -regex ".*\(\.txt|\.pdf\)$"
+
+#注：.：表示当前目录下以及子目录
+
+#-iregex：可以忽略大小写的正则
+```
+```linux
+#否定参数，查找所有非txt文件
+
+find . ! -name "*.txt" -print
+```
+```linux
+#指定搜索深度打印出当前目录的文件（例如：深度为1）
+
+find . -maxdepth 1 -type f
+
+#注：.：表示当前目录下(包括子目录以及子目录的子目录，一直往下)
+    -maxdepth 1：搜索的深度为当前目录下
+    -type f：只搜索文件，不包括目录和其他类型的文件
+    -type d：是搜索目录
+    -type l：符号链接（L）
+
+#注：1：表示深度，如果等于1：深度就是当前目录下；如果等于2：深度就会到子文件夹中；3：深度会到子子文件夹中；往后同理
+```
+###### 定制搜索
+* 按文件类型搜索
+```linxu
+#只列出所有的目录
+find . -type d -print
+
+#只列出所有的文件
+find . -type f -print
+
+#只列出所有的文件（L）
+find . -type l -print
+
+#列出所有的文件和目录
+find .
+```
+```linux
+#查找本地目录下所有的二进制文件
+ls -lrt | awk '{print $9}'|xargs file|grep  ELF| awk '{print $1}'|tr -d ':'
+
+#参考数据：二进制文件和文本文件的区分
+$file redis-cli  # 二进制文件
+redis-cli: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.9, not stripped
+$file redis.pid  # 文本文件
+redis.pid: ASCII text
+```
+* 按文件时间搜索
+> -atime：访问时间(单位是天，分钟单位则是-amin，以下类似)  
+-mtime：修改时间(内容被修改) 单位是天，-mmin：分钟
+-ctime：变化时间(元数据或权限变化) 单位是天，-cmin：分钟
+注：一个是内容修改，一个是元数据或权限的变化，需要加以区分
+```linux
+#最近第7天被访问的所有文件：第7天 -> 7
+find . -atime 7 -type f -print
+```
+```linux
+#最近7天内被访问过的所有文件：7天内 -> -7
+find . -atime -7 -type f -print
+```
+```linux
+#查询7天前被访问过的所有文件：7天前 -> +7
+find . -atime +7 -type f -print
+```
+* 按文件大小搜索
+```linux
+#搜索文件大小大于2k的所有文件
+find . -type f -size +2k
+
+#注：c：Byte
+     k：KB
+     M：MB
+     G：GB
+```
+* 按权限查找
+```linux
+#找具有可执行权限的所有文件
+find . -type f -perm 644 -print 
+```
+* 按用户查找
+```linux
+#找具有可执行权限的所有文件
+find . -type f -user username -print 
+```
+###### 找到后的后续动作
+* 删除
+```linux
+#删除当前目录下所有pdf类型的文件
+find . -type f -name "*.pdf" -delete
+
+#另外一种语法
+find . -type f -name "*.pdf" | xargs rm
+```
+* 执行动作（强大的exec）
+```linux
+#将当前目录下的文件的所有权变更为weber(注意有：{} \;)
+find . -type f -user root -exec chown weber {} \;
+
+#注：{}是一个特色的字符串，对于每一个匹配的文件，{}会被替换成对应的文件名
+```
+```linux
+#在当前目录下将修改时间大于10天且后缀是pdf的所有文件复制到另外一个目录(other_dir这个目录下)
+find . -type f -mtime +10 -name "*.pdf" -exec cp {} other_dir \;
+```
+* 结合多个命令
+```linux
+#如果后续需要执行多个命令，可以将多个命令写成一个脚本，然后在-exce调用时执行脚本即可
+...... -exec ./command.sh {} \;
+
+---------------------------------------------------------
+eg:
+#command.sh
+#!/bin/bash
+# 这是一个示例脚本，用于执行多个命令
+
+# 打印当前目录
+echo "当前目录："
+pwd
+
+# 列出当前目录下的所有文件和文件夹
+echo "文件和文件夹列表："
+ls -l
+
+# 创建一个新文件
+touch newfile.txt
+
+# 显示新创建的文件的内容
+cat newfile.txt
+---------------------------------------------------------
+#执行指令
+find . -type f -name "*.txt" -exec ./command.sh {} \;
+---------------------------------------------------------
+```
+* -print的定界符
+```linux
+#默认使用'\n'换行作为定界符
+
+-print0 表示使用'\0'作为文件的定界符，打印出来的数据就不会换行了，这样可以搜索包含空格的文件
+
+#eg:
+find . -type f printO
+```
+#### 3.2，grep文本搜索
+```linux
+#默认访问匹配行(就是一行一行的进行匹配)
+
+#模板
+grep match_pattern file
+```
+###### 常用参数
+> -o：只输出匹配的文本行  
+> -v：只输出没有匹配的文本行  
+> -c：统计文件中包含文本的次数  
+    grep -c "text" a.txt  (统计text在a.txt中出现的次数)  
+> -n：打印匹配的行号  
+> -i：搜索是忽略大小写  
+> -l：纸打印文件名称  
+```linux
+#在多级目录中对文件夹递归搜索文本（俺们程序员的最爱）
+grep "class" . -r -n    #文件或路径必须在搜索内容后面，例如："class" .(.点表示当前目录下)
+```
+```linux
+#匹配多个模式：-e（或的意思）
+grep -e "sql" -e "mysql" a.txt
+```
+```linux
+#grep输出以0作为结尾符的文件名（-z）(-0处理特殊字符的文件名称，然后使用rm进行删除)
+grep "sql" a.txt -lz | xargs -0 rm
+```
+```linux
+#综合应用：将多个日志文件中的所有带where条件的sql查找出来放入b文件之宏
+cat LOG.* | tr a-z A-Z | grep "FROM" | grep "WHERE" > b
+```
+```linux
+#查找中文示例：工程目录中utf-8格式和gb2312格式两种文件，要查找字的是中文；
+#查找到它的utf-8编码和gb2312编码分别是E4B8ADE69687和D6D0CEC4
+grep -rnP "\xE4\xB8\xAD\xE6\x96\x87|\xD6\xD0\xCE\xC4"
+```
+#### 3.3，xargs命令行参数转换
