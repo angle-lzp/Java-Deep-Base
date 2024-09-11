@@ -650,7 +650,7 @@ echo 1234 | tr "0-9" "9876543210"
 cat data.txt | tr -d '0-9'
 ```
 ```linux
-# -c 求补集
+# -c 选项表示压缩模式，只保留指定的字符集。
 
 #获取文件中所有数字
 cat data.txt | tr -c '0-9'
@@ -686,7 +686,7 @@ cut -d " " -f2,4 data.txt
     -f2,4：表示截取文件中的第2列和第4列；（下标从1开始）
 ```
 ```linux
-#去除文件除了第3列的所有的列（只保留第3列）
+#去除文件除了第3列的所有的列（只保留第3列）(complement:补充、补足)
 cut -f3 --complement data.txt
 ```
 ```linux
@@ -701,7 +701,7 @@ cut -f2 -d ";" data.txt
 * cut取的单位
   * -b：以字节为单位
   * -c：以字符为单位
-  * -f：以字段为单位（需要使用定界符分隔 -d）
+  * -f：以字段为单位（需要使用定界符分隔 -d，字段 一段一段的；）
 ```linux 
 #以字段为单位 截取第2个字符到的结尾，以空格分隔
 #数据：echo 1 2 3 4 5 6 > data.txt
@@ -950,7 +950,7 @@ out:a\nd
 #行号在1和4之间的数据打印出来，用,隔开；{print}加不加都可以，一样会打印；
 awk 'NR==1,NR==4 {print}' data.txt
 out：a\nb\nc\nd
-#注：如果NR==1,NR==4,NR==5,... 超过了两个，那么就去第一个的数据NR==1的数据
+#注：如果NR==1,NR==4,NR==5,... 超过了两个，那么就取第一个的数据NR==1的数据
 
 #包含linux文本的行（可以用正则表达式来指定，超级强大）
 awk '/linux/' data.txt
@@ -1009,3 +1009,295 @@ awk 'NR<=10{print}' error.log
 awk '{info[NR%10]=$0;num=NR%10;} END{for(i=num+1;i<num+11;i++)print(info[i])}' error.log
 ```
 ###### 打印指定列
+```linux
+#awk方式实现，获取第6个字段的数据（下标1开始）
+ls -lrt | awk '{print $6}'
+```
+```linux
+#cut方式实现，获取第6个字段的数据（下标1开始）
+ls -lrt | cut -f6
+```
+###### 打印指定文本区域
+```linux
+#确定行号，打印第2到第4行的数据，注意用的是逗号,表示的范围；如果用的是分号;则表示单个（可参考awk上面的案例）
+seq 100 | awk 'NR==2,NR==4 {print}'
+```
+```linux
+#确定文本，打印处在文本10和21之间的数据[10,21]
+seq 100 | awk '/10/,/21/'
+
+#注：会匹配每一组完整出现的[10,21]中的数据；
+  例如：10 11 21 22 21：输出：10 11 21
+  例如：10 11 21 22 10 34 56 21：输出：10 11 21 10 34 56 21
+```
+###### awk常用内建函数
+```text
+只能在awk中使用
+```
+
+>1.index(string,search_string)：返回search_string在string中出现的位置;(下标从1开始) 
+>2.sub(regex,replacement_str,string)：将正则表达式匹配的第一处内容替换为replacement_str;  
+>3.match(string,regex)：检查正则表达式是否能够匹配字符串  
+>4.length(string)：返回字符串长度  
+>5.substr(string,index,length)：截取字符串，string原字符串数据；index截取的下标；length：截取的长度；（下标从1开始）
+
+```linux
+#length：输出/etc/passwd中包含root行数据的长度
+echo | awk '{"grep root /etc/passwd" | getline cmdout; print(length(cmdout))}'
+
+#index
+echo | awk '{print(index("str","string"));}'
+
+#sub
+echo string | awk '{sub(/s/,"luo",$0);print;}'
+
+#match
+echo | awk '{print match("string",/[a-z]+/)}'
+true：返回第一个匹配的位置（下标从1开始）；匹配到了就是返回>0的
+false：返回0
+```
+```linux
+#printf类似C语言中的printf，对输出进行格式化
+seq 10 | awk '{printf "->%4s\n",$1}'
+out
+->    1
+->    2
+...同理...
+```
+#### 3.12，迭代文件中的行、单词、字符
+###### 1.迭代文件中的每一行
+```linux
+#while 循环法，读取每一行
+cat data.txt | (while read line;do echo $line;done)
+```
+```linux
+#awk方式
+cat data.txt | awk '{print}'
+```
+###### 2.迭代一行中的每一个单词
+```linux
+#while、for循环的写法
+cat data.txt | (while read line;do for word in $line;do echo -n $word;done;echo;done;)
+#注：-n：表示echo不换行；读完一整行后再执行一个echo换行；
+
+#awk方式
+cat data.txt | awk '{for(i=1;i<=NF;i++)printf "->%s\t",$i;print("");}'
+```
+###### 3.迭代每一个字符
+```linux
+# ${string:start_pos:num_of_chars}：从字符串中提取一个字符；(bash文本切片）
+# ${#word}:返回变量word的长度
+# 使用常规的while和for方式，有问题；可以试试在其他linux系统上看看
+cat data.txt | while read line; do
+  for word in $line; do
+    for ((i=0; i<${#word}; i++)); do
+      echo ${word:$i:1}
+    done
+  done
+done
+
+#使用awk方式
+awk '{for(i=1;i<=length($0);i++)printf substr($0,i,1);print("")}' data.txt  
+
+#使用tr、fold方式（去除空格，打印每一个字符并换行）
+cat data.txt | tr -d '[:space:]' | fold -w1 #(1：是数字1，不是L)
+
+解析：
+echo 命令用于输出文本内容。
+tr -d '[:space:]' 用于删除所有空格字符。
+fold -w1 用于将每行文本折叠成单个字符，每个字符占一行。（如果需要二个字符占一行可以使用-w2）
+```
+### 4，磁盘管理
+#### 4.1，查看磁盘空间
+```linux
+#查看磁盘空间利用大小
+df -h
+
+#注：-h：human缩写，以易读的方式显示结果（即带单位：比如M/G，如果不加这个参数，显示的数字以B为单位）
+
+$df -h
+/opt/app/todeav/config#df -h
+Filesystem            Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup00-LogVol00
+2.0G  711M  1.2G  38% /
+/dev/mapper/vg1-lv2    20G  3.8G   15G  21% /opt/applog
+/dev/mapper/vg1-lv1    20G   13G  5.6G  70% /opt/app
+```
+```linux
+#查看当前目录所占空间大小
+du -sh
+out:1.0M
+
+#注：-h：人性化显示
+    -s：递归整个目录的大小
+```
+```linux
+#查看当前目录下所有子文件夹和文件排序后的大小
+#方式一：
+du -sh `ls` | sort  #：ls用的是反引号``
+
+#方式二：
+for i in `ls`;do du -sh $i; done | sort   #注意done后面没有分号;
+```
+#### 4.2，打包/压缩
+```text
+在linux中打包和压缩是分两部来实现的
+
+1.先打包   -   后压缩
+2.先解压缩 -   后解包
+
+```
+###### 打包
+```linux
+#打包是将多个文件归到一个文件
+tar -cvf etc.tar /etc     #仅打包，不压缩
+
+# -c：打包选项
+# -v：显示打包进度
+# -f：使用档案文件
+#注：有的系统中指定参数时不需要在前面加-，直接使用tar cvf
+```
+```linux
+#示例：用tar实现文件夹同步，排除部分文件不同步
+tar --exclude '*.svn' -cvf - /path/to/source | (cd /path/to/target; tar -xf -)
+```
+###### 压缩
+```linux
+#压缩；生成demo.txt.gz
+gzip demo.txt
+```
+#### 4.3，解包/解压缩
+###### 解包
+```linux
+#解包
+tar -xvf demo.tar
+
+-x：解包选项
+```
+```linux
+#解压后缀为.tar.gz的文件：1.先解压缩 ——>xxx.tar；2.再解包 ——>xxxx.txt
+
+#1.解压缩
+gunzip demo.tar.gz
+
+#2.解包
+tar -xvf demo.tar
+```
+```linux
+#bz2解压
+tar jxvf demo.tar.bz2
+#如果tar 不支持j，则同样需要分两步来解包解压缩，使用bzip2来解压，再使用tar解包:
+
+bzip2 -d demo.tar.bz2
+tar -xvf demo.tar
+
+-d：decompose 解压缩
+```
+###### tar解压参数说明
+> -z：解压gz文件 tar -zxvf demo.tar.gz -c target_folder  
+> -j：解压bz2文件  tar -jxvf  
+> -J：解压xz文件 tar -Jxvf  
+### 5.进程管理工具
+#### 5.1，查询进程
+```linux
+#查询正在运行的进程信息
+ps -ef
+
+#查询归属于用户root的进程
+ps -ef | grep root
+ps -lu root         #作用：同上；-u：表示按用户显示进程信息
+```
+```linux
+#查询进程ID（适合只记得部分进程字段）
+#查询进程名中包含re的进程
+pgrep -l re
+out：
+2 kthreadd
+28 ecryptfs-kthrea
+29515 redis-server
+```
+```linux
+#以完整的格式显示所有的进程
+ps -ajx
+```
+```linux
+#显示进程信息，并实时更新
+top
+```
+```linux
+#查看端口占用的进程状态
+lsof -i:3306
+```
+```linux
+#查看用户username的进程所打开的文件
+lsof -u username
+```
+```linux
+#查询init进程当前打开的文件
+lsof -c init
+```
+```linux
+#查询指定进程ID（例如：23295）打开的文件
+lsof -p 23295
+```
+```linux
+#查询指定目录下被进程开启的文件（使用+D递归目录）
+lsof +d mydir1/
+```
+#### 5.2，终止进程
+```linux
+#杀死指定PID进程（PID为Process ID）
+kill PID
+
+#杀死相关进程
+kill -9 3434
+```
+```linux
+#杀死后台进程job工作（job为job number）
+kill %job
+
+#通过jobs来查看后台作业列表
+[1]-  Running                 sleep 300 &
+[1]就是job号
+
+kill %1
+#注意：在某些系统中，你可能需要使用 kill -9 %1 来强制终止进程。
+```
+#### 5.3，进程监控
+```linux
+#查看系统中使用cpu、使用内存最多的进程
+top
+(->)P
+
+#输入top命令后，进入到交互界面；接着输入字符命令后显示相应的进程状态；
+```
+```text
+对于进程，平时我们最常想知道的就是哪些进程占用cpu最多、占用内存最多。可以使用下面的参数
+P：根据CPU使用百分比大小进行排序
+M：根据驻留内存大小进行排序
+i：使top不显示任何闲置或僵死的进程
+```
+#### 5.4，分析线程栈
+```linux
+#使用命令pmap，来输出进程内存的状况，可以用来分析线程堆栈
+pmap PID
+
+eg:
+[/home/weber#]ps -fe| grep redis
+weber    13508 13070  0 08:14 pts/0    00:00:00 grep --color=auto redis
+weber    29515     1  0  2013 ?        02:55:59 ./redis-server redis.conf
+[/home/weber#]pmap 29515
+29515:   ./redis-server redis.conf
+08048000    768K r-x--  /home/weber/soft/redis-2.6.16/src/redis-server
+08108000      4K r----  /home/weber/soft/redis-2.6.16/src/redis-server
+08109000     12K rw---  /home/weber/soft/redis-2.6.16/src/redis-server
+```
+#### 5.5，综合运用
+```linux
+#将用户angelo下的所有进程名称以av_开头的进程终止
+ps -u angelo | awk '/av_/ {print "kill -9 " $1}' | sh
+```
+```linux
+#将用户angelo下所有进程名中包含HOST的进程终止
+ps -ef | grep angelo | grep HOST | awk '{print $2}' | xargs kill -9;
+```
