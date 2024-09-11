@@ -496,8 +496,8 @@ grep match_pattern file
 
 ###### 常用参数
 
-> -o：只输出匹配的文本行数据
-> -v：只输出没有匹配的文本行数据
+> -o：只输出匹配的文本行数据(一行一行的)
+> -v：只输出没有匹配的文本行数据(一行一行的)
 > -c：统计文件中包含文本的次数
 > grep -c "text" a.txt  (统计text在a.txt中出现的次数)
 > -n：打印匹配的行号
@@ -576,6 +576,7 @@ echo "file1 file2 file3" | xargs -I {} cp {} /backup
 在某些情况下，输入的数据可能包含特殊字符或空格，导致默认的空格定界符无法正确解析。在这种情况下，可以使用-0选项指定\0作为输入定界符。
 例如，假设有一个包含以空字符分隔的文件名列表的文件files.txt，可以使用以下命令处理这些文件：
 xargs -0 < file.txt ls
+
 # 注：直接在文件中使用\0，可能无法处理空字符；可以使用如下指令
 printf "a.txt\0b.txt\0c.txt\0" > file.txt
 ```
@@ -679,8 +680,332 @@ cat data.txt | tr '[:lower:]' '[:upper:]'
 #### 3.7，cut按列切分文本
 ```linux
 #截取文件的第2列和第4列
-cut -f2,4 data.txt
+cut -d " " -f2,4 data.txt
+
+#注：-d " "：表示以空格进行分隔，需要标明是以什么进行分隔的；
+    -f2,4：表示截取文件中的第2列和第4列；（下标从1开始）
 ```
 ```linux
-
+#去除文件除了第3列的所有的列（只保留第3列）
+cut -f3 --complement data.txt
 ```
+```linux
+# -d：指定定界符（分隔符）;以;作为定界符，只截取出第2个字符
+cut -f2 -d ";" data.txt
+```
+* cut取的范围
+  * N-：第N个字段到结尾
+  * -M：第1个字段到第M个字段
+  * N-M：N到M个字段
+
+* cut取的单位
+  * -b：以字节为单位
+  * -c：以字符为单位
+  * -f：以字段为单位（需要使用定界符分隔 -d）
+```linux 
+#以字段为单位 截取第2个字符到的结尾，以空格分隔
+#数据：echo 1 2 3 4 5 6 > data.txt
+cut -f2- -d " " data.txt
+
+out:2 3 4 5 6
+```
+```linux
+#以字段为单位 截取第1个字段到第3个字段
+#数据：echo 1 2 3 4 5 6 > data.txt
+cut -f-3 -d " " data.txt
+
+out:1 2 3
+```
+```linux
+#以字段为单位 截取第2个到第4个数据
+#数据：echo 1 2 3 4 5 6 > data.txt
+cut -f2-4 -d " " data.txt
+cut -f2,4 -d " " data.txt (功能一致，同上)
+out:2 3 4 
+```
+```linux
+#以字节为单位截取第1个字节到第4个字节
+#数据：echo 1 2 3 4 5 6 > data.txt
+cut -c1-4 data.txt
+
+out:1 2 (2后面还有一个空格)
+```
+```linux
+以字符为单位截取第1到第3个字符
+#数据：echo 1 2 3 4 5 6 > data.txt
+cut -c1-3 data.txt
+
+out:1 2(2后面没有字符)
+```
+```linux
+#截取文本第5到第7列
+echo string | cut -c5-7
+```
+#### 3.8，paste按列拼接文本
+```linux
+#将两个文本按列拼接在一起（a文本的第一行和b文本的第一行默认以制表符分隔然后拼接在一起）
+cat file1
+1
+2
+
+cat file2
+colin
+book
+
+paste file1 file2
+1 colin
+2 book
+```
+```linux
+#默认的定界符是制表符，可以用-d指明定界符
+paste file1.txt file2.txt -d ";"
+
+out:
+1,colin
+2,book
+```
+#### 3.9，wc统计行和字符的工具
+```linux
+#统计行数
+wc -l data.txt
+
+#统计单词数
+wc -w data.txt
+
+#统计字符数
+wc -c data.txt
+```
+#### 3.10，sed文本替换利器
+```text
+sed的全称是Stream Editor，它是一个流编辑器，用于对输入流（文件或管道）进行基本的文本转换。
+```
+```linux
+#首处替换
+#替换每一行的第一处匹配的text将其替换为replace_text，同一行中的第2处就不会被替换
+sed "s/text/replace_text/" data.txt
+
+#默认替换后，输出替换后的内容，如果需要直接替换源文件，使用-i
+sed -i "s/text/replace_text/" data.txt
+
+#移除空白行
+sed "/^$/d" data.txt
+
+#全局替换
+sed "s/text/replace_text/g" data.txt
+
+#注：s（substitute）：替换操作
+    g：表示全局的意思，全局替换；不加的话就替换每一行的第一处
+```
+```linux
+#变量转换
+
+#已匹配的字符串通过标记&来引用，将字符放到[]中，&相当于每个字符的占位符
+echo this is an example | sed "s/\w[&]/g"
+
+#注：\w：表示字段，这里表示单个单词
+    g：全局，表示全局进行标记        
+```
+```linux
+#字串匹配标记
+#第一个匹配到括号内的内容使用标记1来替换，因为后面没有g所以不是全局的；匹配luo后面任意一个数字的数据将其替换为1
+例如：luo1 smart
+      luo1,luo2,angelo
+文件：data.txt
+
+#使用正则表达式：\([0-9]\)
+sed "s/luo\([0-9]\)/\1/" data.txt
+
+out：
+1 smart
+1,luo2,angelo
+
+#注：\1表示引用这个捕获的数字字符。如果不使用反斜杠，1将被解释为字面上的字符"1"，而不是引用捕获的数字字符。
+```
+```linux
+#双引号求值
+#sed通常使用单引号引用；也可以使用双引号，使用双引号后，双引号会对表达式求值
+sed 's/$var/HELLO/'
+注：$var是提前定义好的一个属性
+
+#当使用双引号是，我们可以在sed样式和替换字符串中指定变量
+eg:
+p=patten
+r=replaced
+echo "line con a patten" | sed "s/$p/$r/g"
+$>line con a replaced
+
+将变量p的值由变量r来进行替换
+s：替换
+g：全局
+```
+```linux
+#字符串插入字符：将文本中每行内容（ABCDEFG）转换成ABC/DEFG
+echo ABCDEFG | sed "s/^.\{3\}/&\//g"
+out:ABC/DEFG
+#注：^.\{3\}：前面的任意三个字符
+    &/：&表示引用整个匹配模式，即前面匹配的三个字符，会在前面的三个字符后面加上/（&\/中的\表示转义）
+```
+#### 3.11，awk数据流处理工具
+###### awk脚本结构
+```linux
+#BEGIN|END必须是要大写，Linux中区分大小写
+awk 'BEGIN{ statements } statements2 END{ statements }'
+```
+###### 工作方式
+```text
+1.执行BEGIN中的语句块；
+2.从文件或stdin(标准输入流)中读取一行，然后执行statements2，重复这个过程，直到文件全部被读取完毕；
+3.执行END中的语句块
+```
+###### print打印当前行
+```linux
+#使用不带参数的print是，会打印当前行(statements2中的语句块)
+echo -e "abc\ndefg" | awk 'BEGIN{print "start"} {print} END{print "END"}'
+
+#第2个的{print}是没有参数的，它的参数来自于前面的"abc\ndefg"，它会打印每一行
+# -e：表示启用对反斜杠转义的解释，不使用的话就会被当作普通的字符串
+```
+```linux
+#print以逗号分个的时候，返回的参数以空格定界
+echo | awk '{var1="v1";var2="v2";var3="v3";print var1,var2,var3;}'
+
+out:(以空格分隔)
+v1 v2 v3
+```
+```linux
+#使用-拼接符的方式（以-作为定界符，也可以使用其他的符号，只要在""里面就可以）
+echo | awk '{var1="v1";var2="v2";var3="v3";print var1"-"var2"-"var3;}'
+
+out:(以-分隔)
+v1-v2-v3
+```
+###### 特殊变量：NR NF $0 $1 $2
+* NR：表示记录数量，在执行过程中对应的当前行号（第几行数据）
+* NF：表示字段数量，在执行过程中对应当前行中的字段数量（有定界符来决定）
+* $0：包含执行过程中当前行的文本内容
+* $1：第一个字段的文本内容
+* $2：第二个字段的文本内容
+* $3：同理
+* ...以此类推...
+```linux
+echo -e "line1 f1 f2 f3\nline2 f3" | awk '{print NR":"NF":"$0"-"$1"-"$2}' 
+
+out:
+1:4:line1 f1 f2 f3-line1-f1
+1:2:line2 f3-line2-f3-
+```
+```linux
+#打印每一行的第2和第3个字段
+echo -e "f11 f12\nf21 f22" | awk '{print $1"-"$2}'
+
+#读取文件（同理）
+awk '{print $1"-"$2}' data.txt
+
+out:
+f11-f12
+f21-f22
+```
+```linux
+#统计文件的行数
+awk 'END {print NR}' data.txt
+
+echo -e "a\nb\nc\nd\ne" | awk 'END {print NR}'
+
+out:
+5
+```
+```linux
+#累加每一行的第一个字段
+echo -e " 1\n 2\n 3\n 4" | awk 'BEGIN{str="";print "Begin";} {str=str" "$1;} END{print str;print "End";}'
+
+out:
+Begin
+1234
+End
+```
+###### 传递外部变量
+```linux
+#输入来自stdin
+root>data=1000
+root>echo | awk '{print var}' var=$data
+root>1000
+```
+```linux
+#输入来自文件
+awk '{print var}' var=$data data.txt
+```
+###### 用样式对awk处理的行进行过滤
+```linux
+文件data.txt
+a\nb\nc\nd\ne\nf\ng
+
+#行号小于5
+awk 'NR < 5' 
+out：a\nb\nc\nd
+
+#行号等于1和4的打印出来，如果还有多个直接NR==5用;分隔
+awk 'NR==1;NR==4 {print}' data.txt
+out:a\nd
+
+#行号在1和4之间的数据打印出来，用,隔开；{print}加不加都可以，一样会打印；
+awk 'NR==1,NR==4 {print}' data.txt
+out：a\nb\nc\nd
+#注：如果NR==1,NR==4,NR==5,... 超过了两个，那么就去第一个的数据NR==1的数据
+
+#包含linux文本的行（可以用正则表达式来指定，超级强大）
+awk '/linux/' data.txt
+out:data.txt每一行都不包含linux，所以没数据输出
+
+#不包含linux文本的行
+awk '!/linux/' data.txt
+out：a\nb\nc\nd\ne\nf\ng （全部输出）
+```
+###### 设置定界符
+```linux
+#使用-F来设置定界符（默认是空格）
+awk -F: '{print $NF}' /etc/passwd       有$：打印最后一个字段数据（由定界符决定）
+awk -F: '{print NF}' /etc/passwd        无$：打印字段数量（由定界符决定）
+```
+###### 读取命令输出
+```linux
+#使用getline，将外部shell命令的输出读入到变量cmdout中
+echo | awk '{"grep root /etc/passwd" | getline cmdout; print cmdout}'
+
+#注：解读：通过grep在/etc/passwd中查找行中存在root数据的行，然后通过getline存储到cmdout中，最后打印cmdout；
+```
+###### 在awk中使用循环
+```linux
+#以下字符串，打印出其中的时间
+#2024_04_02 20:20:08: mysqli connect failed, please check connect info
+echo '2024_04_02 20:20:08: mysqli connect failed'|awk -F: '{ for(i=1;i<=3;i++) printf("%s:",$i)}'
+out：2024_04_02 20:20:08:
+#注：这种方式打印会在最后面多一个冒号:
+
+#这种方式就没有最后面的冒号
+echo '2024_04_02 20:20:08: mysqli connect failed'|awk -F: '{print $1 ":" $2 ":" $3; }'
+out：2024_04_02 20:20:08
+
+#时间部分和非时间部分分开打印
+echo '2024_04_02 20:20:08: mysqli connect failed'|awk -F: '{print $1 ":" $2 ":" $3; print $4;}'
+out:
+2024_04_02 20:20:08
+mysqli connect failed
+```
+```linux
+#以逆序的形式打印行：（tac命令的实现）
+#seq(sequence):用于生成数字序列的命令;seq 9：表示生成1-9的数字，会换行；
+seq 9 | awk '{info[NR]=$0;num=NR} END {for(i=num;i>0;i--)print(info[i])}'
+```
+###### awk结合grep找到指定的服务，然后将其kill掉
+```linux
+ps -ef | grep msv8 | grep -v MFORWARD | awk '{print $2}' | xargs kill -9
+```
+###### awk实现head、tail命令
+```linux
+#head：输出前10行的数据
+awk 'NR<=10{print}' error.log
+
+#tail：输出后10行的数据(%求余的话得到的数据最后都是最后面的十条10N到10N+9)
+awk '{info[NR%10]=$0;num=NR%10;} END{for(i=num+1;i<num+11;i++)print(info[i])}' error.log
+```
+###### 打印指定列
