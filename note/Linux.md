@@ -1746,6 +1746,10 @@ lftp user@host:~> mirror -n
 
 #### 7.5，网络复制
 
+```text
+scp：Secure Copy Protocol（安全复制协议）
+```
+
 ```linux
 #将本地localpath指向的文件上传到远程主机的path路径上
 scp localpath ID@host:path    #ID：远程主机用户名；host：远程主机IP或域名
@@ -1772,4 +1776,369 @@ scp -r user@192.168.1.100:~/example_folder .      #~/：同理，当前远程用
 ```linux
 #创建用户名为username
 useradd -m username
+
+#设置密码
+passwd username       #输入后进入交互方式创建
+```
+
+```linux
+#删除用户
+userdel -r username
+
+#注：不带-r选项使用userdel，只会删除用户，用户的家目录仍然存在/home目录下。要完全的删除用户信息，使用-r选项。
+```
+
+```linux
+#账号切换，登入账号为userA用户状态下，切换到userB用户账号下工作
+su userB        #进入交互模式
+```
+
+#### 8.2，用户的组
+
+###### 将用户加入到组
+
+```text
+默认情况下，添加用户操作也会相应的增加一个同名的组，用户属于同名组。
+```
+
+```linux
+#查看当前用户所属组
+groups
+```
+
+```linux
+#一个用户可以属于多个组，将用户加入到组（首次加入到组）
+usermod -g groupName userName
+```
+
+```linux
+#修改用户所在组（加入到新的组，并从原来的组中移除）（非首次加入到组）
+usermod -g groupName userName
+```
+
+```linux
+#给用户追加用户组，不会从原来的组中移除
+usermod -ag newGroupName userName       # -a(append)：追加；-g：修改组信息
+```
+
+```linux
+#删除用户的组
+usermod -g "" userName    #组使用""表示，那就是删除该用户的所有的组
+```
+
+###### 查看系统所有的组
+
+```text
+系统的所有用户和所有组信息分别记录在两个文件中：/etc/passwd、/etc/group 默认情况下这两个文件对所有用户可读
+```
+
+```linux
+#查看所有用户及权限
+more /etc/passwd
+```
+
+```linux
+#查看所有的用户组及权限
+more /etc/group
+```
+
+```linux
+#新增组
+groupadd groupName
+
+#删除组
+groupdel groupName
+
+#修改组名
+groupmod -n newGrouName oldGroupName    #-n(name)：表示设置新的组名
+```
+
+#### 8.3，用户权限
+
+```text
+使用ls -al可以查看文件的属性字段，文件的属性字段总共有10个字母组车；
+第1个字母：如果是"-"表示是普通文件；"d"：表示是文件夹(Directory)；
+第2-第4个字母：所属用户的权限
+第5-第7个字母：所属组的权限
+第8-第10个字母：其他的权限（非当前用户、非当前所属组的其他用户的权限）
+```
+
+```linux
+ls -l /etc/group
+out:
+-rwxrw-r-- colin king 725 2013-11-12 15:37 /home/colin/a
+
+#表示这个文件对文件拥有者colin这个用户可读写、可执行；
+#对colin所属组(king)的用户可读可写；
+#对其他的用户只可读；
+```
+
+###### 更改读写权限
+
+```text
+chmod：更改文件的读写执行权限，更改读写执行权限有两种方式：一种字母方式、一种数字方式
+```
+
+1. 字母方式
+
+```linux
+#字母方式：
+chomd userMark(+|-)PermissionsMark
+```
+
+> userMark取值：  
+> u：用户  
+> g：组  
+> o：其他用户  
+> a：所有用户
+>
+> PermissionsMark取值：  
+> r：读  
+> w：写  
+> x：执行1
+
+```linux
+#对所有用户给为你教案main增加可执行权限
+chmod a+x main
+
+#多组用户给文件blogs增加可写权限
+chmod g+w blogs
+
+#给所有用户对文件 data.txt 增加读写执行的权限
+chmod a+rwx data.txt
+
+#给所有用户对文件 data.txt 删除读写执行的权限
+chmod a-rwx data.txt
+```
+
+2. 数字方式
+
+```text
+数字方式直接设置所有权限，相比字母方式更加简洁方便
+
+使用三位8进制数字的形式来表示权限
+第一位：所属用户权限
+第二位：所属组权限
+第三位：其他用户权限
+
+r(读)：4
+w(写)：2
+x(执行)：1
+
+例如：6(4+2)：读写权限；7(4+2+1)：读写执行权限
+```
+
+```linux
+#将main的用户权限设置为  -rwxr------
+chmod 740 main
+```
+
+###### 更改文件或目录的拥有者（将文件或目录的所有者进行变更）
+
+```linux
+#将dirOrFile的所有者变更成username用户
+chown username dirOrFile
+```
+
+```linux
+#使用-R选项递归更改该目录下的所有文件的拥有者(将server目录下的所有文件的所有者变更为weber)
+chown -r weber server/
+```
+
+#### 8.4，环境变量
+
+```text
+bashrc与profile都用于保存用户的环境信息，bashrc用于交互式non-loginshell，而profile用于交互式login shell
+
+/etc/profile、/etc/bashrc：是系统全局环境变量设定
+~/.profile、~/.bashrc：用户目录下的私有环境变量设定
+```
+
+```text
+当登录系统获得一个shell进程时，其读取环境设置脚本分为三步：
+1. 首先读入的时全局环境变量设置文件/etc/profile，然后根据其内容读取额外的文档，如/etc/profile.d和/etc/inputrc；
+2. 读取当前登录用户Home目录下的文件~/.bash_profile，其次读取~/.bash_login，最后读取~/.profile，这三个文档设定基本上是一样，读取有优先关系；
+3. 读取~/.bashrc
+```
+
+```text
+~/.profile与~/.bashrc的区别：
+1. 这两者都具有个性化定时功能；
+2. ~/.profile可以设定本用户专有的路径、环境变量等，它只能登录的时候执行一次；
+3. ~/.bashrc也是某用户专有设定文档，可以设定路径、命令别名，每次shell script执行都会使用它一次；
+```
+
+```linux
+#我们可以在这些环境变量中设置自己经常进入的文件路径，以及命令的快捷方式
+.bashrc
+alias m='more'
+alias cp='cp -i'
+alias mv='mv -i'
+alias ll='ls -l'
+alias lsl='ls -lrt'
+alias lm='ls -al|more'
+log=/opt/applog/common_dir
+unit=/opt/app/unittest/common
+
+
+.bash_profile
+. /opt/app/tuxapp/openav/config/setenv.prod.sh.linux
+export PS1='$PWD#'
+
+#通过上述设置，我们进入log目录只需要输入：cd $log 即可
+```
+
+### 系统管理及IPC资源管理
+
+#### 9.1，系统管理
+
+###### 查询系统版本
+
+```linux
+#查看Linux系统版本
+uname -a 
+lsb_release -a
+
+# uname -a： 是一个Linux shell命令，用于显示系统内核的详细信息。它会输出当前操作系统的名称、主机名、内核版本号、机器架构等信息。
+# lsb_release -a： 也是一个Linux shell命令，用于显示发行版相关的信息。它会输出发行版的完整名称、版本号、代号等信息。这个命令通常用于识别Linux发行版，例如Ubuntu、CentOS等。
+```
+
+```linux
+#查看Unix系统版本：操作系统版本
+more /etc/release
+```
+
+###### 查询硬件信息
+
+```linux
+#查看CPU使用情况
+sar -u 5 10
+```
+
+```linux
+#查询CPU信息
+cat /proc/cpuinfo
+```
+
+```linx
+#查看CPU的核个个数
+cat /proc/cpuinfo | grep processor | wc -l
+```
+
+```linxu
+#查看内存信息
+cat /proc/meminfo
+```
+
+```linux
+#显示内存page大小（以KByte为单位）
+pagesize
+```
+
+```linux
+#显示架构
+arch
+```
+
+###### 设置系统时间
+
+```linux
+#显示当前系统时间
+date
+```
+
+```linux
+#设置系统日期和时间（格式为：2024-09-15 17:05:00）
+date -s 2024-09-15 17:05:00
+date -s 2024-09-15
+date -s 17:05:00
+```
+
+```linux
+#设置时区，选择时区信息
+tzselect    #time zone select
+
+#根据系统提示，选择相应的时区信息
+```
+
+```linux
+强制把系统时间写入COMS（这样重启后时间也正确了）
+clock -w
+```
+
+```linux
+#格式化输出当前日期时间
+date +%Y%m%d.%H%M%S
+```
+
+**设置系统时间需要有root用户权限**
+
+#### 9.2，IPC资源管理
+
+```text
+ipc:全称是Inter-Process Communication（进程间通信）.
+这个指令用于在Linux系统中创建和管理各种进程间通信机制，如信号量、消息队列、共享内存等。通过ipc命令，用户可以查看和控制这些通信机制的状态和属性。
+```
+
+###### IPC资源查询
+
+```linux
+#查看系统使用的IPC资源
+ipcs
+
+$ipcs
+out:
+------ Shared Memory Segments --------
+key        shmid      owner      perms      bytes      nattch     status
+
+------ Semaphore Arrays --------
+key        semid      owner      perms      nsems
+0x00000000 229376     weber      600        1
+
+------ Message Queues --------
+key        msqid      owner      perms      used-bytes   messages
+```
+
+```linux
+#查看系统使用的IPC共享内存资源（shared memory）
+ipcs -m
+```
+
+```linux
+#查看系统使用的IPC消息队列资源（message queues）
+ipcs -q
+``` 
+
+```linux
+#查看系统使用的IPC信号量资源（semaphores）
+ipcs -s
+
+#应用示例：查看IPC资源被谁占用
+```
+
+```linxu
+#有个IPCKEY：51036，需要查询其是否被占用
+
+1. 首先通过计算器将其转化成十六进制
+  51036 -> c75c
+2. 如果知道是被共享内存占用
+ipcs -m | grep c75c
+out：
+0x0000c75c 40403197   tdea3    666        536870912  2
+
+3. 如果不确定，则直接查找(查找所有的)
+ipcs | grep c75c
+out：
+0x0000c75c 40403197   tdea3    666        536870912  2
+0x0000c75c 5079070    tdea3    666        4
+```
+###### 检测和设置系统资源限制
+```linux
+#显示当前所有的系统资源limit信息
+ulimit -a
+```
+
+```linux
+#对生成的core文件的大小进行限制
+ulimit -c unlimited
 ```
