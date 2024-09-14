@@ -1,22 +1,22 @@
-## Linux指令
+## Linux指令基础
 
 ### 1，使用命令帮助
 
 #### 1.1，whatis 简要说明命令的作用
 
-```linux
+```shell
 #模板：
 
 whatis command
 
-示例：查看cat指令的作用
+#示例：查看cat指令的作用
 
 whatis cat
 ```
 
 #### 1.2，info 更详细的说明文档
 
-```linux
+```shell
 #模板
 
 info command
@@ -40,7 +40,7 @@ info cat
 > (8)、系统管理员可用的管理条令  
 > (9)、与内核有关的文件
 
-```linux
+```shell
 #模板
 
 man command
@@ -48,15 +48,17 @@ man command
 #示例：man date
 ```
 
-```linux
+```shell
 #当我们使用whatis printf的时候发现，在1分类和3分类都有，当我们要查看指定分类3中的帮助
 
-man -k keyword 
+man -k keyword
 
-示例：man 3 printf
+#示例：
+
+man 3 printf
 ```
 
-```linux
+```shell
 #查询关键字 根据命令中部分关键字来查询命令，适用于只记住部分命令的场合
 
 #示例：查找GNOME的config配置工具命令中包含"1"的指令（1也可以换成cat）
@@ -66,16 +68,18 @@ man -k GNOME config | grep 1
 
 #### 1.4，which 查看路径
 
-```linux
+```shell
 #模板
 
-which command 
+which command
 
-示例：which make
->/opt/app/openav/soft/bin/make install
+#示例：
+which make
+install >/opt/app/openav/soft/bin/make
+
 ```
 
-```linux
+```shell
 #查看程序的搜索路径：当一个系统中安装了同一个软件的多个版本，不确定使用的是哪个版本，就可以使用这个命令；
 
 whereis command
@@ -85,7 +89,7 @@ whereis command
 
 #### 2.1，删除和创建
 
-```linux
+```shell
 #创建文件夹：mkdir
 
 #创建文件：touch
@@ -107,7 +111,7 @@ whereis command
 
 #### 2.2，目录切换
 
-```linux
+```shell
 #找到文件/目录位置：cd
 
 #切换当上一个工作目录：cd - or cd ..
@@ -121,25 +125,26 @@ whereis command
 
 #### 2.3，列出目录项
 
-```linux
+```shell
 #显示当前目录下的文件：ls
 
 #按时间排序以列表的方式显示目录项：ls -lrt
-    l：以长格式显示文件信息，包括文件权限、所有者、大小、修改时间等
-    r：反向排序，即倒序
-    t：以修改时间进行排序，配合r使用，以修改时间进行倒序排序
-  
+#    l：以长格式显示文件信息，包括文件权限、所有者、大小、修改时间等
+#    r：反向排序，即倒序
+#    t：以修改时间进行排序，配合r使用，以修改时间进行倒序排序
+
 #有些命令使用频率较高的可以建立快捷方式，在.bashrc中设置命令别名
 alias lsl='ls -lrt'
-alias lm='ls -al|more'      #more：以分页的方式展示列表项
-alias lcn='ls | cat -n'     #cat -n：给每个列表项前面加一个编号：1  a 2 a.out 3 app 4 b 5 bin 6 config
+alias lm='ls -al|more'  #more：以分页的方式展示列表项
+alias lcn='ls | cat -n' #cat -n：给每个列表项前面加一个编号：1  a 2 a.out 3 app 4 b 5 bin 6 config
+
 ```
 
 **注：.bashrc在/home/你的用户名/文件夹下，以隐藏文件的方式存储；可以使用ls -a查看**
 
 #### 2.4，查找目录及文件find/locate
 
-```linux
+```shell
 #搜寻文件或目录
 find ./ -name "core*" | xargs file  #输出各个文件的类型
 
@@ -162,7 +167,7 @@ updatedb
 
 ###### 查看文件：cat、vim、head、tail、more、less
 
-```linux
+```shell
 #查看文件的同时显示行号
 cat -n a.log
 
@@ -174,7 +179,8 @@ more a.log
 
 #只看前10行
 head -n 10 a.log
-同理：head -10 a.log   (-n 10 简写成：-10)
+#同理：
+head -10 a.log   #(-n 10 简写成：-10)
 
 #显示文件后五行数据
 tail -n 5 a.log (tail -5 a.log)
@@ -188,7 +194,7 @@ tail -f a.log
 
 #### 2.6，查找文件内容
 
-```linux
+```shell
 #查找文件内容，有数据就返回一样的，有几行返回几行，没有就不返回
 grep 'luo' a.log
 #返回数据在文件中出现的行数
@@ -205,7 +211,7 @@ grep -rn 'luo' /root #(/root可以换成自己指定的文件夹目录)
 
 #### 2.7，文件与目录权限修改
 
-```linux
+```shell
 #改变文件的拥有者：chown
 
 #改变文件读、写、执行等属性：chmod
@@ -217,7 +223,7 @@ grep -rn 'luo' /root #(/root可以换成自己指定的文件夹目录)
 
 #### 2.8，给文件增加别名
 
-```linux
+```shell
 #创建符号软链接(软链接)/硬链接
 #模板
 ln [选项] 源文件 目标文件    #源文件：实际存在的文件；目标文件：创建链接的文件
@@ -238,7 +244,7 @@ ln -s 源文件.txt 链接文件.txt
 > 3）前面成功，则执行后面一条，否则，不执行：&&
 > 4）前面失败，则执行后一条：||
 
-```linux
+```shell
 #&&、||
 #查看proc文件夹中的列表，存在返回suss信息，不存在返回fail信息；逻辑运算符的顺序和Java开发中是一样的 && > ||
 ls /proc && echo suss!! || echo fail!!  
@@ -247,7 +253,7 @@ ls /proc && echo suss!! || echo fail!!
 if ls /proc; then echo suss; else echo fail; fi
 ```
 
-```linux
+```shell
 #重定向
 
 #模板：
@@ -262,12 +268,12 @@ ls -al /root2 > list 2>&1
 ls -al /root2 &> list
 ```
 
-```linux
+```shell
 #清空文件
 :> a.txt
 ```
 
-```linux
+```shell
 #重定向(将数据换行追加到文件末尾)
 echo aa >> a.txt
 
@@ -288,7 +294,7 @@ ehco cc > a.txt
 
 #### 2.12，综合应用
 
-```linux
+```shell
 #找到a.txt中每行包含sql，但不包含mysql的记录行的总数
 cat -v a.txt | grep sql | grep -v mysql | wc -l
 
@@ -300,17 +306,18 @@ cat -v a.txt | grep sql | grep -v mysql | wc -l
 
 #### 3.1，find文件查找
 
-```linux
+```shell
 #查找txt和pdf类型的文件
 
 find . \( -name "*.txt" -o -name "*.pdf" \) -print
 
 #注：.：表示当前目录下以及子目录
-    "\("、"\)"：是一体的不要和其他的指令连着写，否者无效
-    -print：使用print函数打印出目录，不使用也是可以的，也一样会打印
+#    "\("、"\)"：是一体的不要和其他的指令连着写，否者无效
+#    -print：使用print函数打印出目录，不使用也是可以的，也一样会打印
+
 ```
 
-```linux
+```shell
 #使用正则表达式查找.txt和.pdf文件
 
 find . -regex ".*\(\.txt|\.pdf\)$"
@@ -320,24 +327,25 @@ find . -regex ".*\(\.txt|\.pdf\)$"
 #-iregex：可以忽略大小写的正则
 ```
 
-```linux
+```shell
 #否定参数，查找所有非txt文件
 
 find . ! -name "*.txt" -print
 ```
 
-```linux
+```shell
 #指定搜索深度打印出当前目录的文件（例如：深度为1）
 
 find . -maxdepth 1 -type f
 
 #注：.：表示当前目录下(包括子目录以及子目录的子目录，一直往下)
-    -maxdepth 1：搜索的深度为当前目录下
-    -type f：只搜索文件，不包括目录和其他类型的文件
-    -type d：只搜索目录
-    -type l：符号链接（L）
+#    -maxdepth 1：搜索的深度为当前目录下
+#    -type f：只搜索文件，不包括目录和其他类型的文件
+#    -type d：只搜索目录
+#    -type l：符号链接（L）
 
 #注：1：表示深度，如果等于1：深度就是当前目录下；如果等于2：深度就会到子文件夹中；3：深度会到子子文件夹中；往后同理
+
 ```
 
 ###### 定制搜索
@@ -358,7 +366,7 @@ find . -type l -print
 find .
 ```
 
-```linux
+```shell
 #查找本地目录下所有的二进制文件
 ls -lrt | awk '{print $9}'|xargs file|grep  ELF| awk '{print $1}'|tr -d ':'
 
@@ -376,43 +384,43 @@ redis.pid: ASCII text
 > -ctime：变化时间(元数据或权限变化) 单位是天，-cmin：分钟
 > 注：一个是内容修改，一个是元数据或权限的变化，需要加以区分
 
-```linux
+```shell
 #最近第7天被访问的所有文件：第7天 -> 7
 find . -atime 7 -type f -print
 ```
 
-```linux
+```shell
 #最近7天内被访问过的所有文件：7天内 -> -7
 find . -atime -7 -type f -print
 ```
 
-```linux
+```shell
 #查询7天前被访问过的所有文件：7天前 -> +7
 find . -atime +7 -type f -print
 ```
 
 * 按文件大小搜索
 
-```linux
+```shell
 #搜索文件大小大于2k的所有文件
 find . -type f -size +2k
 
 #注：c：Byte
-     k：KB
-     M：MB
-     G：GB
+#     k：KB
+#     M：MB
+#     G：GB
 ```
 
 * 按权限查找
 
-```linux
+```shell
 #找具有可执行权限的所有文件
 find . -type f -perm 644 -print 
 ```
 
 * 按用户查找
 
-```linux
+```shell
 #找属于某个用户的的所有文件
 find . -type f -user username -print 
 ```
@@ -421,7 +429,7 @@ find . -type f -user username -print
 
 * 删除
 
-```linux
+```shell
 #删除当前目录下所有pdf类型的文件
 find . -type f -name "*.pdf" -delete
 
@@ -431,21 +439,21 @@ find . -type f -name "*.pdf" | xargs rm
 
 * 执行动作（强大的exec）
 
-```linux
+```shell
 #将当前目录下的文件的所有权变更为weber(注意有：{} \;)
 find . -type f -user root -exec chown weber {} \;
 
 #注：{}是一个特色的字符串，对于每一个匹配的文件，{}会被替换成对应的文件名
 ```
 
-```linux
+```shell
 #在当前目录下将修改时间大于10天且后缀是pdf的所有文件复制到另外一个目录(other_dir这个目录下)
 find . -type f -mtime +10 -name "*.pdf" -exec cp {} other_dir \;
 ```
 
 * 结合多个命令
 
-```linux
+```shell
 #如果后续需要执行多个命令，可以将多个命令写成一个脚本，然后在-exce调用时执行脚本即可
 ...... -exec ./command.sh {} \;
 
@@ -476,10 +484,10 @@ find . -type f -name "*.txt" -exec ./command.sh {} \;
 
 * -print的定界符
 
-```linux
+```shell
 #默认使用'\n'换行作为定界符
 
--print0 表示使用'\0'作为文件的定界符，打印出来的数据就不会换行了，这样可以搜索包含空格的文件
+# -print0 表示使用'\0'作为文件的定界符，打印出来的数据就不会换行了，这样可以搜索包含空格的文件
 
 #eg:
 find . -type f printO
@@ -487,7 +495,7 @@ find . -type f printO
 
 #### 3.2，grep文本搜索
 
-```linux
+```shell
 #默认访问匹配行(就是一行一行的进行匹配)
 
 #模板
@@ -504,34 +512,35 @@ grep match_pattern file
 > -i：搜索是忽略大小写
 > -l：只打印文件名称
 
-```linux
+```shell
 #在多级目录中对文件夹递归搜索文本（俺们程序员的最爱）
 grep "class" . -r -n    #文件或路径必须在搜索内容后面，例如："class" .(.点表示当前目录下)
 ```
 
-```linux
+```shell
 #匹配多个模式：-e（或的意思）
 grep -e "sql" -e "mysql" a.txt
 ```
 
-```linux
+```shell
 #grep输出以0作为结尾符的文件名（-z）(-0：处理特殊字符的文件名称，然后使用rm进行删除)
 grep "sql" a.txt -lz | xargs -0 rm
 ```
 
-```linux
+```shell
 #综合应用：将多个日志文件中的所有带where条件的sql查找出来放入b文件之宏
 cat LOG.* | tr a-z A-Z | grep "FROM" | grep "WHERE" > b
 ```
 
-```linux
+```shell
 #查找中文示例：工程目录中utf-8格式和gb2312格式两种文件，要查找字的是中文；
 #查找到它的utf-8编码和gb2312编码分别是E4B8ADE69687和D6D0CEC4
 grep -rnP "\xE4\xB8\xAD\xE6\x96\x87|\xD6\xD0\xCE\xC4"
 
--r 或 --recursive：递归地搜索指定目录下的所有文件和子目录。
--n 或 --line-number：输出匹配行的行号。
--P 或 --perl-regexp：使用Perl正则表达式进行模式匹配。
+# -r 或 --recursive：递归地搜索指定目录下的所有文件和子目录。
+# -n 或 --line-number：输出匹配行的行号。
+# -P 或 --perl-regexp：使用Perl正则表达式进行模式匹配。
+
 ```
 
 #### 3.3，xargs命令行参数转换（更多的是对文件进行操作）
@@ -540,12 +549,12 @@ grep -rnP "\xE4\xB8\xAD\xE6\x96\x87|\xD6\xD0\xCE\xC4"
 定义：xargs能够将输入数据转化为特定命令行参数；这样，可以配合很多命令来组合使用。比如grep，find；可以将多行输出转化成单行输出，也可以将单行输出转换成多行输出。
 ```
 
-```linux
+```shell
 #多行转化成单行输出
 cat a.txt | xargs
 ```
 
-```linux
+```shell
 #单行转换成多行
 cat b.txt | xargs -n 3
 
@@ -562,44 +571,45 @@ cat b.txt | xargs -n 3
 > -I {}：指定替换字符串，这个字符串在xargs扩展时会被替换掉,用于待执行的命令需要多个参数时  
 > -0：指定0为输入定界符
 
-```linux
+```shell
 # -d：定义定界符（默认为空格）：
-默认情况下，xargs使用空格作为输入的定界符，将连续的参数分隔开来。通过指定-d选项，可以自定义定界符。例如，如果输入的文件名之间用逗号分隔，可以使用以下命令：
+# 默认情况下，xargs使用空格作为输入的定界符，将连续的参数分隔开来。通过指定-d选项，可以自定义定界符。例如，如果输入的文件名之间用逗号分隔，可以使用以下命令：
 echo "file1,file2,file3" | xargs -d, ls
 #注：这将执行ls file1 file2 file3，列出所有指定的文件。
 
 # -n:-n 指定输出为多行：
-默认情况下，xargs会将所有参数合并成一个命令行并执行。通过指定-n选项，可以将参数分成多个命令行进行执行。例如，下面的命令将每个文件名单独传递给rm命令：
+# 默认情况下，xargs会将所有参数合并成一个命令行并执行。通过指定-n选项，可以将参数分成多个命令行进行执行。例如，下面的命令将每个文件名单独传递给rm命令：
 echo "file1 file2 file3" | xargs -n 1 rm
 #注：以空格(也可以是其他符号)作为分隔，每一行一个数据，然后每一行的文件名单独传给rm，执行删除操作；
 
 # -I {}：指定替换字符串
 echo "file1 file2 file3" | xargs -I {} cp {} /backup
 #注：将执行cp file1 /backup、cp file2 /backup和cp file3 /backup；其实就是将第一个{}中的数据复制到第二个{}，可以理解为第二个{}是cp {} /backup中的一个占位符
-    因为xargs返回的数据是要放在 cp {} /backup的中间的；如果数据就放在最后面例如：rm {} 直接使用-n 1就可以
-    
+#    因为xargs返回的数据是要放在 cp {} /backup的中间的；如果数据就放在最后面例如：rm {} 直接使用-n 1就可以
+
 # -0：指定0为输入定界符：
-在某些情况下，输入的数据可能包含特殊字符或空格，导致默认的空格定界符无法正确解析。在这种情况下，可以使用-0选项指定\0作为输入定界符。
-例如，假设有一个包含以空字符分隔的文件名列表的文件files.txt，可以使用以下命令处理这些文件：
-xargs -0 < file.txt ls
+# 在某些情况下，输入的数据可能包含特殊字符或空格，导致默认的空格定界符无法正确解析。在这种情况下，可以使用-0选项指定\0作为输入定界符。
+# 例如，假设有一个包含以空字符分隔的文件名列表的文件files.txt，可以使用以下命令处理这些文件：
+xargs -0 ls <file.txt
 
 # 注：直接在文件中使用\0，可能无法处理空字符；可以使用如下指令
-printf "a.txt\0b.txt\0c.txt\0" > file.txt
+printf "a.txt\0b.txt\0c.txt\0" >file.txt
+
 ```
 
-```linux
+```shell
 # 示例
 #读取file.txt中的数据，通过xargs变成一整行，然后从标准输入中读取参数替换成{}，然后将参数替换第二个{}，同时传递-p和-1的额外参数  
 #通过-I {}是一行一行读取的，不会转换成一行
 cat file.txt | xargs -I {} ./command.sh -p {} -1
 ```
 
-```linux
+```shell
 #统计程序行数：统计每个.cpp文件中程序的总行数
 find source_dir/ -type f -name "*.cpp" -print0 | xargs -0 wc -l
 ```
 
-```linux
+```shell
 ##redis通过string存储数据，通过set存储索引，需要通过索引来查询出所有的值：
 ./redis-cli smembers $1  | awk '{print $1}'|xargs -I {} ./redis-cli get {}
 ```
@@ -613,7 +623,7 @@ find source_dir/ -type f -name "*.cpp" -print0 | xargs -0 wc -l
 > -r：逆序排序(倒序)  
 > -k N：指定按第N列排序(每行文字的第几个字符：N=1：表示每一行的第一个字符)
 
-```linux
+```shell
 #通过每行的第一个字符进行数字进行倒序排序
 sort -nrk 1 data.txt
 
@@ -630,22 +640,22 @@ sort -nk -k1 data.txt
 
 #### 3.5，uniq消除重复行
 
-```linux
+```shell
 #消除重复行(去重)
 sort unsort.txt | uniq
 ```
 
-```linux
+```shell
 #统计各行在文件中出现的次数
 sort unsort.txt | uniq -c
 ```
 
-```linux
+```shell
 #找出重复行
 sort unsort.txt | uniq -d
 ```
 
-```linux
+```shell
 #可指定每一行中需要进行比较重复的内容：-s 开始位置(下边从0开始)，-w 比较字符
 #文件名称：data.txt
 sql123 34
@@ -659,19 +669,19 @@ sort -k1,1 data.txt | uniq -s 1 -w 3
 
 #### 3.6，用tr进行转换
 
-```linux
+```shell
 #通用用法
 echo 1234 | tr "0-9" "9876543210"
 输出：8765
 ```
 
-```linux
+```shell
 #tr删除字符
 #只打印data.txt文件中不含数字的数据（相当于打印之前把数字给删除了）
 cat data.txt | tr -d '0-9'
 ```
 
-```linux
+```shell
 # -c 选项表示压缩模式，只保留指定的字符集。
 
 #获取文件中所有数字
@@ -681,7 +691,7 @@ cat data.txt | tr -c '0-9'
 cat data.txt | tr -d -c '0-9 \n'
 ```
 
-```linux
+```shell
 #tr压缩字符
 #tr -s压缩文本中出现的重复字符；最常用于压缩多余的空格
 cat data.txt | tr -s " " 
@@ -698,7 +708,7 @@ cat data.txt | tr -s " "
 > cntrl：控制（非可打印）字符  
 > print：可打印字符
 
-```linux
+```shell
 #使用方法：tr [:class:] [:class:]
 #表示将文件里面的字符小写的转化成大写：[原来类型] -> [需要类型]
 cat data.txt | tr '[:lower:]' '[:upper:]'
@@ -706,20 +716,20 @@ cat data.txt | tr '[:lower:]' '[:upper:]'
 
 #### 3.7，cut按列切分文本
 
-```linux
+```shell
 #截取文件的第2列和第4列
 cut -d " " -f2,4 data.txt
 
 #注：-d " "：表示以空格进行分隔，需要标明是以什么进行分隔的；
-    -f2,4：表示截取文件中的第2列和第4列；（下标从1开始）
+#   -f2,4：表示截取文件中的第2列和第4列；（下标从1开始）
 ```
 
-```linux
+```shell
 #去除文件除了第3列的所有的列（只保留第3列）(complement:补充、补足)
 cut -f3 --complement data.txt
 ```
 
-```linux
+```shell
 # -d：指定定界符（分隔符）;以;作为定界符，只截取出第2个字符
 cut -f2 -d ";" data.txt
 ```
@@ -734,7 +744,7 @@ cut -f2 -d ";" data.txt
     * -c：以字符为单位
     * -f：以字段为单位（需要使用定界符分隔 -d，字段 一段一段的；）
 
-```linux 
+```shell 
 #以字段为单位 截取第2个字符到的结尾，以空格分隔
 #数据：echo 1 2 3 4 5 6 > data.txt
 cut -f2- -d " " data.txt
@@ -742,7 +752,7 @@ cut -f2- -d " " data.txt
 out:2 3 4 5 6
 ```
 
-```linux
+```shell
 #以字段为单位 截取第1个字段到第3个字段
 #数据：echo 1 2 3 4 5 6 > data.txt
 cut -f-3 -d " " data.txt
@@ -750,38 +760,42 @@ cut -f-3 -d " " data.txt
 out:1 2 3
 ```
 
-```linux
+```shell
 #以字段为单位 截取第2个到第4个数据
 #数据：echo 1 2 3 4 5 6 > data.txt
 cut -f2-4 -d " " data.txt
-cut -f2,4 -d " " data.txt (功能一致，同上)
+cut -f2,4 -d " " data.txt #(功能一致，同上)
 out:2 3 4 
 ```
 
-```linux
+```shell
 #以字节为单位截取第1个字节到第4个字节
 #数据：echo 1 2 3 4 5 6 > data.txt
 cut -c1-4 data.txt
 
-out:1 2 (2后面还有一个空格)
+out:
+1 2 #(2后面还有一个空格)
+
 ```
 
-```linux
+```shell
 以字符为单位截取第1到第3个字符
 #数据：echo 1 2 3 4 5 6 > data.txt
 cut -c1-3 data.txt
 
-out:1 2(2后面没有字符)
+out: #(2后面没有字符)
+1 2
+
 ```
 
-```linux
+```shell
 #截取文本第5到第7列
 echo string | cut -c5-7
 ```
 
 #### 3.8，paste按列拼接文本
 
-```linux
+```shell
 #将两个文本按列拼接在一起（a文本的第一行和b文本的第一行默认以制表符分隔然后拼接在一起）
 cat file1
 1
@@ -796,7 +810,7 @@ paste file1 file2
 2 book
 ```
 
-```linux
+```shell
 #默认的定界符是制表符，可以用-d指明定界符
 paste file1.txt file2.txt -d ";"
 
@@ -807,7 +821,7 @@ out:
 
 #### 3.9，wc统计行和字符的工具
 
-```linux
+```shell
 #统计行数
 wc -l data.txt
 
@@ -824,7 +838,7 @@ wc -c data.txt
 sed的全称是Stream Editor，它是一个流编辑器，用于对输入流（文件或管道）进行基本的文本转换。
 ```
 
-```linux
+```shell
 #首处替换
 #替换每一行的第一处匹配的text将其替换为replace_text，同一行中的第2处就不会被替换
 sed "s/text/replace_text/" data.txt
@@ -839,41 +853,44 @@ sed "/^$/d" data.txt
 sed "s/text/replace_text/g" data.txt
 
 #注：s（substitute）：替换操作
-    g：表示全局的意思，全局替换；不加的话就替换每一行的第一处
+#   g：表示全局的意思，全局替换；不加的话就替换每一行的第一处
+
 ```
 
-```linux
+```shell
 #变量转换
 
 #已匹配的字符串通过标记&来引用，将字符放到[]中，&相当于每个字符的占位符
 echo this is an example | sed "s/\w[&]/g"
 
 #注：\w：表示字段，这里表示单个单词
-    g：全局，表示全局进行标记        
+#   g：全局，表示全局进行标记
+
 ```
 
-```linux
+```shell
 #字串匹配标记
 #第一个匹配到括号内的内容使用标记1来替换，因为后面没有g所以不是全局的；匹配luo后面任意一个数字的数据将其替换为1
-例如：luo1 smart
-      luo1,luo2,angelo
-文件：data.txt
+# 例如：luo1 smart
+#      luo1,luo2,angelo
+# 文件：data.txt
 
 #使用正则表达式：\([0-9]\)
 sed "s/luo\([0-9]\)/\1/" data.txt
 
-out：
+out:
 1 smart
 1,luo2,angelo
 
 #注：\1表示引用这个捕获的数字字符。如果不使用反斜杠，1将被解释为字面上的字符"1"，而不是引用捕获的数字字符。
+
 ```
 
-```linux
+```shell
 #双引号求值
 #sed通常使用单引号引用；也可以使用双引号，使用双引号后，双引号会对表达式求值
 sed 's/$var/HELLO/'
-注：$var是提前定义好的一个属性
+#注：$var是提前定义好的一个属性
 
 #当使用双引号是，我们可以在sed样式和替换字符串中指定变量
 eg:
@@ -882,24 +899,24 @@ r=replaced
 echo "line con a patten" | sed "s/$p/$r/g"
 $>line con a replaced
 
-将变量p的值由变量r来进行替换
-s：替换
-g：全局
+#将变量p的值由变量r来进行替换
+#s：替换
+#g：全局
 ```
 
-```linux
+```shell
 #字符串插入字符：将文本中每行内容（ABCDEFG）转换成ABC/DEFG
 echo ABCDEFG | sed "s/^.\{3\}/&\//g"
 out:ABC/DEFG
 #注：^.\{3\}：前面的任意三个字符
-    &/：&表示引用整个匹配模式，即前面匹配的三个字符，会在前面的三个字符后面加上/（&\/中的\表示转义）
+#    &/：&表示引用整个匹配模式，即前面匹配的三个字符，会在前面的三个字符后面加上/（&\/中的\表示转义）
 ```
 
 #### 3.11，awk数据流处理工具
 
 ###### awk脚本结构
 
-```linux
+```shell
 #BEGIN|END必须是要大写，Linux中区分大小写
 awk 'BEGIN{ statements } statements2 END{ statements }'
 ```
@@ -914,7 +931,7 @@ awk 'BEGIN{ statements } statements2 END{ statements }'
 
 ###### print打印当前行
 
-```linux
+```shell
 #使用不带参数的print是，会打印当前行(statements2中的语句块)
 echo -e "abc\ndefg" | awk 'BEGIN{print "start"} {print} END{print "END"}'
 
@@ -922,19 +939,19 @@ echo -e "abc\ndefg" | awk 'BEGIN{print "start"} {print} END{print "END"}'
 # -e：表示启用对反斜杠转义的解释，不使用的话就会被当作普通的字符串
 ```
 
-```linux
+```shell
 #print以逗号分个的时候，返回的参数以空格定界
 echo | awk '{var1="v1";var2="v2";var3="v3";print var1,var2,var3;}'
 
-out:(以空格分隔)
+out: #(以空格分隔)
 v1 v2 v3
 ```
 
-```linux
+```shell
 #使用-拼接符的方式（以-作为定界符，也可以使用其他的符号，只要在""里面就可以）
 echo | awk '{var1="v1";var2="v2";var3="v3";print var1"-"var2"-"var3;}'
 
-out:(以-分隔)
+out: #(以-分隔)
 v1-v2-v3
 ```
 
@@ -948,7 +965,7 @@ v1-v2-v3
 * $3：同理
 * ...以此类推...
 
-```linux
+```shell
 echo -e "line1 f1 f2 f3\nline2 f3" | awk '{print NR":"NF":"$0"-"$1"-"$2}' 
 
 out:
@@ -956,7 +973,7 @@ out:
 1:2:line2 f3-line2-f3-
 ```
 
-```linux
+```shell
 #打印每一行的第2和第3个字段
 echo -e "f11 f12\nf21 f22" | awk '{print $1"-"$2}'
 
@@ -968,7 +985,7 @@ f11-f12
 f21-f22
 ```
 
-```linux
+```shell
 #统计文件的行数
 awk 'END {print NR}' data.txt
 
@@ -978,7 +995,7 @@ out:
 5
 ```
 
-```linux
+```shell
 #累加每一行的第一个字段
 echo -e " 1\n 2\n 3\n 4" | awk 'BEGIN{str="";print "Begin";} {str=str" "$1;} END{print str;print "End";}'
 
@@ -990,27 +1007,27 @@ End
 
 ###### 传递外部变量
 
-```linux
+```shell
 #输入来自stdin
 root>data=1000
 root>echo | awk '{print var}' var=$data
 root>1000
 ```
 
-```linux
+```shell
 #输入来自文件
 awk '{print var}' var=$data data.txt
 ```
 
 ###### 用样式对awk处理的行进行过滤
 
-```linux
+```shell
 文件data.txt
 a\nb\nc\nd\ne\nf\ng
 
 #行号小于5
 awk 'NR < 5' 
-out：a\nb\nc\nd
+#out：a\nb\nc\nd
 
 #行号等于1和4的打印出来，如果还有多个直接NR==5用;分隔
 awk 'NR==1;NR==4 {print}' data.txt
@@ -1018,29 +1035,29 @@ out:a\nd
 
 #行号在1和4之间的数据打印出来，用,隔开；{print}加不加都可以，一样会打印；
 awk 'NR==1,NR==4 {print}' data.txt
-out：a\nb\nc\nd
+#out：a\nb\nc\nd
 #注：如果NR==1,NR==4,NR==5,... 超过了两个，那么就取第一个的数据NR==1的数据
 
 #包含linux文本的行（可以用正则表达式来指定，超级强大）
 awk '/linux/' data.txt
-out:data.txt每一行都不包含linux，所以没数据输出
+#out:data.txt每一行都不包含linux，所以没数据输出
 
 #不包含linux文本的行
 awk '!/linux/' data.txt
-out：a\nb\nc\nd\ne\nf\ng （全部输出）
+#out：a\nb\nc\nd\ne\nf\ng （全部输出）
 ```
 
 ###### 设置定界符
 
-```linux
+```shell
 #使用-F来设置定界符（默认是空格）
-awk -F: '{print $NF}' /etc/passwd       有$：打印最后一个字段数据（由定界符决定）
-awk -F: '{print NF}' /etc/passwd        无$：打印字段数量（由定界符决定）
+awk -F: '{print $NF}' /etc/passwd       #有$：打印最后一个字段数据（由定界符决定）
+awk -F: '{print NF}' /etc/passwd        #无$：打印字段数量（由定界符决定）
 ```
 
 ###### 读取命令输出
 
-```linux
+```shell
 #使用getline，将外部shell命令的输出读入到变量cmdout中
 echo | awk '{"grep root /etc/passwd" | getline cmdout; print cmdout}'
 
@@ -1049,16 +1066,16 @@ echo | awk '{"grep root /etc/passwd" | getline cmdout; print cmdout}'
 
 ###### 在awk中使用循环
 
-```linux
+```shell
 #以下字符串，打印出其中的时间
 #2024_04_02 20:20:08: mysqli connect failed, please check connect info
 echo '2024_04_02 20:20:08: mysqli connect failed'|awk -F: '{ for(i=1;i<=3;i++) printf("%s:",$i)}'
-out：2024_04_02 20:20:08:
+#out：2024_04_02 20:20:08:
 #注：这种方式打印会在最后面多一个冒号:
 
 #这种方式就没有最后面的冒号
 echo '2024_04_02 20:20:08: mysqli connect failed'|awk -F: '{print $1 ":" $2 ":" $3; }'
-out：2024_04_02 20:20:08
+#out：2024_04_02 20:20:08
 
 #时间部分和非时间部分分开打印
 echo '2024_04_02 20:20:08: mysqli connect failed'|awk -F: '{print $1 ":" $2 ":" $3; print $4;}'
@@ -1067,7 +1084,7 @@ out:
 mysqli connect failed
 ```
 
-```linux
+```shell
 #以逆序的形式打印行：（tac命令的实现）
 #seq(sequence):用于生成数字序列的命令;seq 9：表示生成1-9的数字，会换行；
 seq 9 | awk '{info[NR]=$0;num=NR} END {for(i=num;i>0;i--)print(info[i])}'
@@ -1075,13 +1092,13 @@ seq 9 | awk '{info[NR]=$0;num=NR} END {for(i=num;i>0;i--)print(info[i])}'
 
 ###### awk结合grep找到指定的服务，然后将其kill掉
 
-```linux
+```shell
 ps -ef | grep msv8 | grep -v MFORWARD | awk '{print $2}' | xargs kill -9
 ```
 
 ###### awk实现head、tail命令
 
-```linux
+```shell
 #head：输出前10行的数据
 awk 'NR<=10{print}' error.log
 
@@ -1091,30 +1108,30 @@ awk '{info[NR%10]=$0;num=NR%10;} END{for(i=num+1;i<num+11;i++)print(info[i])}' e
 
 ###### 打印指定列
 
-```linux
+```shell
 #awk方式实现，获取第6个字段的数据（下标1开始）
 ls -lrt | awk '{print $6}'
 ```
 
-```linux
+```shell
 #cut方式实现，获取第6个字段的数据（下标1开始）
 ls -lrt | cut -f6
 ```
 
 ###### 打印指定文本区域
 
-```linux
+```shell
 #确定行号，打印第2到第4行的数据，注意用的是逗号,表示的范围；如果用的是分号;则表示单个（可参考awk上面的案例）
 seq 100 | awk 'NR==2,NR==4 {print}'
 ```
 
-```linux
+```shell
 #确定文本，打印处在文本10和21之间的数据[10,21]
 seq 100 | awk '/10/,/21/'
 
 #注：会匹配每一组完整出现的[10,21]中的数据；
-  例如：10 11 21 22 21：输出：10 11 21
-  例如：10 11 21 22 10 34 56 21：输出：10 11 21 10 34 56 21
+#  例如：10 11 21 22 21：输出：10 11 21
+#  例如：10 11 21 22 10 34 56 21：输出：10 11 21 10 34 56 21
 ```
 
 ###### awk常用内建函数
@@ -1129,7 +1146,7 @@ seq 100 | awk '/10/,/21/'
 > 4.length(string)：返回字符串长度  
 > 5.substr(string,index,length)：截取字符串，string原字符串数据；index截取的下标；length：截取的长度；（下标从1开始）
 
-```linux
+```shell
 #length：输出/etc/passwd中包含root行数据的长度
 echo | awk '{"grep root /etc/passwd" | getline cmdout; print(length(cmdout))}'
 
@@ -1141,11 +1158,11 @@ echo string | awk '{sub(/s/,"luo",$0);print;}'
 
 #match
 echo | awk '{print match("string",/[a-z]+/)}'
-true：返回第一个匹配的位置（下标从1开始）；匹配到了就是返回>0的
-false：返回0
+#true：返回第一个匹配的位置（下标从1开始）；匹配到了就是返回>0的
+#false：返回0
 ```
 
-```linux
+```shell
 #printf类似C语言中的printf，对输出进行格式化
 seq 10 | awk '{printf "->%4s\n",$1}'
 out
@@ -1158,19 +1175,19 @@ out
 
 ###### 1.迭代文件中的每一行
 
-```linux
+```shell
 #while 循环法，读取每一行
 cat data.txt | (while read line;do echo $line;done)
 ```
 
-```linux
+```shell
 #awk方式
 cat data.txt | awk '{print}'
 ```
 
 ###### 2.迭代一行中的每一个单词
 
-```linux
+```shell
 #while、for循环的写法
 cat data.txt | (while read line;do for word in $line;do echo -n $word;done;echo;done;)
 #注：-n：表示echo不换行；读完一整行后再执行一个echo换行；
@@ -1181,7 +1198,7 @@ cat data.txt | awk '{for(i=1;i<=NF;i++)printf "->%s\t",$i;print("");}'
 
 ###### 3.迭代每一个字符
 
-```linux
+```shell
 # ${string:start_pos:num_of_chars}：从字符串中提取一个字符；(bash文本切片）
 # ${#word}:返回变量word的长度
 # 使用常规的while和for方式，有问题；可以试试在其他linux系统上看看
@@ -1199,17 +1216,17 @@ awk '{for(i=1;i<=length($0);i++)printf substr($0,i,1);print("")}' data.txt
 #使用tr、fold方式（去除空格，打印每一个字符并换行）
 cat data.txt | tr -d '[:space:]' | fold -w1 #(1：是数字1，不是L)
 
-解析：
-echo 命令用于输出文本内容。
-tr -d '[:space:]' 用于删除所有空格字符。
-fold -w1 用于将每行文本折叠成单个字符，每个字符占一行。（如果需要二个字符占一行可以使用-w2）
+#解析：
+#echo 命令用于输出文本内容。
+#tr -d '[:space:]' 用于删除所有空格字符。
+#fold -w1 用于将每行文本折叠成单个字符，每个字符占一行。（如果需要二个字符占一行可以使用-w2）
 ```
 
 ### 4，磁盘管理
 
 #### 4.1，查看磁盘空间
 
-```linux
+```shell
 #查看磁盘空间利用大小
 df -h
 
@@ -1224,16 +1241,16 @@ Filesystem            Size  Used Avail Use% Mounted on
 /dev/mapper/vg1-lv1    20G   13G  5.6G  70% /opt/app
 ```
 
-```linux
+```shell
 #查看当前目录所占空间大小
 du -sh
 out:1.0M
 
 #注：-h：人性化显示
-    -s：递归整个目录的大小
+#    -s：递归整个目录的大小
 ```
 
-```linux
+```shell
 #查看当前目录下所有子文件夹和文件排序后的大小
 #方式一：
 du -sh `ls` | sort  #：ls用的是反引号``
@@ -1254,7 +1271,7 @@ for i in `ls`;do du -sh $i; done | sort   #注意done后面没有分号;
 
 ###### 打包
 
-```linux
+```shell
 #打包是将多个文件归到一个文件
 tar -cvf etc.tar /etc     #仅打包，不压缩
 
@@ -1264,14 +1281,14 @@ tar -cvf etc.tar /etc     #仅打包，不压缩
 #注：有的系统中指定参数时不需要在前面加-，直接使用tar cvf
 ```
 
-```linux
+```shell
 #示例：用tar实现文件夹同步，排除部分文件不同步
 tar --exclude '*.svn' -cvf - /path/to/source | (cd /path/to/target; tar -xf -)
 ```
 
 ###### 压缩
 
-```linux
+```shell
 #压缩；生成demo.txt.gz
 gzip demo.txt
 ```
@@ -1280,14 +1297,14 @@ gzip demo.txt
 
 ###### 解包
 
-```linux
+```shell
 #解包
 tar -xvf demo.tar
 
--x：解包选项
+# -x：解包选项
 ```
 
-```linux
+```shell
 #解压后缀为.tar.gz的文件：1.先解压缩 ——>xxx.tar；2.再解包 ——>xxxx.txt
 
 #1.解压缩
@@ -1297,7 +1314,7 @@ gunzip demo.tar.gz
 tar -xvf demo.tar
 ```
 
-```linux
+```shell
 #bz2解压
 tar jxvf demo.tar.bz2
 #如果tar 不支持j，则同样需要分两步来解包解压缩，使用bzip2来解压，再使用tar解包:
@@ -1305,7 +1322,7 @@ tar jxvf demo.tar.bz2
 bzip2 -d demo.tar.bz2
 tar -xvf demo.tar
 
--d：decompose 解压缩
+# -d：decompose 解压缩
 ```
 
 ###### tar解压参数说明
@@ -1322,7 +1339,7 @@ tar -xvf demo.tar
 ps：ps 是Process Status（进程状态）的缩写，它是一个用于报告当前系统中运行的进程信息的命令。
 ```
 
-```linux
+```shell
 #查询正在运行的进程信息
 ps -ef
 
@@ -1335,54 +1352,55 @@ ps -lu root         #作用：同上；-u：表示按用户显示进程信息
 pgrep：Process Grep（进程搜索）的缩写，它是一个用于根据进程名称或其他属性搜索进程的命令。
 ```
 
-```linux
+```shell
 #查询进程ID（适合只记得部分进程字段）
 #查询进程名中包含re的进程
-pgrep -l re   #-l 选项表示只显示进程的名称，而不显示完整的命令行参数。
-out：
+pgrep -l re #-l 选项表示只显示进程的名称，而不显示完整的命令行参数。
+#out：
 2 kthreadd
 28 ecryptfs-kthrea
 29515 redis-server
+
 ```
 
-```linux
+```shell
 #以完整的格式显示所有的进程
 ps -ajx
 ```
 
-```linux
+```shell
 #显示进程信息，并实时更新
 top
 ```
 
-```linux
+```shell
 #查看端口占用的进程状态
 lsof -i:3306
 ```
 
-```linux
+```shell
 #查看用户username的进程所打开的文件
 lsof -u username
 ```
 
-```linux
+```shell
 #查询init进程当前打开的文件
 lsof -c init
 ```
 
-```linux
+```shell
 #查询指定进程ID（例如：23295）打开的文件
 lsof -p 23295
 ```
 
-```linux
+```shell
 #查询指定目录下被进程开启的文件（使用+D递归目录）
 lsof +d mydir1/
 ```
 
 #### 5.2，终止进程
 
-```linux
+```shell
 #杀死指定PID进程（PID为Process ID）
 kill PID
 
@@ -1390,7 +1408,7 @@ kill PID
 kill -9 3434
 ```
 
-```linux
+```shell
 #杀死后台进程job工作（job为job number）
 kill %job
 
@@ -1404,7 +1422,7 @@ kill %1
 
 #### 5.3，进程监控
 
-```linux
+```shell
 #查看系统中使用cpu、使用内存最多的进程
 top
 (->)P
@@ -1421,7 +1439,7 @@ i：使top不显示任何闲置或僵死的进程
 
 #### 5.4，分析线程栈
 
-```linux
+```shell
 #使用命令pmap，来输出进程内存的状况，可以用来分析线程堆栈
 pmap PID
 
@@ -1438,12 +1456,12 @@ weber    29515     1  0  2013 ?        02:55:59 ./redis-server redis.conf
 
 #### 5.5，综合运用
 
-```linux
+```shell
 #将用户angelo下的所有进程名称以av_开头的进程终止
 ps -u angelo | awk '/av_/ {print "kill -9 " $1}' | sh
 ```
 
-```linux
+```shell
 #将用户angelo下所有进程名中包含HOST的进程终止
 ps -ef | grep angelo | grep HOST | awk '{print $2}' | xargs kill -9;
 ```
@@ -1456,7 +1474,7 @@ ps -ef | grep angelo | grep HOST | awk '{print $2}' | xargs kill -9;
 
 #### 6.1，监控CPU
 
-```linux
+```shell
 #查看CPU使用率
 sar -u
 
@@ -1487,7 +1505,7 @@ sar -q 1 2
 
 #### 6.2，查询内存
 
-```linux
+```shell
 #查看内存使用状况，sar指定-r之后，可以查看内存使用状况；
 sar -r 1 2
 09:08:48 AM kbmemfree kbmemused  %memused kbbuffers  kbcached  kbcommit   %commit  kbactive   kbinact
@@ -1507,7 +1525,7 @@ Average:        17888    359784     95.26     37796     73272    507004     65.4
 > kbinact：非活跃内存量（以KB为单位），即长时间未被访问过的内存。  
 > kbdirty：脏页内存量（以KB为单位），即等待写入磁盘的内存。
 
-```linux
+```shell
 #查看内存使用量
 free -m
 ```
@@ -1518,7 +1536,7 @@ free -m
 查看页面交换发生状况，页面发生交换使，服务器的吞吐量会大幅下降；服务器状况不良时，如果怀疑因为内存不足而导致了页面交换的发生，可以使用sar -W这个命令来确认是否发生了大量的交换；
 ```
 
-```linux
+```shell
 sar -W 1 3  #查询交换页面的数据，每一秒查询一次，一共查询3次；
 ```
 
@@ -1535,17 +1553,17 @@ sar -W 1 3  #查询交换页面的数据，每一秒查询一次，一共查询3
 
 #### 6.4，查询硬盘使用
 
-```linux
+```shell
 #查看磁盘空间利用情况
 df -h
 ```
 
-```linux
+```shell
 #查询当前目录下空间的使用情况
 du -sh    #-h：是人性化显示（大小默认显示Byte，加h会显示M，G等）；-s：递归整个目录的大小；
 ```
 
-```linux
+```shell
 #查询该目录下所有文件夹的排序后的大小
 du -sh `ls`
 或
@@ -1560,7 +1578,7 @@ Linux中的vmstat
 Unix中的prstat
 ```
 
-```linux
+```shell
 #查看CPU、内存、使用情况：vmstat n m（n监控频率；m监控次数）
 vmstat 1 3    #每一秒监控一次；总共监控3次；
 ```
@@ -1569,10 +1587,10 @@ vmstat 1 3    #每一秒监控一次；总共监控3次；
 使用watch工具监控变化 当需要持续的监控应用的某个数据变化时，watch工具可以满足要求；执行watch命令后会进入一个界面，输出当前被监控的数据，一旦数据变化，便会高亮显示变化情况；
 ```
 
-```linux
+```shell
 #操作redis时，监控内存变化
 watch -d -n 1 './redis-cli info | grep memory'
-(以下为watch工具中的界面内容，一旦内存变化即实时高亮显示变化)
+#(以下为watch工具中的界面内容，一旦内存变化即实时高亮显示变化)
 Every 1.0s: ./redis-cli info | grep memory
 
 used_memory:45157376
@@ -1582,7 +1600,7 @@ used_memory_peak:49686080
 used_memory_peak_human:47.38Ms
 ```
 
-### 网络工具
+### 7.网络工具
 
 #### 7.1，查询网络服务和端口
 
@@ -1590,27 +1608,27 @@ used_memory_peak_human:47.38Ms
 netstat命令用于显示各种网络相关信息，如网络连接、路由表、接口状态(interface statistic)、masquerade连接、多播成员(Multicast memberships)等等；
 ```
 
-```linux
+```shell
 #列出所有端口（包括监听和未监听得）
 netstat -a
 ```
 
-```linux
+```shell
 #列出所有TCP端口
 netstat -ta   #-t：TCP
 ```
 
-```linux
+```shell
 #列出所有UDP端口
 netstat -ua   #-u：UDP
 ```
 
-```linux
+```shell
 #列出所有有监听的服务状态
 netstat -l
 ```
 
-```linux
+```shell
 #使用netstat工具查询端口
 netstat -antp | grep 379
 out:
@@ -1626,7 +1644,7 @@ lsof（list open files）是一个列出当前系统打开文件的工具。在L
 所以如传输控制协议TCP和用户数据包协议UDP套接字等；在查询网络端口时，经常会用到这个工具。
 ```
 
-```linux
+```shell
 #查询7902端口现在运行什么程序
 
 #分两步：
@@ -1645,34 +1663,34 @@ root     22781 22698  0 00:54 pts/20   00:00:00 grep 11554
 
 #### 7.2，网络路由
 
-```linux
+```shell
 #查看路由状态
 route -n
 ```
 
-```linux
+```shell
 #发送ping包到地址IP
 ping IP
 ```
 
-```linux
+```shell
 #探测前往地址IP的路由路径
 traceroute IP
 ```
 
-```linux
+```shell
 #DNS查询，寻找域名domain对应的IP
 host domain
 ```
 
-```linux
+```shell
 #反向DNS查询
 host IP
 ```
 
 #### 7.3，镜像下载
 
-```linux
+```shell
 #直接下载文本或页面
 wget url
 
@@ -1696,7 +1714,7 @@ wget https://github.com/rgl/redis/downloads
 >
 > ssh：Secure Shell（安全外壳），是一种加密的网络传输协议，用于在不安全的网络上安全地访问远程计算机。它可以用于远程登录、执行命令、传输文件等。
 
-```linux
+```shell
 #SSH登录
 ssh ID@host     #ssh登录远程服务器host：远程主机的IP或者域名；ID：远程主机上的用户名
 
@@ -1707,7 +1725,7 @@ ssh user123@192.168.1.100
 ssh user123@example.com
 ```
 
-```linux
+```shell
 #ftp/sftp文件传输
 sftp ID@host        #ID 是你要登录的远程主机上的用户名；host 是远程主机的 IP 地址或域名。
 
@@ -1727,7 +1745,7 @@ sftp user123@example.com
     * lls：列出本地主机上当前路径的所有文件
     * lcd：在本地主机上更改当前路径
 
-```linux
+```shell
 #lftp同步文件夹（类似于rsync）
 lftp -u user:pass host        #user：远程主机上的用户名；pass：远程主机上对应的密码；host：远程主机的IP或域名
 
@@ -1750,7 +1768,7 @@ lftp user@host:~> mirror -n
 scp：Secure Copy Protocol（安全复制协议）
 ```
 
-```linux
+```shell
 #将本地localpath指向的文件上传到远程主机的path路径上
 scp localpath ID@host:path    #ID：远程主机用户名；host：远程主机IP或域名
 
@@ -1759,7 +1777,7 @@ scp example.txt user@192.168.1.100:~/     #~/：表示当前用户的主目录�
 
 ```
 
-```linux
+```shell
 #以ssh协议，遍历下载path路径下的整个文件系统，到本地的localpath文件夹下
 scp -r ID@site:path localpath       #ID：远程主机的用户名；site：远程主机主机名或IP
 
@@ -1773,7 +1791,7 @@ scp -r user@192.168.1.100:~/example_folder .      #~/：同理，当前远程用
 
 ###### 添加用户
 
-```linux
+```shell
 #创建用户名为username
 useradd -m username
 
@@ -1781,14 +1799,14 @@ useradd -m username
 passwd username       #输入后进入交互方式创建
 ```
 
-```linux
+```shell
 #删除用户
 userdel -r username
 
 #注：不带-r选项使用userdel，只会删除用户，用户的家目录仍然存在/home目录下。要完全的删除用户信息，使用-r选项。
 ```
 
-```linux
+```shell
 #账号切换，登入账号为userA用户状态下，切换到userB用户账号下工作
 su userB        #进入交互模式
 ```
@@ -1801,27 +1819,27 @@ su userB        #进入交互模式
 默认情况下，添加用户操作也会相应的增加一个同名的组，用户属于同名组。
 ```
 
-```linux
+```shell
 #查看当前用户所属组
 groups
 ```
 
-```linux
+```shell
 #一个用户可以属于多个组，将用户加入到组（首次加入到组）
 usermod -g groupName userName
 ```
 
-```linux
+```shell
 #修改用户所在组（加入到新的组，并从原来的组中移除）（非首次加入到组）
 usermod -g groupName userName
 ```
 
-```linux
+```shell
 #给用户追加用户组，不会从原来的组中移除
 usermod -ag newGroupName userName       # -a(append)：追加；-g：修改组信息
 ```
 
-```linux
+```shell
 #删除用户的组
 usermod -g "" userName    #组使用""表示，那就是删除该用户的所有的组
 ```
@@ -1832,17 +1850,17 @@ usermod -g "" userName    #组使用""表示，那就是删除该用户的所有
 系统的所有用户和所有组信息分别记录在两个文件中：/etc/passwd、/etc/group 默认情况下这两个文件对所有用户可读
 ```
 
-```linux
+```shell
 #查看所有用户及权限
 more /etc/passwd
 ```
 
-```linux
+```shell
 #查看所有的用户组及权限
 more /etc/group
 ```
 
-```linux
+```shell
 #新增组
 groupadd groupName
 
@@ -1863,7 +1881,7 @@ groupmod -n newGrouName oldGroupName    #-n(name)：表示设置新的组名
 第8-第10个字母：其他的权限（非当前用户、非当前所属组的其他用户的权限）
 ```
 
-```linux
+```shell
 ls -l /etc/group
 out:
 -rwxrw-r-- colin king 725 2013-11-12 15:37 /home/colin/a
@@ -1881,7 +1899,7 @@ chmod：更改文件的读写执行权限，更改读写执行权限有两种方
 
 1. 字母方式
 
-```linux
+```shell
 #字母方式：
 chomd userMark(+|-)PermissionsMark
 ```
@@ -1897,7 +1915,7 @@ chomd userMark(+|-)PermissionsMark
 > w：写  
 > x：执行1
 
-```linux
+```shell
 #对所有用户给为你教案main增加可执行权限
 chmod a+x main
 
@@ -1928,19 +1946,19 @@ x(执行)：1
 例如：6(4+2)：读写权限；7(4+2+1)：读写执行权限
 ```
 
-```linux
+```shell
 #将main的用户权限设置为  -rwxr------
 chmod 740 main
 ```
 
 ###### 更改文件或目录的拥有者（将文件或目录的所有者进行变更）
 
-```linux
+```shell
 #将dirOrFile的所有者变更成username用户
 chown username dirOrFile
 ```
 
-```linux
+```shell
 #使用-R选项递归更改该目录下的所有文件的拥有者(将server目录下的所有文件的所有者变更为weber)
 chown -r weber server/
 ```
@@ -1968,7 +1986,7 @@ bashrc与profile都用于保存用户的环境信息，bashrc用于交互式non-
 3. ~/.bashrc也是某用户专有设定文档，可以设定路径、命令别名，每次shell script执行都会使用它一次；
 ```
 
-```linux
+```shell
 #我们可以在这些环境变量中设置自己经常进入的文件路径，以及命令的快捷方式
 .bashrc
 alias m='more'
@@ -1988,13 +2006,13 @@ export PS1='$PWD#'
 #通过上述设置，我们进入log目录只需要输入：cd $log 即可
 ```
 
-### 系统管理及IPC资源管理
+### 9.系统管理及IPC资源管理
 
 #### 9.1，系统管理
 
 ###### 查询系统版本
 
-```linux
+```shell
 #查看Linux系统版本
 uname -a 
 lsb_release -a
@@ -2003,19 +2021,19 @@ lsb_release -a
 # lsb_release -a： 也是一个Linux shell命令，用于显示发行版相关的信息。它会输出发行版的完整名称、版本号、代号等信息。这个命令通常用于识别Linux发行版，例如Ubuntu、CentOS等。
 ```
 
-```linux
+```shell
 #查看Unix系统版本：操作系统版本
 more /etc/release
 ```
 
 ###### 查询硬件信息
 
-```linux
+```shell
 #查看CPU使用情况
 sar -u 5 10
 ```
 
-```linux
+```shell
 #查询CPU信息
 cat /proc/cpuinfo
 ```
@@ -2030,43 +2048,43 @@ cat /proc/cpuinfo | grep processor | wc -l
 cat /proc/meminfo
 ```
 
-```linux
+```shell
 #显示内存page大小（以KByte为单位）
 pagesize
 ```
 
-```linux
+```shell
 #显示架构
 arch
 ```
 
 ###### 设置系统时间
 
-```linux
+```shell
 #显示当前系统时间
 date
 ```
 
-```linux
+```shell
 #设置系统日期和时间（格式为：2024-09-15 17:05:00）
 date -s 2024-09-15 17:05:00
 date -s 2024-09-15
 date -s 17:05:00
 ```
 
-```linux
+```shell
 #设置时区，选择时区信息
 tzselect    #time zone select
 
 #根据系统提示，选择相应的时区信息
 ```
 
-```linux
-强制把系统时间写入COMS（这样重启后时间也正确了）
+```shell
+#强制把系统时间写入COMS（这样重启后时间也正确了）
 clock -w
 ```
 
-```linux
+```shell
 #格式化输出当前日期时间
 date +%Y%m%d.%H%M%S
 ```
@@ -2082,7 +2100,7 @@ ipc:全称是Inter-Process Communication（进程间通信）.
 
 ###### IPC资源查询
 
-```linux
+```shell
 #查看系统使用的IPC资源
 ipcs
 
@@ -2099,17 +2117,17 @@ key        semid      owner      perms      nsems
 key        msqid      owner      perms      used-bytes   messages
 ```
 
-```linux
+```shell
 #查看系统使用的IPC共享内存资源（shared memory）
 ipcs -m
 ```
 
-```linux
+```shell
 #查看系统使用的IPC消息队列资源（message queues）
 ipcs -q
 ``` 
 
-```linux
+```shell
 #查看系统使用的IPC信号量资源（semaphores）
 ipcs -s
 
@@ -2132,13 +2150,525 @@ out：
 0x0000c75c 40403197   tdea3    666        536870912  2
 0x0000c75c 5079070    tdea3    666        4
 ```
+
 ###### 检测和设置系统资源限制
-```linux
+
+```shell
 #显示当前所有的系统资源limit信息
 ulimit -a
 ```
 
-```linux
+```shell
 #对生成的core文件的大小进行限制
 ulimit -c unlimited
+```
+
+## Linux工具进阶
+
+### 1.程序构建
+
+```text
+一般源代码提供的程序安装需要通过配置、编译、安装三个步骤；
+
+1.配置做的工作主要是检查当前环境是否满足要安装软件的依赖关系，以及设置安装所需要的初始化信息，比如安装路径，需要安装那些租金啊；配置完成，会生成makefile（生成文件）供第二步make使用；
+2.编译是对源文件进行编译链接生成可执行程序。
+3.安装做的工作就简单多了，就是将生成的可执行文件拷贝到配置时设置的初始化路径下。
+```
+
+#### 1.1，配置
+
+```shell
+#查询可用的配置选项
+./configure --help
+
+#配置路径
+./configure --prefix=/usr/local/snmp
+#注：-prefix是配置使用的最常用选项，设置程序安装的路径；
+```
+
+#### 1.2，编译
+
+```shell
+#编译使用make编译
+make -f myMakefile
+```
+
+```text
+通过-f选项显式指定需要编译的makefile；如果待使用makefile文件在当前路径，且文件名为以下几个，则不用显式指定：
+makefile    Makefile
+
+可以直接使用指令：make -f
+```
+
+##### makefile编写的要点
+
+* 必须满足第一条规则，满足后停止；
+* 除第一条规则，其他无顺序；
+
+##### makefile中的全局自变量
+
+* $@目标文件名
+* @^所有前提名，除副本
+* @＋所有前提名，含副本
+* @＜一个前提名
+* @？所有新于目标文件的前提名
+* @*目标文件的基名称
+
+##### 更多选择CMake
+
+```text
+CMake是一个跨平台的安装（编译）工具，可以用简单的语句来描述所有平台的安装(编译过程)。
+他能够输出各种各样的makefile或者project文件。使用CMake，能够使程序员从复杂的编译连接过程中解脱出来。
+它使用一个名为 CMakeLists.txt 的文件来描述构建过程,可以生成标准的构建文件,如 Unix/Linux 的 Makefile 或Windows Visual C++ 的 projects/workspaces 。
+```
+
+##### 编译依赖的库
+
+```text
+makefile编译过程中所依赖的非标准库和头文件路径需要显示指明:
+
+CPPFLAGS -I标记非标准头文件存放路径
+LDFLAGS  -L标记非标准库存放路径
+
+如果CPPFLAGS和LDFLAGS已在用户环境变量中设置并且导出（使用export关键字），就不用再显示指定；
+```
+
+```shell
+eg:
+make -f myMakefile LDFLAGS='-L/var/xxx/lib -L/opt/mysql/lib'
+    CPPFLAGS='-I/usr/local/libcom/include -I/usr/local/libpng/include'
+    
+#注：链接多库时，多个库之间如果有依赖，需要注意书写的顺序，右边是左边的前提；
+```
+
+##### g++编译
+
+```shell
+g++ -o unixapp unixapp.o a.o b.o
+```
+
+```text
+选项说明：
+-o：指明生成的目标文件
+-g：添加调试信息
+-E：查看中间文件
+
+应用：查询宏展开的中间文件
+```
+
+```shell
+#在g++的编译选项中，添加-E选项，然后去掉-o选项，重定向到一个文件中即可；
+g++ -g -E unixapp.cpp -I/opt/app/source >midfile
+
+#这段指令是使用g++编译器对unixApp.cpp文件进行预处理，并将处理结果输出到midfile文件中。具体来说：
+
+#g++: 调用g++编译器。
+#-g: 生成调试信息，这对于后续的调试非常有用。
+#-E: 只执行预处理阶段，不进行编译、汇编和链接。预处理阶段包括宏替换、包含头文件等操作。
+#unixApp.cpp: 这是要进行预处理的源文件。
+#-I/opt/app/source: 这是一个编译选项，告诉编译器在/opt/app/source目录下查找头文件。
+# > midfile: 将预处理的输出重定向到名为midfile的文件中。
+
+```
+
+```shell
+#查询应用程序需要连接的库
+$ldd myprogrammer
+    libstdc++.so.6 => /usr/lib64/libstdc++.so.6 (0x00000039a7e00000)
+    libm.so.6 => /lib64/libm.so.6 (0x0000003996400000)
+    libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00000039a5600000)
+    libc.so.6 => /lib64/libc.so.6 (0x0000003995800000)
+    /lib64/ld-linux-x86-64.so.2 (0x0000003995400000)
+```
+
+#### 1.3，安装
+
+```shell
+#安装做的工作就简单多了，就是将生成的可执行文件拷贝到配置时设置的初始路径下:
+make install
+
+#注：其实 install 就是makefile中的一个规则，打开makefile文件后可以查看程序安装的所做的工作；
+```
+
+### 2.程序调试
+
+#### 2.1，进程调试
+
+##### gdb程序交互式调试
+
+```text
+gdb（GNU Debugger：GNU调试器）是一个由GNU开源组织发布的、UNIX/LINUX操作系统下的、基于命令的、功能强大的程序调试工具。
+
+对于一名Linux下工作的c++程序员，gdb是必不可少的工具；
+
+GDB中的命令固然很多，但我们只需掌握其中十个左右的命令，就大致可以完成日常的基本的程序调试工作。
+
+以下从一个完整的调试过程简单说明最基本的几个命令;
+gdb programmer      #启动GDB
+>break main         #设置断电
+>run                #运行调式程序
+>next               #单步调试
+>print var1         #在调试过程中，我们需要查看当前某个变量值的时候，使用print指令打印值
+>list               #显示当前调试处的源代码
+>info b             #显示当前断点设置情况
+```
+
+##### pstack跟踪栈空间
+
+```text
+pstack是一个脚本工具，可显示每一个进程的站跟踪。pstack命令必须由相应进程的属主或root运行。其核心实现就是使用了gdb以及thread apply all bt命令
+```
+
+```shell
+#语法
+pstack <program-pid>
+```
+
+##### strace分析系统调用
+
+```text
+strace常用来跟踪进程执行时的系统调用和所接收的信号。
+在Linux世界，进程不能直接访问硬件设备，当进程需要访问硬件设备(比如读取磁盘文件，接收网络数据等等)时，必须由用户态模式切换至内核态模式，通过系统调用访问硬件设备。
+strace可以跟踪到一个进程产生的系统调用,包括参数，返回值，执行消耗的时间。
+```
+
+略略略...
+
+#### 2.2，目标文件分析
+
+##### nm
+
+```text
+nm用来列出目标文件的符号清单
+```
+
+##### objdump
+
+```text
+objdump工具用来显示二进制文件的信息，就是以一种可阅读的格式让你更多的了解二进制文件可能带有的附加信息。
+```
+
+##### readelf
+
+```text
+这个工具和objdump买了提供的功能类似，但是他显示的信息更为具体，并且它不依赖BFD库（BFD库是一个GNU项目，他的目标就是希望可以通过一种统一的接口来处理不同的目标文件。）
+```
+
+##### size查看程序内存占用
+
+```text
+size这个工具用来查看程序运行时各个阶段的实际内存占用
+```
+
+```shell
+size a.out
+text           data     bss     dec     hex filename
+1146            256       8    1410     582 a.out9
+```
+
+##### file文件类型查询
+
+```text
+这个工具用于查看文件的类型
+```
+
+```shell
+#比如我们在64位机器上发现了一个32位的库，链接不上，这就有问题了
+file a.out
+a.out: ELF 64-bit LSB executable, AMD x86-64, version 1 (SYSV), for GNU/Linux 2.6.9, dynamically linked (uses shared libs), for GNU/Linux 2.6.9, not stripped
+
+#也可以查看Core文件是由哪个程序生成的
+file core.23435
+```
+
+##### strings查询数据中的文本信息
+
+```text
+一个文件中包含二进制数据和文本数据，如果只需要查看其文本信息，使用这个命令就很方便；过滤掉非字符数据，将文本信息输出；
+```
+
+```shell
+strings <objfile>
+```
+
+##### fuser 显示文件使用者
+
+```text
+显示所有正在使用着指定的file，file system或者sockets的进程信息
+```
+
+```shell
+fuser -m -u redis-server
+out:
+redis-server: 11552rce(weber) 22912rce(weber) 25501rce(weber)
+
+#注：使用了-m和-u选项，用来查找所有正在使用redis-server的所有进程的PID以及该进程的OWNER；
+```
+
+```shell
+#fuser通常被用在诊断系统的”resource busy”问题。如果你希望kill所有正在使用某一指定的file, file system or sockets的进程的时候，你可以使用-k选项:
+fuser -k /path/to/your/filename
+```
+
+##### xxd 十六进制显示数据
+
+```shell
+#以十六进制方式显示文件，只显示文本信息
+xxd a.out
+0000000: 7f45 4c46 0101 0100 0000 0000 0000 0000  .ELF............
+0000010: 0200 0300 0100 0000 3083 0408 3400 0000  ........0...4...
+0000020: 3c11 0000 0000 0000 3400 2000 0900 2800  <.......4. ...(.
+0000030: 1e00 1b00 0600 0000 3400 0000 3480 0408  ........4...4...
+0000040: 3480 0408 2001 0000 2001 0000 0500 0000  4... ... .......
+0000050: 0400 0000 0300 0000 5401 0000 5481 0408  ........T...T...
+...
+```
+
+##### od
+
+```text
+通常使用od命令查看特殊格式的文件内容。通过指定该命令的不同选项可以以十进制、八进制、十六进制和ASCII码来显示文件。
+```
+
+```text
+参数说明：
+-A 指定地址基数，包括：
+
+d 十进制
+o 八进制（系统默认值）
+x 十六进制
+n 不打印位移值
+-t 指定数据的显示格式，主要的参数有：
+
+c ASCII字符或反斜杠序列
+d 有符号十进制数
+f 浮点数
+o 八进制（系统默认值为02）
+u 无符号十进制数
+x 十六进制数
+
+除了选项c以外的其他选项后面都可以跟一个十进制数n，指定每个显示值所包含的字节数。
+
+说明：od命令系统默认的显示方式是八进制，这也是该命令的名称由来（Octal Dump）。
+但这不是最有用的显示方式，用ASCII码和十六进制组合的方式能提供更有价值的信息输出。
+```
+
+```shell
+#以十六进制和字符同时显示
+od -Ax -tcx4 a.c
+000000   #   i   n   c   l   u   d   e       <   s   t   d   i   o   .
+              636e6923        6564756c        74733c20        2e6f6964
+000010   h   >  \n  \n   v   o   i   d       m   a   i   n   (   )  \n
+              0a0a3e68        64696f76        69616d20        0a29286e
+000020   {  \n  \t   i   n   t       i       =       5   ;  \n  \t   p
+              69090a7b        6920746e        35203d20        70090a3b
+000030   r   i   n   t   f   (   "   h   e   l   l   o   ,   %   d   "
+              746e6972        68222866        6f6c6c65        2264252c
+000040   ,   i   )   ;  \n   }  \n
+              3b29692c        000a7d0a
+000047
+```
+
+```shell
+#以字符方式显示
+od -c a.c
+
+0000000   #   i   n   c   l   u   d   e       <   s   t   d   i   o   .
+0000020   h   >  \n  \n   v   o   i   d       m   a   i   n   (   )  \n
+0000040   {  \n  \t   i   n   t       i       =       5   ;  \n  \t   p
+0000060   r   i   n   t   f   (   "   h   e   l   l   o   ,   %   d   "
+0000100   ,   i   )   ;  \n   }  \n
+0000107
+```
+
+### 3.性能优化
+
+```text
+性能优化的核心是找出系统的瓶颈点，问题找到了，优化的工作也就完成了大半；
+这里介绍的性能优化主要从两个层面来介绍：系统层面和程序层面；
+```
+
+#### 3.1，分析系统瓶颈
+
+```text
+系统响应变慢，首先得定位大致的问题出在哪里，是IO瓶颈、CPU瓶颈、内存瓶颈还是程序导致的系统问题；
+```
+
+```shell
+#使用top工具能够比较全面的查看我们关注的点
+top
+
+top - 09:14:56 up 264 days, 20:56,  1 user,  load average: 0.02, 0.04, 0.00
+    Tasks:  87 total,   1 running,  86 sleeping,   0 stopped,   0 zombie
+    Cpu(s):  0.0%us,  0.2%sy,  0.0%ni, 99.7%id,  0.0%wa,  0.0%hi,  0.0%si,  0.2%st
+    Mem:    377672k total,   322332k used,    55340k free,    32592k buffers
+    Swap:   397308k total,    67192k used,   330116k free,    71900k cached
+    PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+    1 root      20   0  2856  656  388 S  0.0  0.2   0:49.40 init
+    2 root      20   0     0    0    0 S  0.0  0.0   0:00.00 kthreadd
+    3 root      20   0     0    0    0 S  0.0  0.0   7:15.20 ksoftirqd/0
+    4 root      RT   0     0    0    0 S  0.0  0.0   0:00.00 migration/
+```
+
+##### 进入交互模式后
+
+```text
+1.输入M：进程列表按内存使用大小降序排序，便于我们观察最大内存使用者使用的问题（检查内存泄漏问题）
+2.输入P：进程列表按CPU使用大小降序排序，便于我们观察最耗CPU资源的使用者是否有问题；
+```
+
+##### top第三行显示当前系统的情况，其中有两个值很关键
+
+```text
+1.%id：空闲CPU时间百分比，如果这个值比较低，表面系统CPU存在瓶颈；（空闲占比越低说明越忙，可能CPU存在瓶颈）
+2.%wa：等待I/O的CPU时间百分比，如果这估值过高，表示IO存在瓶颈；（IO输入输出等待的时间太长了，说明IO存在瓶颈）
+```
+
+#### 3.2，分析内存瓶颈
+
+```text
+查看内存是否存在瓶颈，使用top指令看比较麻烦，而free命令更为直观；
+```
+
+```shell
+#free
+free
+             total       used       free     shared    buffers     cached
+Mem:        501820     452028      49792      37064       5056     136732
+-/+ buffers/cache:     310240     191580
+Swap:            0          0          0
+
+#top
+top
+top - 17:52:17 up 42 days,  7:10,  1 user,  load average: 0.02, 0.02, 0.05
+Tasks:  80 total,   1 running,  79 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem:    501820 total,   452548 used,    49272 free,     5144 buffers
+KiB Swap:        0 total,        0 used,        0 free.   136988 cached Mem
+```
+
+```text
+top工具显示了free工具的第一行所有信息，但真实可用的内存，还需要自己计算才知道；系统实际可用的内存为free工具输出第二行的free+buffer+cached的总和；也就是第三行的free值191580；
+
+如果是因为缺少内存，系统响应变慢明显，因为这个使得系统不停的做换入换出的工作；
+
+进一步的监视内存使用情况，可使用工具vmstat，实时动态监视操作系统的内存和虚拟内存的动态变化；
+```
+
+#### 3.3，分析IO瓶颈
+
+```text
+如果IO存在性能瓶颈，top工具中的%wa会偏高；
+进一步分析使用iostat工具；
+```
+
+```shell
+#进一步分析使用iostat工具
+iostat -d -x -k 1 1       #-d:只显示磁盘的统计信息；-x：显示扩展的统计信息，包括每个设备的详细信息；-k：以KB为单位显示数据；1 1：每一秒刷新一次，只显示一次信息；
+
+Linux 2.6.32-279.el6.x86_64 (colin)   07/16/2014      _x86_64_        (4 CPU)
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await  svctm  %util
+sda               0.02     7.25    0.04    1.90     0.74    35.47    37.15     0.04   19.13   5.58   1.09
+dm-0              0.00     0.00    0.04    3.05     0.28    12.18     8.07     0.65  209.01   1.11   0.34
+dm-1              0.00     0.00    0.02    5.82     0.46    23.26     8.13     0.43   74.33   1.30   0.76
+dm-2              0.00     0.00    0.00    0.01     0.00     0.02     8.00     0.00    5.41   3.28   0.00
+```
+
+* 如果%iowait的值过高，表示硬盘存在I/O瓶颈
+* 如果%util接近100%，说明产生的I/O请求太多，I/O系统已经满负荷，该磁盘可能存在瓶颈
+* 如果svctm比较接近await，说明I/O几乎没有等待时间；
+* 如果await远大于svctm，说明I/O队列太长，IO响应太慢，则需要进行必要优化；
+* 如果avgqu-sz比较大，也表示大量的IO在等待。
+
+#### 3.4，分析进程调用
+
+```text
+通过top等工具发现性能问题是由某个进程导致的之后，接下来我们就需要分析这个进程，继续查询问题所在；
+
+使用两个好用的工具：pstack、pstrace
+pstack(process stack)：查看进程栈信息
+pstrace(process status and trace)：追踪进程状态和系统调用
+```
+
+```shell
+pstack PID
+
+pstrace -p PID
+
+```
+
+```text
+pstack用来追踪进程栈，这个命令在排查进程问题时非常有用，比如我们发现一个服务一直处于work状态（例如假死状态，好似死循环），使用这个命令就能轻松定位问题所在；
+可以在一段时间内，多执行几次pstack，若发现代码栈总是停在同一个位置，那么这个位置就需要重点关注，可能是出现问题的地方。
+```
+
+```shell
+查看bash程序进程栈
+
+-ef >ps | grep bash
+tdev1 7013 7012 0 19:42 pts/1 00:00:00 -bash
+tdev1 11402 11401 0 20:31 pts/2 00:00:00 -bash
+tdev1 11474 11402 0 20:32 pts/2 00:00:00 grep bash
+
+7013 >pstack
+#0  0x00000039958c5620 in __read_nocancel () from /lib64/libc.so.6
+#1  0x000000000047dafe in rl_getc ()
+#2  0x000000000047def6 in rl_read_key ()
+#3  0x000000000046d0f5 in readline_internal_char ()
+#4  0x000000000046d4e5 in readline ()
+#5  0x00000000004213cf in ?? ()
+#6  0x000000000041d685 in ?? ()
+#7  0x000000000041e89e in ?? ()
+#8  0x00000000004218dc in yyparse ()
+#9  0x000000000041b507 in parse_command ()
+#10 0x000000000041b5c6 in read_command ()
+#11 0x000000000041b74e in reader_loop ()
+#12 0x000000000041b2aa in main ()
+
+```
+
+```text
+而strace（pstrace的加强版）用来跟踪进程中的系统调用；
+这个工具能够动态的跟踪进程执行时的系统调用和所接受信号。是一个非常有效的检测、指导和调试工具。系统管理员可以通过该命令容易的解决程序问题。
+
+pstrace VS strace
+1.pstrace是一个独立的命令行工具，而strace是GNU coreutils包的一部分。这意味着pstrace需要单独安装，而strace通常已经预装在大多数Linux发行版中。
+2.strace提供了更多的选项和功能，例如可以限制输出到特定进程、过滤特定的系统调用等。而pstrace的功能相对较少，主要用于显示进程的系统调用轨迹。
+3.strace可以跟踪子进程的系统调用，而pstrace只能跟踪指定的进程ID。
+4.strace可以跟踪信号处理程序，而pstrace不支持这个功能。
+总的来说，strace更加强大和灵活，适用于更复杂的跟踪需求。而pstrace则相对简单，主要关注于显示进程的系统调用轨迹。
+```
+
+#### 3.5，优化程序代码
+
+```text
+优化自己开发的程序，建议采用以下准则：
+
+1.二八法则：在任何一组东西中，最重要的只占其中一小部分，约20%，其余80%尽管是多数，确实次要的；在优化实践中，我们将精力集中在优化那20%最耗时的代码上，整体性能将有显著的提升；
+这个很好理解，例如一个函数A代码量很大，但是它只执行一次；另外一个函数B代码量比A要少很多，但是被调用了1000次。显然，我们应该关系B的优化。
+
+2.编完代码，再优化：编码的始终是考虑代码的性能未必总是好的；在强调最佳性能的编码方式的同时，可能就损失了代码的可读性和开发效率；
+```
+
+##### gprof使用步骤
+
+```text
+1.用gcc、g++、xlC编译程序时，使用-pg参数，如：g++ -pg -o test.exe test.cpp编译器会自动在目标代码中插入用于性能测试的代码片断，这些代码在程序运行时采集并记录函数的调用关系和调用次数，并记录函数自身执行时间和被调用函数的执行时间。
+
+2.执行编译后的可执行程序，如：./test.exe。该步骤运行程序的时间会稍慢于正常编译的可执行程序的运行时间。程序运行结束后，会在程序所在路径下生成一个缺省文件名为gmon.out的文件，这个文件就是记录程序运行的性能、调用关系、调用次数等信息的数据文件。
+
+3.使用gprof命令来分析记录程序运行信息的gmon.out文件，如：gprof test.exe gmon.out则可以在显示器上看到函数调用相关的统计、分析信息。上述信息也可以采用gprof test.exe gmon.out> gprofresult.
+txt重定向到文本文件以便于后续分析。
+```
+
+#### 3.6，其他工具
+```text
+1.调试内存泄漏的工具valgrind，感兴趣的朋友可以google了解；
+
+2.OProfile: Linux 平台上的一个功能强大的性能分析工具,使用参考 [f2] ;
+
+3.除了上面介绍的工具，还有一些比较全面的性能分析工具，
+比如sar（Linux系统上默认不安装，需要手动安装下）； 
+将sar的常驻监控工具打开后，能够收集比较全面的性能分析数据；
 ```
