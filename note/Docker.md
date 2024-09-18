@@ -360,26 +360,35 @@ docker exec -it 容器ID /bin/bash
 #实战版本
 #1，在主机上创建redis配置文件redis.conf
 mkdir -p /app/redis
-将配置文件模板复制到我们新建的文件夹中
+
+#将配置文件模板复制到我们新建的文件夹中
 cp /home/making/redis.conf /app/redis
-修改配置文件配置
+
+#修改配置文件配置
 vim redis.conf
-1），开启redis验证，是否需要密码登入，可选
+
+#1），开启redis验证，是否需要密码登入，可选
 requirepass 123
-2），允许redis外部连接，必须
-注释掉：bind 127.0.0.1
-#bind 127.0.0.1
-3），daemonize no；将daemonize yes注释或者将daemonize设置为no，因为该配置为yes或和docker run中的-d参数冲突，导致容器无法启动
+
+#2），允许redis外部连接，必须
+注释掉：bind 127.0.0.1    #bind 127.0.0.1
+
+#3），daemonize no；将daemonize yes注释或者将daemonize设置为no，因为该配置为yes或和docker run中的-d参数冲突，导致容器无法启动
 daemonize no
-4），开启redis持久化，可选
+
+#4），开启redis持久化，可选
 appendonly yes
+
 #2，创建redis容器
 docker run -d -p 6379:6379 --name redis6.0.8 --privileged=true -v /app/redis/redis.conf:/etc/redis/redis.conf -v /app/redis/data:/data
 redis:6.0.8 redis-server /etc/redis/redis.conf
+
 #3，查看容器是否创建
 docker ps
+
 #4，进入redis容器中
 docker exec -it 容器ID /bin/bash
+
 #5，开启redis客户端
 > redis-cli
 ```
