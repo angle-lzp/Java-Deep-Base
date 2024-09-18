@@ -370,8 +370,8 @@ vim redis.conf
 #1），开启redis验证，是否需要密码登入，可选
 requirepass 123
 
-#2），允许redis外部连接，必须
-注释掉：bind 127.0.0.1    #bind 127.0.0.1
+#2），允许redis外部连接，必须注释掉：
+bind 127.0.0.1    #bind 127.0.0.1
 
 #3），daemonize no；将daemonize yes注释或者将daemonize设置为no，因为该配置为yes或和docker run中的-d参数冲突，导致容器无法启动
 daemonize no
