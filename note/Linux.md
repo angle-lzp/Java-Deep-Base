@@ -3357,3 +3357,26 @@ ps aux
 ```
 
 <img src="./img/ps06.png" style="width:40%" alt="ps06.png"/>
+
+##### 实例7：显示进程的CPU和内存使用情况
+
+```shell
+#这将显示进程ID、父进程ID、命令名称以及CPU和内存的使用百分比。
+ps -eo pid,ppid,cmd,%cpu,%mem
+```
+
+<img src="./img/ps07.png" style="width:40%" alt="ps07.png"/>
+
+##### 实例8：显示特定进程信息
+
+```shell
+ps -p 47 #47:PID
+```
+
+##### 实例9：显示进程的实时更新
+
+```shell
+ps -eo pid,ppid,cmd --sort=-%mem | head
+```
+
+<img src="./img/ps09.png" style="width:40%" alt="ps09.png"/>
