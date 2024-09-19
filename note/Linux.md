@@ -1379,7 +1379,7 @@ top
 ```
 
 ```shell
-#查看端口占用的进程状态
+#查看端口占用的进程状态（查看使用该端口运行的程序相关信息）
 lsof -i:3306
 ```
 
@@ -1400,7 +1400,7 @@ lsof -p 23295
 
 ```shell
 #查询指定目录下被进程开启的文件（使用+D递归目录）
-lsof +d mydir1/
+lsof +D mydir1/   #递归这个D是大写
 ```
 
 #### 5.2，终止进程
@@ -2683,6 +2683,128 @@ txt重定向到文本文件以便于后续分析。
 
 ### 1.gdb调试利器
 
+```text
+GDB是一个由GNU开源组织发布的、UNIX/LINUX操作系统下的、基于命令的、功能强大的程序调试工具。对于一名Linux下工作人员，gdb是必不可少的。
+```
+
+#### 1.1 启动gdb
+
+```shell
+#对C/C++程序的调试，需要在编译前面加上-g选项
+#存在一个C语言程序 Hello.c
+g++ -g Hello.c -o Hello
+
+#编译完成后调试可执行文件就是Hello.exe
+gdb Hello
+
+#Hello也就是你的执行文件，一般在当前目录下。
+```
+
+```shell
+#调试core 文件（core是程序非法执行后core dump后产生的文件）
+gdb <program> <core dump file>
+
+eg:
+gdb program core.111127
+```
+
+```shell
+#调试服务程序
+#模板
+gdb <program> <PID>
+
+eg:
+gdb Hello 11127
+```
+
+```text
+如果你的程序是一个服务程序，那么你可以指定这个服务程序运行时的进程ID。gdb会自动attach上去，并调试它。program应该在PATH环境变量中搜索得到。
+```
+
+#### 1.2 gdb交互命令
+
+```text
+启动gdb后，进入到交互式模式，通过以下买了完成对程序的调试；注意高频使用的命令一般都会有缩写，熟练使用这些缩写买了能提高调试的效率。
+```
+
+##### 运行
+
+* run：简记为 r ，其作用是运行程序，当遇到断点后，程序会在断点处停止运行，等待用户输入下一步的命令。
+* continue （简写c ）：继续执行，到下一个断点处（或运行结束）
+* next：（简写 n），单步跟踪程序，当遇到函数调用时，也不进入此函数体；此命令同 step 的主要区别是，step 遇到用户自定义的函数，将步进到函数中去运行，而
+  next 则直接调用函数，不会进入到函数体内。
+* step （简写s）：单步调试如果有函数调用，则进入函数；与命令n不同，n是不进入调用的函数的
+* until：当你厌倦了在一个循环体内单步跟踪时，这个命令可以运行程序直到退出循环体。
+* until+行号： 运行至某行，不仅仅用来跳出循环
+* finish： 运行程序，直到当前函数完成返回，并打印函数返回时的堆栈地址和返回值及参数值等信息。
+* call 函数(参数)：调用程序中可见的函数，并传递“参数”，如：call gdb_test(55)
+* quit：简记为 q ，退出gdb
+
+##### 设置断点
+
+* break n （简写b n）:在第n行处设置断点
+  （可以带上代码路径和代码名称： b OAGUPDATE.cpp:578）
+* b fn1 if a＞b：条件断点设置
+* break func（break缩写为b）：在函数func()的入口处设置断点，如：break cb_button
+* delete 断点号n：删除第n个断点
+* disable 断点号n：暂停第n个断点
+* enable 断点号n：开启第n个断点
+* clear 行号n：清除第n行的断点
+* info b （info breakpoints） ：显示当前程序的断点设置情况
+* delete breakpoints：清除所有断点
+
+##### 查看源代码
+
+* list ：简记为 l ，其作用就是列出程序的源代码，默认每次显示10行。
+* list 行号：将显示当前文件以“行号”为中心的前后10行代码，如：list 12
+* list 函数名：将显示“函数名”所在函数的源代码，如：list main
+* list ：不带参数，将接着上一次 list 命令的，输出下边的内容。
+
+##### 打印表达式
+
+* print 表达式：简记为 p ，其中“表达式”可以是任何当前正在被测试程序的有效表达式，比如当前正在调试C语言的程序，那么“表达式”可以是任何C语言的有效表达式，包括数字，变量甚至是函数调用。
+* print a：将显示整数 a 的值
+* print ++a：将把 a 中的值加1,并显示出来
+* print name：将显示字符串 name 的值
+* print gdb_test(22)：将以整数22作为参数调用 gdb_test() 函数
+* print gdb_test(a)：将以变量 a 作为参数调用 gdb_test() 函数
+* display 表达式：在单步运行时将非常有用，使用display命令设置一个表达式后，它将在每次单步进行指令后，紧接着输出被设置的表达式及值。如： display a
+* watch 表达式：设置一个监视点，一旦被监视的“表达式”的值改变，gdb将强行终止正在被调试的程序。如： watch a
+* whatis ：查询变量或函数
+* info function： 查询函数
+* 扩展info locals： 显示当前堆栈页的所有变量
+
+##### 查询运行信息
+
+* where/bt ：当前运行的堆栈列表；
+* bt backtrace 显示当前调用堆栈
+* up/down 改变堆栈显示的深度
+* set args 参数:指定运行时的参数
+* show args：查看设置好的参数
+* info program： 来查看程序的是否在运行，进程号，被暂停的原因。
+
+##### 分割窗口
+
+* layout：用于分割窗口，可以一边查看代码，一边测试：
+* layout src：显示源代码窗口
+* layout asm：显示反汇编窗口
+* layout regs：显示源代码/反汇编和CPU寄存器窗口
+* layout split：显示源代码和反汇编窗口
+* Ctrl + L：刷新窗口
+
+```text
+注：交互模式下直接回车的作用是重复是上一个指令，对于单步调试非常方便。
+```
+
+#### 1.3 更强大的工具
+
+##### cgdb
+
+```text
+cgdb可以看作gdb的界面增强版，用来代替gdb的gdb -tui。cgdb主要功能是在调试时进行代码的同步显示，这无疑增加了调试的方便性，提高了调试效率。
+界面类似vi，符合unix/linux下开人员习惯。如果熟悉gdb和vi，几乎可以立即使用cgdb。
+```
+
 ### 2.top Linux下的任务管理器
 
 ```text
@@ -2900,23 +3022,338 @@ htop是一个Linux下的交互式的进程浏览器，可以用来替换Linux下
 * 杀进程时不需要输入进程号。
 * htop支持鼠标操作。
 
-<img src="./img/htop.png" style="width:40%"/>
+<img src="./img/htop.png" style="width:40%" alt="htop.png"/>
 
+### 3. ldd查看程序依赖库
 
+```text
+作用：用来查看程序运行所需要的共享库，常用来解决程序因缺少某个库文件而不能运行的一些问题。
+```
 
+#### 示例：查看Hello程序运行所需要的库
 
+<img src="./img/LDD.png" style="width:40%" alt="ldd.png">
 
+* 第一列：程序需要依赖什么库
+* 第二列：系统提供的与程序需要的库所对应库
+* 第三列：库加载的开始地址
 
+1. 通过对比第一列和第二列，我们可以分析程序需要依赖的库和系统实际提供的，是否相匹配。
+2. 查看观察第三列，我们可以知道在当前的库中的符号在对应的进程的地址空间中的开始位置。
 
+**如果以来的某个库找不到，通过这个命令可以迅速定位问题所在。**
 
+```text
+原理：ldd不是个可执行程序，而只是个shell脚本。ldd显示可执行模块的dependency的工作原理，其实质是通过ld-linux.so（elf动态库的装载器）来实现的。
+ld-linux.so模块会先于executable模块程序工作，并获得控制权，因此当上述的那些环境变量被设置时，ld-linux.so选择了显示可执行模块的dependency。
+```
 
+### 4. lsof一切皆文件
 
+```text
+lsof(list open file)是一个查看当前系统文件的工具。在Linux环境下，任何事物都是以文件的形式存在的，通过文件不仅仅可以访问常规数据，还可以访问网络连接和硬件。
+如传输控制协议(TCP)和用户数据报协议(UDP)套接字等，系统后台都为应用程序分配了一个文字描述符，该文件描述符提供了大量关于这个应用程序本身的信息。
+```
 
+**lsof打开的文件可以是**
 
+1. 普通文件
+2. 目录
+3. 网络文字系统的文件
+4. 字符或设备文件
+5. （函数）共享库
+6. 管道、命名管道
+7. 符号链接
+8. 网络文件（NFS File、网络socket、unix域名socket）
+9. 其他类型的文件，等等
 
+#### 4.1 命令参数
 
+* -a：列出打开文件存在的进程
+* -c <进程名称>：列出指定进程所打开的文件
+* -g：列出GID号进程详情
+* -d <文件描述符类型>：列出属于该文件描述符类型的进程（文件描述符类型：可以理解为文件的类型，DF这个字段；-d 3：3表示网络套接字类型）
+* +d <目录>：列出目录下被打开的文件
+* +D <目录>：递归列出目录下被打开的文件
+* -n <目录>：列出使用NFS的文件（这个选项告诉lsof不要将IP地址转换为主机名，即只显示数字形式的IP地址。）
+* -i <条件>：列出符合条件的进程（条件可以：4、6、协议、:端口、@ip；例如：lsof -i 4）
+* -p <进程号>：列出指定进程号(PID)所打开的文件
+* -u：列出UID号进程详情
+* -h：显示帮助信息
+* -v：显示版本信息
 
+#### 4.2 使用实例
 
+##### 实例1：无任何参数
 
+```shell
+lsof | more
+```
 
+<img src="./img/lsof01.png" style="width:40%" alt="lsof01.png"/>
 
+**说明：lsof输出各列信息的意义如下：**
+
+* COMMAND：进程名字
+* PID：进程标识符
+* PPID：父进程标识符（需要指定-R参数）
+* USER：进程所有者
+* PGID：进程所属组
+* FD：文件描述符，应用程序通过文件描述符识别该文件。如：cwd、txt等
+  ```text
+  （1）cwd：表示current work dirctory，即：应用程序的当前工作目录，这是该应用程序启动的目录，除非它本身对这个目录进行更改
+  （2）txt ：该类型的文件是程序代码，如应用程序二进制文件本身或共享库，如上列表中显示的 /sbin/init 程序
+  （3）lnn：library references (AIX);
+  （4）er：FD information error (see NAME column);
+  （5）jld：jail directory (FreeBSD);
+  （6）ltx：shared library text (code and data);
+  （7）mxx ：hex memory-mapped type number xx.
+  （8）m86：DOS Merge mapped file;
+  （9）mem：memory-mapped file;
+  （10）mmap：memory-mapped device;
+  （11）pd：parent directory;
+  （12）rtd：root directory;
+  （13）tr：kernel trace file (OpenBSD);
+  （14）v86  VP/ix mapped file;
+  （15）0：表示标准输入
+  （16）1：表示标准输出
+  （17）2：表示标准错误
+  一般在标准输出、标准错误、标准输入后还跟着文件状态模式：r、w、u等
+  （1）u：表示该文件被打开并处于读取/写入模式
+  （2）r：表示该文件被打开并处于只读模式
+  （3）w：表示该文件被打开并处于
+  （4）空格：表示该文件的状态模式为unknow，且没有锁定
+  （5）-：表示该文件的状态模式为unknow，且被锁定
+  同时在文件状态模式后面，还跟着相关的锁
+  （1）N：for a Solaris NFS lock of unknown type;
+  （2）r：for read lock on part of the file;
+  （3）R：for a read lock on the entire file;
+  （4）w：for a write lock on part of the file;（文件的部分写锁）
+  （5）W：for a write lock on the entire file;（整个文件的写锁）
+  （6）u：for a read and write lock of any length;
+  （7）U：for a lock of unknown type;
+  （8）x：for an SCO OpenServer Xenix lock on part      of the file;
+  （9）X：for an SCO OpenServer Xenix lock on the      entire file;
+  （10）space：if there is no lock.
+  ```
+* TYPE：文件类型，如DIR，REG等，常见的文件类型
+  ```text
+  （1）DIR：表示目录
+  （2）CHR：表示字符类型
+  （3）BLK：块设备类型
+  （4）UNIX： UNIX 域套接字
+  （5）FIFO：先进先出 (FIFO) 队列
+  （6）IPv4：网际协议 (IP) 套接字
+  ```
+* DEVICE：指定磁盘的名称
+* SIZE：文件大小
+* NODE：索引节点（文件在磁盘上的标识）
+* NAME：打开文件的确切名称
+
+#### 实例2：查找某个文件相关的进程
+
+```shell
+lsof /bin/bash
+```
+
+<img src="./img/lsof02.png" style="width:40%" alt="lsof02.png"/>
+
+#### 实例3：列出某个用户打开的文件信息
+
+```shell
+lsof -u root #查看root用户打开的文件
+
+#-u 选项，u是user的缩写
+```
+
+#### 实例4：列出某个程序所打开的文件信息
+
+```shell
+lsof -c mysql
+
+# -c选项将会列出所有以MySQL这个进程开头的程序的文件，其实你可以写成 lsof | grep mysql,但是显然第一种方式比第二种方式少写几个字符。
+```
+
+#### 实例5：列出某个用户以及某个进程所打开的文件信息
+
+```shell
+lsof -u root -c mysql
+```
+
+#### 实例6：通过某个进程号显示该进程打开的文件
+
+```shell
+lsof -p 11987 #11987：进程id（PID）
+```
+
+#### 实例7：列出所有的网络连接
+
+```shell
+lsof -i
+```
+
+#### 实例8：列出谁在使用某个端口
+
+```shell
+lsof -i:3306
+```
+
+#### 实例9：列出所有tcp网络连接信息
+
+```shell
+lsof -i tcp
+
+lsof -n -i tcp
+
+# -n：这个选项告诉lsof不要将IP地址转换为主机名，即只显示数字形式的IP地址。
+```
+
+#### 实例10：列出某个用户的所有活跃的网络端口
+
+```shell
+lsof -a -u root -i
+```
+
+#### 实例11：根据文件描述列出对应的文件信息
+
+```shell
+lsof -d 3 | grep PARSER1
+
+tail      6499 tde    3r   REG    253,3   4514722     417798 /opt/applog/open/log/HOSTPARSER1_ERROR_141217.log.001
+```
+
+```text
+说明：0表示标准输入，1表示标准输出，2表示标准错误，从而可知：所以大多数应用程序所打开的文件的FD都是从3开始；
+```
+
+#### 实例12：列出被进程号1234的进程所打开的所有IPV4 network files
+
+```shell
+lsof -i 4 -a -p 1234
+```
+
+#### 实例13：列出目前连接主机nf5232-td上端口为：20、21、80相关的所有文件信息，且每个3秒重复执行
+
+```shell
+lsof -i @nf5232-td:20,21,80 -r 3
+```
+
+### 5.ps进程查看器
+
+```text
+ps：Process Status
+
+ps命令用来列出系统中当前运行的哪些进程。ps命令列出的是当前哪些进程的快照，就是执行ps梦里的那个时刻的那些进程，如果想要动态的显示进程信息，需要使用top命令。
+
+要对进程进行监测和控制，首先需要了解当前进程的情况，也就是需要查看当前进程，而ps明了就是最基本同时也是非常强大的进程查看命令。
+使用该命令可以确定哪些进程正在进行运行和运行状态、进程是否结束、进程有没有僵死、哪些进程占用了过多的资源等等。总之大部分信息都是可以通过执行该命令得到的。
+
+ps为我们提供了进程的一次性的查看，它所提供的查看结果并不动态连续的；如果想要对进程时间监控，需要使用到top指令。
+
+注：kill命令用于杀死进程。
+```
+
+**Linux上进程有5种状态**
+
+1. 运行：正在运行或在运行队列中等待
+2. 中断：休眠中、受阻、在等待某个条件的形成或接收到信号
+3. 不可中断：收到信号不唤醒和不可运行，进程必须等待知道有中断发生
+4. 僵死：进程已终止，但进程描述符存在，知道父进程调用wait4()系统调用才释放
+5. 停止：进程收到SIGSTOP,SIGTSTP,SIGTTIN,SIGTTOU信号后停止运行
+
+**ps工具标识进程的5种状态码**
+
+* R：运行-runnable（on run queue）
+* S：中断-sleeping
+* D：不可中断-uninterruptible sleep（usually IO）
+* Z：僵死-a defunct（zombie）process
+* T：停止-traced or stopped
+
+#### 5.1 命名参数
+
+* a：显示所有进程
+* -a：线是同一个终端下的所有程序
+* -A：显示所有进程
+* c：显示进程的真实名称
+* -N：反向旋转
+* -e：等于 -A
+* e：显示环境变量
+* f：显示程序间的关系
+* -H：显示树状结构
+* r：显示当前终端的进程
+* T：显示当前终端的所有程序
+* u：指定用户的所有进程
+* -au：显示较详细的资讯
+* -aux：显示所有包含其他使用者的进程
+* -C <命令>:列出指定命令的状况
+* -lines <行数>：每页显示的行数
+* -width <字符数>：每页显示的字符数
+* -help：显示帮助信息
+* -version：显示版本信息
+
+#### 5.2 输出列的含义
+
+* F 代表这个程序的旗标 (flag)， 4 代表使用者为 super user
+* S 代表这个程序的状态 (STAT)，关于各 STAT 的意义将在内文介绍
+* UID 程序被该 UID 所拥有
+* PID 进程的ID
+* PPID 则是其上级父程序的ID
+* C CPU 使用的资源百分比
+* PRI 这个是 Priority (优先执行序) 的缩写，详细后面介绍
+* NI 这个是 Nice 值，在下一小节我们会持续介绍
+* ADDR 这个是 kernel function，指出该程序在内存的那个部分。如果是个 running的程序，一般就是 “-“
+* SZ 使用掉的内存大小
+* WCHAN 目前这个程序是否正在运作当中，若为 - 表示正在运作
+* TTY 登入者的终端机位置
+* TIME 使用掉的 CPU 时间。
+* CMD 所下达的指令为何
+
+#### 5.3 使用实例
+
+##### 实例1：显示所有进程信息
+
+```shell
+ps -A
+```
+
+<img src="./img/ps01.png" style="width:40%" alt="ps01.png"/>
+
+##### 实例2：显示指定用户信息
+
+```shell
+ps -u root
+```
+
+<img src="./img/ps02.png" style="width:40%" alt="ps02.png"/>
+
+##### 实例3：显示所有进程信息包含命令行
+
+```shell
+ps -ef
+```
+
+<img src="./img/ps03.png" style="width:40%" alt="ps03.png"/>
+
+##### 实例4：ps 与 grep 组合使用，查找指定进程
+
+```shell
+ps -ef | grep ssh
+```
+
+<img src="./img/ps04.png" style="width:40%" alt="ps04.png"/>
+
+##### 实例5：将与这次登入的PID以及和相关信息列出来
+
+```shell
+ps -l
+```
+
+<img src="./img/ps05.png" style="width:40%" alt="ps05.png"/>
+
+##### 实例6：列出目前所有的正在内存中的程序
+
+```shell
+ps aux
+```
+
+<img src="./img/ps06.png" style="width:40%" alt="ps06.png"/>
