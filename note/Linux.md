@@ -3380,3 +3380,490 @@ ps -eo pid,ppid,cmd --sort=-%mem | head
 ```
 
 <img src="./img/ps09.png" style="width:40%" alt="ps09.png"/>
+
+### 6.pstack跟踪进程栈
+
+```text
+pstack(process stack：进程栈)此命令可显示每个进程的栈跟踪。pstack命令必须由相应进程的属主或root运行。可以使用pstack来确定进程挂起的位置。
+此命令允许使用的唯一选项是要检查的进程的PID。
+
+这个命令在排查进程问题时非常有用，比如我们发现一个服务一直处于work状态（如假死状态，类似死循环），使用这个命令就能轻松定位问题所在；可以在一段时间内多次执行这个pstack指令，
+若发现代码栈总是停在同一个位置，在这个位置就需要重点关注，很有可能就是出现了问题的地方。
+```
+
+#### 查看bash程序进程栈
+
+```shell
+ps -ef | grep bash
+
+tdev1   7013  7012  0 19:42 pts/1    00:00:00 -bash
+tdev1  11402 11401  0 20:31 pts/2    00:00:00 -bash
+tdev1  11474 11402  0 20:32 pts/2    00:00:00 grep bash
+```
+
+```shell
+pstack 7013
+
+#0  0x00000039958c5620 in __read_nocancel () from /lib64/libc.so.6
+#1  0x000000000047dafe in rl_getc ()
+#2  0x000000000047def6 in rl_read_key ()
+#3  0x000000000046d0f5 in readline_internal_char ()
+#4  0x000000000046d4e5 in readline ()
+#5  0x00000000004213cf in ?? ()
+#6  0x000000000041d685 in ?? ()
+#7  0x000000000041e89e in ?? ()
+#8  0x00000000004218dc in yyparse ()
+#9  0x000000000041b507 in parse_command ()
+#10 0x000000000041b5c6 in read_command ()
+#11 0x000000000041b74e in reader_loop ()
+#12 0x000000000041b2aa in main ()
+```
+
+### 7.strace跟踪进程中的系统调用
+
+```text
+全称：system trace
+strace常用于跟踪进程执行时的系统调用和所接收的信号。在Linux的世界中，进程不能直接访问硬件设备，当进程需要访问硬件设备（读取磁盘文件、接收网络数据等等）的时候，必须有用户态模式切换至内核态模态，通过系统调用访问硬件设备。
+strace可以跟踪到一个进程产生的系统调用，包括参数，返回值，只消耗的时间。
+```
+
+#### 7.1 输出参数含义
+
+```text
+每一行都是一条系统调用，等号左边是系统调用的函数名及其参数，右边是该调用的返回值。strace显示这些调用的参数并返回符号形式的值。strace从内核接收信息，而且不需要以任何特殊的方式构建内核。
+```
+
+```shell
+strace -cat /dev/null
+```
+
+<img src="./img/strace.png" style="width:40%" alt="strace.png"/>
+
+#### 7.2 参数
+
+```text
+-c 统计每一系统调用的所执行的时间,次数和出错的次数等.
+-d 输出strace关于标准错误的调试信息.
+-f 跟踪由fork调用所产生的子进程.
+-ff 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号.
+-F 尝试跟踪vfork调用.在-f时,vfork不被跟踪.
+-h 输出简要的帮助信息.
+-i 输出系统调用的入口指针.
+-q 禁止输出关于脱离的消息.
+-r 打印出相对时间关于,,每一个系统调用.
+-t 在输出中的每一行前加上时间信息.
+-tt 在输出中的每一行前加上时间信息,微秒级.
+-ttt 微秒级输出,以秒了表示时间.
+-T 显示每一调用所耗的时间.
+-v 输出所有的系统调用.一些调用关于环境变量,状态,输入输出等调用由于使用频繁,默认不输出.
+-V 输出strace的版本信息.
+-x 以十六进制形式输出非标准字符串
+-xx 所有字符串以十六进制形式输出.
+
+-a column
+设置返回值的输出位置.默认 为40.
+
+-e expr
+指定一个表达式,用来控制如何跟踪.格式如下:
+[qualifier=][!]value1[,value2]...
+qualifier只能是 trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.例如:
+-eopen等价于 -e trace=open,表示只跟踪open调用.而-etrace!=open表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none.
+注意有些shell使用!来执行历史记录里的命令,所以要使用\\.
+
+-e trace=set
+只跟踪指定的系统 调用.例如:-e trace=open,close,rean,write表示只跟踪这四个系统调用.默认的为set=all.
+
+-e trace=file
+只跟踪有关文件操作的系统调用.
+
+-e trace=process
+只跟踪有关进程控制的系统调用.
+
+-e trace=network
+跟踪与网络有关的所有系统调用.
+
+-e strace=signal
+跟踪所有与系统信号有关的 系统调用
+
+-e trace=ipc
+跟踪所有与进程通讯有关的系统调用
+
+-e abbrev=set
+设定 strace输出的系统调用的结果集.-v 等与 abbrev=none.默认为abbrev=all.
+
+-e raw=set
+将指 定的系统调用的参数以十六进制显示.
+
+-e signal=set
+指定跟踪的系统信号.默认为all.如 signal=!SIGIO(或者signal=!io),表示不跟踪SIGIO信号.
+
+-e read=set
+输出从指定文件中读出 的数据.例如:
+
+-e read=3,5
+-e write=set
+输出写入到指定文件中的数据.
+
+-o filename
+将strace的输出写入文件filename
+
+-p pid
+跟踪指定的进程pid.
+
+-s strsize
+指定输出的字符串的最大长度.默认为32.文件名一直全部输出.
+
+-u username
+以username 的UID和GID执行被跟踪的命令
+```
+
+#### 7.3 命令实例
+
+##### 跟踪可执行程序
+
+```shell
+strace -f -F -o ~/straceout.txt myserver
+```
+
+```text
+-f -F:告诉strace同时跟踪fork和vfork出来的进程，-o把所有strace输出写到~/straceout.txt里面，myserver是要启动和调试的程序。
+```
+
+##### 跟踪服务程序
+
+```shell
+strace -o output.txt -T -tt -e trace=all -p 28979
+```
+
+```text
+跟踪28979进程的所有系统调用（-e trace=all），并统计系统调用的花费时间，以及开始时间（并以可视化的时间分秒格式化显示），最后将记录结果存在output.txt文件里面。
+```
+
+### 8. ipcs查询进程间通信状态
+
+```text
+全称：Inter-Process Communication status
+ipcs是Linux下显示进程间通信设施状态的工具。可以显示消息队列、共享内存和信号量的信息。对于程序员非常有用，普通的系统管理员一般用不到该指令。
+```
+
+#### 8.1 IPC资源查询
+
+##### 查看系统使用的IPC资源
+
+```shell
+ipcs
+
+------ Shared Memory Segments --------
+key        shmid      owner      perms      bytes      nattch     status
+
+------ Semaphore Arrays --------
+key        semid      owner      perms      nsems
+0x00000000 229376     weber      600        1
+
+------ Message Queues --------
+key        msqid      owner      perms      used-bytes   messages
+```
+
+**分别查询IPC资源**
+
+```shell
+#查看系统使用的IPC共享内存资源
+ipcs -m
+
+#查看系统使用的IPC队列资源
+ipcs -q
+
+#查看系统使用的IPC信号量资源
+ipcs -s
+```
+
+##### 查看IPC资源被谁占用
+
+**示例：有一个IPCKEY（51036），需要查询器是否被占用**
+
+1. 首先通过计算器将其转为十六进制
+
+```text
+51036 -> c75c
+```
+
+2. 如果知道是被共享内存占用
+
+```shell
+ipcs -m | grep c75c
+
+0x0000c75c 40403197   tdea3    666        536870912  2
+```
+
+3. 如果不确定，则直接查找所有
+
+```shell
+ipcs | grep c75c
+
+0x0000c75c 40403197 tdea3 666 536870912 2
+0x0000c75c 5079070 tdea3 666 4
+```
+
+#### 8.2 系统IPC参数查询
+
+```shell
+ipcs -l
+
+------ Shared Memory Limits --------
+max number of segments = 4096
+max seg size (kbytes) = 4194303
+max total shared memory (kbytes) = 1073741824
+min seg size (bytes) = 1
+
+------ Semaphore Limits --------
+max number of arrays = 128
+max semaphores per array = 250
+max semaphores system wide = 32000
+max ops per semop call = 32
+semaphore max value = 32767
+
+------ Messages: Limits --------
+max queues system wide = 2048
+max size of message (bytes) = 524288
+default max size of queue (bytes) = 5242880
+```
+
+```text
+以输出显示，目前这个系统的允许的最大内为1073741824kb；最大可使用128个信号量，每个消息的最大长度为524288bytes；
+```
+
+#### 8.3 修改IPC系统参数
+
+```text
+一Linux系统为例，在root用户下修改/etc/sysctl.conf文件，保存后使用sysctl -p生效。
+```
+
+```shell
+$cat /etc/sysctl.conf
+# 一个消息的最大长度
+kernel.msgmax = 524288
+
+# 一个消息队列上的最大字节数
+# 524288*10
+kernel.msgmnb = 5242880
+
+#最大消息队列的个数
+kernel.msgmni=2048
+
+#一个共享内存区的最大字节数
+kernel.shmmax = 17179869184
+
+#系统范围内最大共享内存标识数
+kernel.shmmni=4096
+
+#每个信号灯集的最大信号灯数 系统范围内最大信号灯数 每个信号灯支持的最大操作数 系统范围内最大信号灯集数
+#此参数为系统默认，可以不用修改
+#kernel.sem = <semmsl> <semmni>*<semmsl> <semopm> <semmni>
+kernel.sem = 250 32000 32 128
+```
+
+**显示输入不代标志的ipcs：的输出**
+
+```shell
+ipcs
+
+IPC status from /dev/mem as of Mon Aug 14 15:03:46 1989
+T    ID         KEY        MODE       OWNER     GROUP
+Message Queues:
+q       0    0x00010381 -Rrw-rw-rw-   root      system
+q   65537    0x00010307 -Rrw-rw-rw-   root      system
+q   65538    0x00010311 -Rrw-rw-rw-   root      system
+q   65539    0x0001032f -Rrw-rw-rw-   root      system
+q   65540    0x0001031b -Rrw-rw-rw-   root      system
+q   65541    0x00010339--rw-rw-rw-    root      system
+q       6    0x0002fe03 -Rrw-rw-rw-   root      system
+Shared Memory:
+m   65537    0x00000000 DCrw-------   root      system
+m  720898    0x00010300 -Crw-rw-rw-   root      system
+m   65539    0x00000000 DCrw-------   root      system
+Semaphores:
+s  131072    0x4d02086a --ra-ra----   root      system
+s   65537    0x00000000 --ra-------   root      system
+s 1310722    0x000133d0 --ra-------   7003      30720
+```
+
+#### 8.4 消除IPC资源
+
+```text
+使用ipcrm命令消除ipc资源：这个买了同时会将与ipc对象相关联的数据也一起移除。当然，只有root用户，或者ipc对象的创建者才可以有这个权限。
+```
+
+```shell
+ipcrm -M shmkey #移除用shmkey创建的共享内存段
+ipcrm -m shmid  #移除用shmid标识的共享内存段
+ipcrm -Q msgkey #移除用msqkey创建的消息队列
+ipcrm -q msqid  #移除用msqid标识的消息队列
+ipcrm -S semkey #移除用semkey创建的信号
+ipcrm -s semid  #移除用semid标识的信号
+```
+
+**清除当前用户创建的所有的ipc资源**
+
+```shell
+ipcs -q | awk '{ print "ipcrm -q "$2}' | sh > /dev/null 2>&1;
+ipcs -m | awk '{ print "ipcrm -m "$2}' | sh > /dev/null 2>&1;
+ipcs -s | awk '{ print "ipcrm -s "$2}' | sh > /dev/null 2>&1;
+```
+
+#### 8.5 综合运用
+
+##### 查询user1用户环境上是否存在积queue现象
+
+1. 查询队列queue
+
+```shell
+ipcs -q
+```
+
+2. 查询第六列大于0的服务（就是看看有没有积压queue）
+
+```shell
+ipcs -q | grep user1 | awk '{if($6>0) print $0}'
+
+0x00000000 1071579324 user1 644 1954530 4826
+0x00000000 1071644862 user1 644 1961820 4844
+0x00000000 1071677631 user1 644 1944810 4802
+0x00000000 1071710400 user1 644 1961820 4844
+```
+
+### 9.free查询可用内存
+
+#### free工具用于查看系统可用内存
+
+```shell
+free
+
+             total       used       free     shared    buffers     cached
+Mem:       8175320    6159248    2016072          0     310208    5243680
+-/+ buffers/cache:     605360    7569960
+Swap:      6881272      16196    6865076
+```
+
+#### 解释下Linux下free命令的输出
+
+```text
+下面是free的运行结果，一共4行。为了方便说明，加上列号，这样我们就可以把free的输出当成是一个二维数组。
+```
+
+```shell
+FO[2][1] = 24677460
+FO[3][2] = 10321516
+
+                   1          2          3          4          5          6
+1              total       used       free     shared    buffers     cached
+2 Mem:      24677460   23276064    1401396          0     870540   12084008
+3 -/+ buffers/cache:   10321516   14355944
+4 Swap:     25151484     224188   24927296
+```
+
+```text
+free的输出一公司行，第四行为交换区的信息，分别是：
+交换的总量：total
+使用量：used
+空闲交换区：free
+
+free输出的第二行和第三行让人比较迷惑。这两行都是说明内存的使用情况。第一列：总量（total），第二列：使用量（used）；第三列：可用量（free）
+
+第一行的输出是从操作系统来看的，也就是说从OS的角度来看，计算机上一共有：
+24677460KB（缺省的情况下单位为KB）物理内存，即[2][1]；
+在这些物理内存中有23276064KB（[2][2]）被使用；
+还有1401396KB（[2][3]）是可用的；
+
+公式：[2][1] = [2][2] + [2][3]
+
+[2][4]表示被几个进程共享的内存的，现在已经deprecated（废弃）其值总是0（当然在一些系统上可能不是0，主要取决于free命令是怎么实现的）
+
+[2][5]表示被OS buffer住的内存（缓冲：写入disk先存到buffer，然后再一次性写入到disk）
+[2][6]表示被OS cache住的内存（缓存：从disk中把需要的数据都读取到缓存中）
+buffer和cache都是为了提高IO性能，并由OS管理；
+
+Linux和其他成熟的操作系统（例如Windows），为了提高IO read的性能，总是要多cache一些数据，这也就是为什么[2][6]（cached memory）比较大，er[2][3]比较小的原因。
+```
+
+```shell
+#释放被系统cache占用的数据
+
+echo 3 > /proc/sys/vm/drop_cache
+```
+
+```text
+数字3：代表清理页缓存、目录项和inode缓存
+/proc/sys/vm/drop_caches文件：用于控制内核释放内存缓存
+
+第一位（1）：清理页缓存
+第二位（2）：清理目录项和inode缓存
+第三位（4）：清理页缓存
+
+当写入数字3（二进制：011）时，实际上是将第一位和第二位设置为1，表示要清理页缓存和目录项、inode缓存。第三个位为0，表示不清理页缓存
+```
+
+```text
+在读取大文件的时候，我们会发现第二次读取和第一次读取要快好几倍，这就是因为使用到了缓存。
+```
+
+```text
+free输出的第三行是从一个应用程序的角度看系统内存的使用情况
+
+[3][2]：即-buffers/cache，表示应用程序认为系统被用掉多少内存
+[3][3]：即+buffers/cache，表示应用程序认为系统还有多少内存
+
+
+因为被系统cache和buffer占用的内存可以被快速回收，所以通常[3][3]要比[2][3]大很多
+
+所以会有下面的公式：
+[3][2] = [2][2] — [2][5] - [2][6]   //在第二行中已被用的内存是包含了buffer和cache中的内存
+[3][3] = [2][3] + [2][5] - [2][6]   //在第二行空余的内存不包含buffer和cache的内存
+```
+
+### 10.vmstat监视内存使用情况
+
+```text
+全称：Virtual Memory Statistics（虚拟内存统计）
+可实时动态监视操作系统的虚拟内存、进程、CPU活动
+```
+
+#### 10. vmstat语法
+
+```text
+vmstat [-V][-n][delay[count]]
+
+-V：表示打印vmstat指令版本信息
+-n：表示周期性循环输出时，输出头部信息仅显示一次；（测试好像加不加都是显示一次）
+delay：两次输出之间的延迟时间
+count：按这个时间间隔统计的次数（就是监控多少次）
+```
+
+```shell
+vmstat 5 5 #每间隔5秒打印一次，一共打印5次
+```
+
+<img src="./img/vmstat.png" style="width:55%" alt="vmstat.png"/>
+
+#### 10.2 字段说明
+
+* Procs（进程）
+    * r：运行队列中进程数量
+    * b：等待IO的进程数量
+* Memeory（内存）
+    * swpd：使用虚拟内存大小
+    * free：可用内存大小
+    * buff：用作缓冲的内存大小
+    * cache：用作缓存的内存大小
+* Swap
+    * si：每秒从交换区写到内存的大小
+    * so：每秒写入到交换区的内存大小
+* IO（现在的Linux版本块的大小为1024bytes）
+    * bi：每秒读取的块数
+    * bo：每秒写入的块数
+* System（以百分比表示）
+    * us：用户进程执行时间（user time）
+    * sy：系统进程执行时间（system time）
+    * id：空闲时间（包括IO等待时间）
+    * wa：等待IO时间
+
+### 11.iostat监视I/O子系统
