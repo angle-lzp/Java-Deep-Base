@@ -3817,7 +3817,7 @@ free输出的第三行是从一个应用程序的角度看系统内存的使用�
 
 所以会有下面的公式：
 [3][2] = [2][2] — [2][5] - [2][6]   //在第二行中已被用的内存是包含了buffer和cache中的内存
-[3][3] = [2][3] + [2][5] - [2][6]   //在第二行空余的内存不包含buffer和cache的内存
+[3][3] = [2][3] + [2][5] + [2][6]   //在第二行空余的内存不包含buffer和cache的内存
 ```
 
 ### 10.vmstat监视内存使用情况
@@ -3867,3 +3867,691 @@ vmstat 5 5 #每间隔5秒打印一次，一共打印5次
     * wa：等待IO时间
 
 ### 11.iostat监视I/O子系统
+
+```text
+iostat：I/O statistics（输入/输出统计）的缩写，用来动态监控系统的磁盘操作活动。
+```
+
+#### 命令格式
+
+```text
+iostat [参数][时间间隔][次数]
+```
+
+#### 命令功能
+
+```text
+通过iostat方便查看CPU、网卡、tty设备、磁盘、CD-ROM等等设备的活动情况，负载情况。
+```
+
+#### 命令参数
+
+* -c：显示CPU使用情况
+* -d：显示磁盘使用情况
+* -k：以KB为单位显示
+* -m：以M为单位显示
+* -N：显示磁盘阵列（LVM）信息
+* -n：显示NFS使用情况
+* -p：显示磁盘和分区的情况
+* -t：显示终端和CPU的信息
+* -x：显示详细信息
+* -V：显示版本信息
+
+#### 工具实例
+
+##### 实例1：显示所有设备负载情况
+
+```shell
+iostat
+
+Linux 2.6.32-279.el6.x86_64 (colin)   07/16/2014      _x86_64_        (4 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+10.81    0.00   14.11    0.18    0.00   74.90
+
+Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+sda               1.95         1.48        70.88    9145160  437100644
+dm-0              3.08         0.55        24.34    3392770  150087080
+dm-1              5.83         0.93        46.49    5714522  286724168
+dm-2              0.01         0.00         0.05      23930     289288
+```
+
+###### cpu属性值说明
+
+* %user：CPU出在用户模式下的时间百分比
+* %nice：CPU处在带NICE值得用户模式下的时间百分比
+* %system：CPU处在系统模式下的时间百分比
+* %iowait：CPU等待输入输出完成时间的百分比
+* %steal：管理程序维护另一个虚拟处理器时，虚拟CPU的无意识等待时间百分比
+* %idle：CPU空闲时间百分比
+
+```text
+注：如果%iowait的值过高，表示硬盘存在I/O瓶颈，%idle值高，biaohsiCPU较空闲，如果%idle值高但系统响应慢，有可能是CPU等待分配内存，此时雅加达内存容量。
+%idle值如果持续低于10，namexitongdeCPU处理能力相对较低，表明系统中最需要解决的资源是CPU。
+```
+
+###### disk属性值说明
+
+* rrqm/s: 每秒进行 merge 的读操作数目。即 rmerge/s
+* wrqm/s: 每秒进行 merge 的写操作数目。即 wmerge/s
+* r/s: 每秒完成的读 I/O 设备次数。即 rio/s
+* w/s: 每秒完成的写 I/O 设备次数。即 wio/s
+* rsec/s: 每秒读扇区数。即 rsect/s
+* wsec/s: 每秒写扇区数。即 wsect/s
+* rkB/s: 每秒读K字节数。是 rsect/s 的一半，因为每扇区大小为512字节。
+* wkB/s: 每秒写K字节数。是 wsect/s 的一半。
+* avgrq-sz: 平均每次设备I/O操作的数据大小 (扇区)。
+* avgqu-sz: 平均I/O队列长度。
+* await: 平均每次设备I/O操作的等待时间 (毫秒)。
+* svctm: 平均每次设备I/O操作的服务时间 (毫秒)。
+* %util: 一秒中有百分之多少的时间用于 I/O 操作，即被io消耗的cpu百分比
+
+```text
+注：如果%util接近100%，说明产生的I/O请求太多，I/O系统已经满负荷，该裁判可能存在瓶颈。如果svctm比较接近await，说明I/O几乎没有等待时间；
+如果await远大于svctm，说明I/O队列太长，IO想要太慢，则需要进行必要优化。如果avgqu-sz比较大，也表示有大量IO在等待。
+```
+
+##### 实例2：定时显示所有信息
+
+```shell
+iostat 2 3
+Linux 2.6.32-279.el6.x86_64 (colin)   07/16/2014      _x86_64_        (4 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+10.81    0.00   14.11    0.18    0.00   74.90
+
+Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+sda               1.95         1.48        70.88    9145160  437106156
+dm-0              3.08         0.55        24.34    3392770  150088376
+dm-1              5.83         0.93        46.49    5714522  286728384
+dm-2              0.01         0.00         0.05      23930     289288
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+22.62    0.00   19.67    0.26    0.00   57.46
+
+Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+sda               2.50         0.00        28.00          0         56
+dm-0              0.00         0.00         0.00          0          0
+dm-1              3.50         0.00        28.00          0         56
+dm-2              0.00         0.00         0.00          0          0
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+22.69    0.00   19.62    0.00    0.00   57.69
+
+Device:            tps   Blk_read/s   Blk_wrtn/s   Blk_read   Blk_wrtn
+sda               0.00         0.00         0.00          0          0
+dm-0              0.00         0.00         0.00          0          0
+dm-1              0.00         0.00         0.00          0          0
+dm-2              0.00         0.00         0.00          0          0
+```
+
+```text
+注：每隔2秒钟刷新显示，且显示3次
+```
+
+##### 实例3：查看TPS和吞吐量
+
+```shell
+iostat -d -k 1 1  # -d:显示磁盘使用情况；-k:以KB的单位显示数据
+Linux 2.6.32-279.el6.x86_64 (colin)   07/16/2014      _x86_64_        (4 CPU)
+
+Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
+sda               1.95         0.74        35.44    4572712  218559410
+dm-0              3.08         0.28        12.17    1696513   75045968
+dm-1              5.83         0.46        23.25    2857265  143368744
+dm-2              0.01         0.00         0.02      11965     144644
+```
+
+* tps：该设备美妙的传输次数（Indicate the number of transfers per second that were issued to the
+  device）"一次传输"的意思时"一次I/O请求"。多个逻辑请求可能会被合并为"一次I/O请求"。"一次传输"请求的大小是未知的。
+* KB_read/s：每秒从设备（drive expressed）读取的数据量
+* KB_wrtn/s：每秒向设备（drive expressed）写入的数据量
+* KB_read：读取的总数量
+* KB_wrtn：写入的总数据量
+
+```text
+上面的示例中，我们可以看到磁盘sda以及它的各个分区的统计数据，当时统计decipanzongTPS是1.95，下面是各个分区的TPS。（因为是瞬间之，所以总TPS并不严格等于各个分区TPS的总和）
+```
+
+##### 实例4：查看设备使用率（%util）和响应时间（await）
+
+```shell
+iostat -d -k -x 1 1   # -d:显示磁盘信息；-k：以KB为单位显示；-x：详细显示信息
+
+Linux 2.6.32-279.el6.x86_64 (colin)   07/16/2014      _x86_64_        (4 CPU)
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await  svctm  %util
+sda               0.02     7.25    0.04    1.90     0.74    35.47    37.15     0.04   19.13   5.58   1.09
+dm-0              0.00     0.00    0.04    3.05     0.28    12.18     8.07     0.65  209.01   1.11   0.34
+dm-1              0.00     0.00    0.02    5.82     0.46    23.26     8.13     0.43   74.33   1.30   0.76
+dm-2              0.00     0.00    0.00    0.01     0.00     0.02     8.00     0.00    5.41   3.28   0.00
+```
+
+* rrqm/s： 每秒进行 merge 的读操作数目.即 delta(rmerge)/s
+* wrqm/s： 每秒进行 merge 的写操作数目.即 delta(wmerge)/s
+* r/s： 每秒完成的读 I/O 设备次数.即 delta(rio)/s
+* w/s： 每秒完成的写 I/O 设备次数.即 delta(wio)/s
+* rsec/s： 每秒读扇区数.即 delta(rsect)/s
+* wsec/s： 每秒写扇区数.即 delta(wsect)/s
+* rkB/s： 每秒读K字节数.是 rsect/s 的一半,因为每扇区大小为512字节.(需要计算)
+* wkB/s： 每秒写K字节数.是 wsect/s 的一半.(需要计算)
+* avgrq-sz：平均每次设备I/O操作的数据大小 (扇区).delta(rsect+wsect)/delta(rio+wio)
+* avgqu-sz：平均I/O队列长度.即 delta(aveq)/s/1000 (因为aveq的单位为毫秒).
+* await： 平均每次设备I/O操作的等待时间 (毫秒).即 delta(ruse+wuse)/delta(rio+wio)
+* svctm： 平均每次设备I/O操作的服务时间 (毫秒).即 delta(use)/delta(rio+wio)
+* %util： 一秒中有百分之多少的时间用于 I/O 操作,或者说一秒中有多少时间 I/O 队列是非空的，即 delta(use)/s/1000 (因为use的单位为毫秒)
+
+```text
+如果%util接近100%，说明产生的I/O请求太多，I/O系统以及满负荷，该磁盘可能存在瓶颈。idle小于70%IO压力就比较大，一般读取速度有较多的wait。同时结合vmstat查看b参数（等待资源的进程数）和wa参数（IOdengdaisuozhanyongdeCPU
+时间的百分比，高于30%时压力高）。
+
+另外await的参数要多和svctm来参考。差的过高就一定有IO的问题。
+
+avgqu-sz也是一个做IO调优时需要注意的地方，这个就是直接每次操作的数据的大小，如果次数多，但数据那的小的话，其实IO也会很小。如果数据拿的大，才会IO的数据会高。也可以通过avgqu-sz × ( r/s or w/s ) = rsec/s or 
+wsec/s。也就是讲，读取速度是这个来决定的。
+
+svctm一般要小于await（因为同时等待的请求的等待时间被重复计算了），svctm的大小一般和磁盘性能有关，CPU/内存的负荷会对其有影响，请求过多也会间接导致svctm的增加。await的大小一般取决于服务时间（svctm）以及I/O队列的长度和I/O
+请求的触发模式。如果svctm比较接近await，说明I/O没有等待时间；如果await远大于svctm，说明I/O队列太长，应用得到的响应时间变慢；如果响应时间超过了用户可以容许的范围，这是可以考虑更换更快的磁盘，调整内核elevator算法，优化应用，或者升级CPU。
+
+队列长度（avgqu-sz）也可以作为衡量系统I/O复合的指标，但由于avgqu-sz是按照单位时间的平均值，所以不能反映瞬间的I/O的洪水。
+```
+
+###### 形象比喻
+
+* r/s+w/s 类似于交款人的总数
+* 平均队列长度(avgqu-sz)类似于单位时间里平均排队人的个数
+* 平均服务时间(svctm)类似于收银员的收款速度
+* 平均等待时间(await)类似于平均每人的等待时间
+* 平均I/O数据(avgrq-sz)类似于平均每人所买的东西多少
+* I/O 操作率 (%util)类似于收款台前有人排队的时间比例
+
+```text
+设备IO操作：总IO/s = r/s + w/s
+
+平均等待时间 = 单个I/O服务器时间 * （1+2+3+...+请求总数-1）/ 请求总数
+
+每秒发出的I/O请求很多，打死你hi平均队列就4个，表示这些请求比较均匀，大部分处理还是比较及时。
+```
+
+### 12.sar找出系统瓶颈的利器
+
+```text
+全称：System Activity Reporter（系统活跃情况报告）
+sar工具对系统当前的状态进行取样，然后通过计算数据和比例来表达系统的当前运行状态。它的特点是可以连续对系统取样，获取大量取样数据；取样数据和分析的结果都可以存入文件，所有需要的负载很小。sar试模卡按Linux上最为全面的系统性能分析工具之一，可以从14
+各大父母对系统的活动能够进行报告，包括文件的读写情况、系统的调用情况、串口、CPU效率、内存使用状况、进程活动及IPC有关的活动等，使用也是较为复杂。
+
+sar是查看操作系统报告指标的各种工具中，最为普遍和方便的；
+
+它有两种用法：
+1.追溯过去的统计数据（默认）
+2.周期性的查看当前数据
+```
+
+#### 12.1 追溯过去的统计数据
+
+```text
+默认情况下，sar从最近的0点0分开始显示数据；如果想继续查看一天前的报告；可以查看保存在/var/log/sysstat下的sa日志；
+```
+
+```shell
+#使用工具查看报告
+sar -f /var/log/sysstea/sa23 \| head sar -r -f /var/log/sysstat/sa28
+```
+
+<img src="./img/sar01.png" style="width:40%" alt="sar01.png"/>
+
+#### 12.2 查看CPU的使用率
+
+```text
+sar -u : 默认情况下显示的CPU使用率等信息就是sar -u
+
+sar 1 3 = sar -u 1 3
+```
+
+<img src="./img/sar02.png" style="width:40%" alt="sar02.png"/>
+
+```text
+可以看到这台机器使用了虚拟化技术（%steal不为0就是使用了虚拟化技术；当然上面的服务器是没有采用虚拟化技术，需要区分；），有相应的时间消耗；各列的指标分别是：
+%steal
+0.51
+0.17
+注：上面这样的就是采用了虚拟化技术
+```
+
+* %user：用户模式下消耗的CPU时间的比例
+* %nice：通过nice改变了进程调度优先级的进程，在用户模式下消耗的CPU时间的比例
+* %system：system模式下消耗CPU时间的比例
+* %iowait：CPU等待磁盘I/O导致空闲状态消耗的时间比例
+* %steal：利用Xen等操作系统虚拟化技术，等待其他虚拟CPU计算占用的时间比例
+* %idle：CPU空闲时间比例
+
+#### 12.3 查看平均负载
+
+```text
+查看平均负载
+sar -q 1 3
+
+指定-q后，就能查看运行队列中的进程数、系统上的进程大小、平均负载等；与其他命令相比，他能查看各项指标随时间变化的情况。
+```
+
+* runq-sz：运行队列的长度（等待运行的进程数）
+* plist-sz：进程列表中进程（processes）和线程（threads）的数量
+* ldavg-1：最后一分钟系统平均负载
+* ldavg-5：过去五分钟的系统平均负载
+* ldavg-15：过去十五分钟的系统平均负载
+
+<img src="./img/sar03.png" style="width:40%" alt="sar03.png"/>
+
+#### 12.4 查看内存使用状况
+
+```text
+sar -r : 指定-r之后，可以查看物理内存使用情况
+```
+
+<img src="./img/sar04.png" style="width:40%" alt="sar04.png"/>
+
+* kbmemfree：这个值和free命令中的free值基本一致，所以他不包括buffer和cache的空间。
+* kbmemused：这个值和free命令中的used值基本一致，所以他包括buffer和cache的空间。
+* %memused：物理内存使用率，这个值是kbmemused和内存总量（不包括swap）的一个百分比。
+* kbbuffers和kbcached：这两个值就是free命令中的buffer和cache。
+* kbcommit：保证当前系统所需要的内存，及为了确保不溢出而需要的内存（RAM+swap）。
+* %commit：这个值是kbcommit与内存总量（包括swap）的一个百分比
+
+#### 12.5 查看页面交换发生状况
+
+```shell
+sar -W 1 3
+```
+
+```text
+页面发生交换时，服务器的吞吐量会大幅下降；服务器状况不良时，如果怀疑因为内存不足而导致了页面交换的发生，可以使用这个命令来确认是否发生了大量的交换。
+```
+
+<img src="./img/sar05.png" style="width:40%" alt="sar05.png"/>
+
+* pswpin/s：每秒系统换入的交换页面（swap page）数量
+* pswpout/s：每秒系统患处的交换页面（swap page）数量
+
+```text
+需要判断系统瓶颈问题，有时需几个sar命令选项结合起来
+1.怀疑CPU存在瓶颈，可以使用sar -u和sar -q等来查看；
+2.怀疑内存存在瓶颈，可用sar -B、sar -r和sar -W等来查看
+3.怀疑I/O存在瓶颈，可用sar -b、sar -u和sar -d等来查看
+```
+
+#### 12.6 安装
+
+```text
+1.有些Linux系统下，默认可能没有安装这个包，使用apt-get install sysstat来安装
+2.安装完毕，将性能收集工具的开关打开：vi /etc/default/sysstat
+    设置：ENABLED="true"
+3.启动这个工具来收集系统性能数据：/etc/init.d/sysstat start
+```
+
+#### 12.7 sar参数说明
+
+* -A 汇总所有的报告
+* -a 报告文件读写使用情况
+* -B 报告附加的缓存的使用情况
+* -b 报告缓存的使用情况
+* -c 报告系统调用的使用情况
+* -d 报告磁盘的使用情况
+* -g 报告串口的使用情况
+* -h 报告关于buffer使用的统计数据
+* -m 报告IPC消息队列和信号量的使用情况
+* -n 报告命名cache的使用情况
+* -p 报告调页活动的使用情况
+* -q 报告运行队列和交换队列的平均长度
+* -R 报告进程的活动情况
+* -r 报告没有使用的内存页面和硬盘块
+* -u 报告CPU的利用率
+* -v 报告进程、i节点、文件和锁表状态
+* -w 报告系统交换活动状况
+* -y 报告TTY设备活动状况
+
+### 13.readelf文件格式分析
+
+```text
+可以理解为：对文件进行分析，解析出该文件的类型数据等等；
+这工具和objdump命令提供的功能类似，但是他显示的信息更为具体，并且它不依赖BFD（BFD库是一个GNU项目，他的目标就是希望通过一种统一的接口来处理不同的目标文件）；
+```
+
+**ELF文件类型**
+
+```text
+ELF：Executable and Linking Format
+ELF是一种对象文件的格式，用于定义不同类型的对象文件（Object files）中都放了什么东西、以及都可以以什么样的格式去放这些东西。他自最早在System 
+V系统上出现后，被xNIX世界所有广泛接受，作为缺省的二进制文件格式来使用。可以说，ELF是构成众多xNIX系统的基础之一。
+```
+
+**ELF文件有三种类型**
+
+1. 可重定位的对象文件（Relocatable file）-- 有汇编器汇编生成的o.文件
+2. 可执行的对象文件（Executable file）-- 可执行应用程序
+3. 可被共享的对象文件（Shared object file）-- 动态库文件，也即.so文件
+
+* .text section 里装载了可执行代码；
+* .data section 里面装载了被初始化的数据；
+* .bss section 里面装载了未被初始化的数据；
+* 以 .rec 打头的 sections 里面装载了重定位条目；
+* .symtab 或者 .dynsym section 里面装载了符号信息；
+* .strtab 或者 .dynstr section 里面装载了字符串信息；
+
+#### 13.1 参数说明
+
+* -a –all 全部 Equivalent to: -h -l -S -s -r -d -V -A -I
+* -h –file-header 文件头 Display the ELF file header
+* -l –program-headers 程序 Display the program headers
+* –segments An alias for –program-headers
+* -S –section-headers 段头 Display the sections’ header
+* --sections An alias for –section-headers
+* -e –headers 全部头 Equivalent to: -h -l -S
+* -s –syms 符号表 Display the symbol table
+* --symbols An alias for –syms
+* -n –notes 内核注释 Display the core notes (if present)
+* -r –relocs 重定位 Display the relocations (if present)
+* -u –unwind Display the unwind info (if present)
+* -d –dynamic 动态段 Display the dynamic segment (if present)
+* -V –version-info 版本 Display the version sections (if present)
+* -A –arch-specific CPU构架 Display architecture specific information (if any).
+* -D –use-dynamic 动态段 Use the dynamic section info when displaying symbols
+* -x –hex-dump=<number> 显示 段内内容Dump the contents of section <number>
+* -w[liaprmfFso] or
+* -I –histogram Display histogram of bucket list lengths
+* -W –wide 宽行输出 Allow output width to exceed 80 characters
+* -H –help Display this information
+* -v –version Display the version number of readelf
+
+#### 13.2 示例
+
+##### 想知道一个应用程序的可运行的架构平台
+
+```shell
+#查询文件hello中的Machine属性（hello.exe）
+readelf -h hello | grep Machine
+```
+
+<img src="./img/readelf01.png" style="width:40%" alt="readelf01.png"/>
+
+##### -h选项将显示文件头的概要信息，从里面可以看到，有很多有用的信息
+
+<img src="./img/readelf02.png" style="width:40%" alt="readelf02.png"/>
+
+##### 一个编译好的应用程序，想知道其编译时是否使用了-g选项（加入调试信息）
+
+<img src="./img/readelf03.png" style="width:40%" alt="readelf03.png"/>
+
+##### 用-S选项时显示所有字段信息；如果编译时使用了-g选项，则会有debug字段
+
+<img src="./img/readelf04.png" style="width:40%" alt="readelf04.png"/>
+
+#### 13.3 完整示例
+
+```shell
+$readelf -all a.out
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           Intel 80386
+  Version:                           0x1
+  Entry point address:               0x8048330
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          4412 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         9
+  Size of section headers:           40 (bytes)
+  Number of section headers:         30
+  Section header string table index: 27
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .interp           PROGBITS        08048154 000154 000013 00   A  0   0  1
+  [ 2] .note.ABI-tag     NOTE            08048168 000168 000020 00   A  0   0  4
+  [ 3] .note.gnu.build-i NOTE            08048188 000188 000024 00   A  0   0  4
+  [ 4] .gnu.hash         GNU_HASH        080481ac 0001ac 000020 04   A  5   0  4
+  [ 5] .dynsym           DYNSYM          080481cc 0001cc 000050 10   A  6   1  4
+  [ 6] .dynstr           STRTAB          0804821c 00021c 00004c 00   A  0   0  1
+  [ 7] .gnu.version      VERSYM          08048268 000268 00000a 02   A  5   0  2
+  [ 8] .gnu.version_r    VERNEED         08048274 000274 000020 00   A  6   1  4
+  [ 9] .rel.dyn          REL             08048294 000294 000008 08   A  5   0  4
+  [10] .rel.plt          REL             0804829c 00029c 000018 08   A  5  12  4
+  [11] .init             PROGBITS        080482b4 0002b4 00002e 00  AX  0   0  4
+  [12] .plt              PROGBITS        080482f0 0002f0 000040 04  AX  0   0 16
+  [13] .text             PROGBITS        08048330 000330 00018c 00  AX  0   0 16
+  [14] .fini             PROGBITS        080484bc 0004bc 00001a 00  AX  0   0  4
+  [15] .rodata           PROGBITS        080484d8 0004d8 000011 00   A  0   0  4
+  [16] .eh_frame_hdr     PROGBITS        080484ec 0004ec 000034 00   A  0   0  4
+  [17] .eh_frame         PROGBITS        08048520 000520 0000c4 00   A  0   0  4
+  [18] .ctors            PROGBITS        08049f14 000f14 000008 00  WA  0   0  4
+  [19] .dtors            PROGBITS        08049f1c 000f1c 000008 00  WA  0   0  4
+  [20] .jcr              PROGBITS        08049f24 000f24 000004 00  WA  0   0  4
+  [21] .dynamic          DYNAMIC         08049f28 000f28 0000c8 08  WA  6   0  4
+  [22] .got              PROGBITS        08049ff0 000ff0 000004 04  WA  0   0  4
+  [23] .got.plt          PROGBITS        08049ff4 000ff4 000018 04  WA  0   0  4
+  [24] .data             PROGBITS        0804a00c 00100c 000008 00  WA  0   0  4
+  [25] .bss              NOBITS          0804a014 001014 000008 00  WA  0   0  4
+  [26] .comment          PROGBITS        00000000 001014 00002a 01  MS  0   0  1
+  [27] .shstrtab         STRTAB          00000000 00103e 0000fc 00      0   0  1
+  [28] .symtab           SYMTAB          00000000 0015ec 000410 10     29  45  4
+  [29] .strtab           STRTAB          00000000 0019fc 0001f9 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x08048034 0x08048034 0x00120 0x00120 R E 0x4
+  INTERP         0x000154 0x08048154 0x08048154 0x00013 0x00013 R   0x1
+      [Requesting program interpreter: /lib/ld-linux.so.2]
+  LOAD           0x000000 0x08048000 0x08048000 0x005e4 0x005e4 R E 0x1000
+  LOAD           0x000f14 0x08049f14 0x08049f14 0x00100 0x00108 RW  0x1000
+  DYNAMIC        0x000f28 0x08049f28 0x08049f28 0x000c8 0x000c8 RW  0x4
+  NOTE           0x000168 0x08048168 0x08048168 0x00044 0x00044 R   0x4
+  GNU_EH_FRAME   0x0004ec 0x080484ec 0x080484ec 0x00034 0x00034 R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x4
+  GNU_RELRO      0x000f14 0x08049f14 0x08049f14 0x000ec 0x000ec R   0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00
+   01     .interp
+   02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rel.dyn .rel.plt .init .plt .text .fini .rodata .eh_frame_hdr .eh_frame
+   03     .ctors .dtors .jcr .dynamic .got .got.plt .data .bss
+   04     .dynamic
+   05     .note.ABI-tag .note.gnu.build-id
+   06     .eh_frame_hdr
+   07
+   08     .ctors .dtors .jcr .dynamic .got
+
+Dynamic section at offset 0xf28 contains 20 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x0000000c (INIT)                       0x80482b4
+ 0x0000000d (FINI)                       0x80484bc
+ 0x6ffffef5 (GNU_HASH)                   0x80481ac
+ 0x00000005 (STRTAB)                     0x804821c
+ 0x00000006 (SYMTAB)                     0x80481cc
+ 0x0000000a (STRSZ)                      76 (bytes)
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000015 (DEBUG)                      0x0
+ 0x00000003 (PLTGOT)                     0x8049ff4
+ 0x00000002 (PLTRELSZ)                   24 (bytes)
+ 0x00000014 (PLTREL)                     REL
+ 0x00000017 (JMPREL)                     0x804829c
+ 0x00000011 (REL)                        0x8048294
+ 0x00000012 (RELSZ)                      8 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffe (VERNEED)                    0x8048274
+ 0x6fffffff (VERNEEDNUM)                 1
+ 0x6ffffff0 (VERSYM)                     0x8048268
+ 0x00000000 (NULL)                       0x0
+
+Relocation section '.rel.dyn' at offset 0x294 contains 1 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+08049ff0  00000206 R_386_GLOB_DAT    00000000   __gmon_start__
+
+Relocation section '.rel.plt' at offset 0x29c contains 3 entries:
+ Offset     Info    Type            Sym.Value  Sym. Name
+0804a000  00000107 R_386_JUMP_SLOT   00000000   printf
+0804a004  00000207 R_386_JUMP_SLOT   00000000   __gmon_start__
+0804a008  00000307 R_386_JUMP_SLOT   00000000   __libc_start_main
+
+There are no unwind sections in this file.
+
+Symbol table '.dynsym' contains 5 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND
+     1: 00000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.0 (2)
+     2: 00000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+     3: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.0 (2)
+     4: 080484dc     4 OBJECT  GLOBAL DEFAULT   15 _IO_stdin_used
+
+Symbol table '.symtab' contains 65 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND
+     1: 08048154     0 SECTION LOCAL  DEFAULT    1
+     2: 08048168     0 SECTION LOCAL  DEFAULT    2
+     3: 08048188     0 SECTION LOCAL  DEFAULT    3
+     4: 080481ac     0 SECTION LOCAL  DEFAULT    4
+     5: 080481cc     0 SECTION LOCAL  DEFAULT    5
+     6: 0804821c     0 SECTION LOCAL  DEFAULT    6
+     7: 08048268     0 SECTION LOCAL  DEFAULT    7
+     8: 08048274     0 SECTION LOCAL  DEFAULT    8
+     9: 08048294     0 SECTION LOCAL  DEFAULT    9
+    10: 0804829c     0 SECTION LOCAL  DEFAULT   10
+    11: 080482b4     0 SECTION LOCAL  DEFAULT   11
+    12: 080482f0     0 SECTION LOCAL  DEFAULT   12
+    13: 08048330     0 SECTION LOCAL  DEFAULT   13
+    14: 080484bc     0 SECTION LOCAL  DEFAULT   14
+    15: 080484d8     0 SECTION LOCAL  DEFAULT   15
+    16: 080484ec     0 SECTION LOCAL  DEFAULT   16
+    17: 08048520     0 SECTION LOCAL  DEFAULT   17
+    18: 08049f14     0 SECTION LOCAL  DEFAULT   18
+    19: 08049f1c     0 SECTION LOCAL  DEFAULT   19
+    20: 08049f24     0 SECTION LOCAL  DEFAULT   20
+    21: 08049f28     0 SECTION LOCAL  DEFAULT   21
+    22: 08049ff0     0 SECTION LOCAL  DEFAULT   22
+    23: 08049ff4     0 SECTION LOCAL  DEFAULT   23
+    24: 0804a00c     0 SECTION LOCAL  DEFAULT   24
+    25: 0804a014     0 SECTION LOCAL  DEFAULT   25
+    26: 00000000     0 SECTION LOCAL  DEFAULT   26
+    27: 00000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    28: 08049f14     0 OBJECT  LOCAL  DEFAULT   18 __CTOR_LIST__
+    29: 08049f1c     0 OBJECT  LOCAL  DEFAULT   19 __DTOR_LIST__
+    30: 08049f24     0 OBJECT  LOCAL  DEFAULT   20 __JCR_LIST__
+    31: 08048360     0 FUNC    LOCAL  DEFAULT   13 __do_global_dtors_aux
+    32: 0804a014     1 OBJECT  LOCAL  DEFAULT   25 completed.6086
+    33: 0804a018     4 OBJECT  LOCAL  DEFAULT   25 dtor_idx.6088
+    34: 080483c0     0 FUNC    LOCAL  DEFAULT   13 frame_dummy
+    35: 00000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    36: 08049f18     0 OBJECT  LOCAL  DEFAULT   18 __CTOR_END__
+    37: 080485e0     0 OBJECT  LOCAL  DEFAULT   17 __FRAME_END__
+    38: 08049f24     0 OBJECT  LOCAL  DEFAULT   20 __JCR_END__
+    39: 08048490     0 FUNC    LOCAL  DEFAULT   13 __do_global_ctors_aux
+    40: 00000000     0 FILE    LOCAL  DEFAULT  ABS a.c
+    41: 08049f14     0 NOTYPE  LOCAL  DEFAULT   18 __init_array_end
+    42: 08049f28     0 OBJECT  LOCAL  DEFAULT   21 _DYNAMIC
+    43: 08049f14     0 NOTYPE  LOCAL  DEFAULT   18 __init_array_start
+    44: 08049ff4     0 OBJECT  LOCAL  DEFAULT   23 _GLOBAL_OFFSET_TABLE_
+    45: 08048480     2 FUNC    GLOBAL DEFAULT   13 __libc_csu_fini
+    46: 08048482     0 FUNC    GLOBAL HIDDEN    13 __i686.get_pc_thunk.bx
+    47: 0804a00c     0 NOTYPE  WEAK   DEFAULT   24 data_start
+    48: 00000000     0 FUNC    GLOBAL DEFAULT  UND printf@@GLIBC_2.0
+    49: 0804a014     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
+    50: 080484bc     0 FUNC    GLOBAL DEFAULT   14 _fini
+    51: 08049f20     0 OBJECT  GLOBAL HIDDEN    19 __DTOR_END__
+    52: 0804a00c     0 NOTYPE  GLOBAL DEFAULT   24 __data_start
+    53: 00000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    54: 0804a010     0 OBJECT  GLOBAL HIDDEN    24 __dso_handle
+    55: 080484dc     4 OBJECT  GLOBAL DEFAULT   15 _IO_stdin_used
+    56: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@@GLIBC_
+    57: 08048410    97 FUNC    GLOBAL DEFAULT   13 __libc_csu_init
+    58: 0804a01c     0 NOTYPE  GLOBAL DEFAULT  ABS _end
+    59: 08048330     0 FUNC    GLOBAL DEFAULT   13 _start
+    60: 080484d8     4 OBJECT  GLOBAL DEFAULT   15 _fp_hw
+    61: 0804a014     0 NOTYPE  GLOBAL DEFAULT  ABS __bss_start
+    62: 080483e4    40 FUNC    GLOBAL DEFAULT   13 main
+    63: 00000000     0 NOTYPE  WEAK   DEFAULT  UND _Jv_RegisterClasses
+    64: 080482b4     0 FUNC    GLOBAL DEFAULT   11 _init
+
+Histogram for `.gnu.hash' bucket list length (total of 2 buckets):
+ Length  Number     % of total  Coverage
+      0  1          ( 50.0%)
+      1  1          ( 50.0%)    100.0%
+
+Version symbols section '.gnu.version' contains 5 entries:
+ Addr: 0000000008048268  Offset: 0x000268  Link: 5 (.dynsym)
+  000:   0 (*local*)       2 (GLIBC_2.0)     0 (*local*)       2 (GLIBC_2.0)
+  004:   1 (*global*)
+
+Version needs section '.gnu.version_r' contains 1 entries:
+ Addr: 0x0000000008048274  Offset: 0x000274  Link: 6 (.dynstr)
+  000000: Version: 1  File: libc.so.6  Cnt: 1
+  0x0010:   Name: GLIBC_2.0  Flags: none  Version: 2
+
+Notes at offset 0x00000168 with length 0x00000020:
+  Owner                 Data size   Description
+  GNU                  0x00000010   NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 2.6.15
+
+Notes at offset 0x00000188 with length 0x00000024:
+  Owner                 Data size   Description
+  GNU                  0x00000014   NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 17fb9651029b6a8543bfafec9eea23bd16454e65
+```
+
+### 14.objdump二进制文件分析
+
+```text
+objdump工具用来显示二进制文件的信息，就是以一种可阅读的格式让你更多的了解二进制文件可能带有的附加信息。
+```
+
+#### 14.1 常用参数说明
+
+* -f：显示文件头信息
+* -D：反汇编所有section（-d反汇编特定section）
+* -h：显示目标文件各个section头部摘要信息
+* -x：显示所有可用的头信息，包括符号表、重定位入口。-x等价于-a -f -h -r -t同时指定
+* -i：显示对于-b或者-m选项可用的架构和目标格式列表
+* -r：显示文件的重定位入口。如果和-d或者-D一起使用，重定位部分以反汇编后的格式显示出来。
+* -R：显示文件的动态重定位入口，仅仅对于动态目标文件有意义，比如某些共享库。
+* -S：尽可能反汇编出源代码，尤其当编译的时候制定了-g这种调试参数时，效果比较明显。隐含了-d参数
+* -t：显示文件的符号表入口。类似于nm -s提供的信息
+
+#### 14.2 示例
+
+```shell
+#查看本机目标结构（使用大端还是小端存储）
+objdump -i
+```
+
+<img src="./img/objdump01.png" style="width:40%" alt="objdump01.png">
+
+```shell
+#反汇编程序
+objdump -d hello
+```
+
+<img src="./img/objdump02.png" style="width:40%" alt="objdump02.png">
+
+```shell
+#显示符号表入口
+objdump -t hello
+```
+
+<img src="./img/objdump03.png" style="width:40%" alt="objdump03.png">
+
+```text
+希望显示可用的简介帮助信息，直接输入objdump即可
+```
