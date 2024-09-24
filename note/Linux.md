@@ -4555,3 +4555,387 @@ objdump -t hello
 ```text
 希望显示可用的简介帮助信息，直接输入objdump即可
 ```
+
+### 15.nm目标文件格式分析
+
+```text
+nm命令显示关于指定File中符号的信息，文件可以是对象文件、可执行文件、对象文件库。如果文件没有包含符号信息，nm命令报告该情况，但不把它解释为出错条件。nm命令缺省情况下报告十进制符号表示法下的数字值。
+```
+
+<img src="./img/nm01.png" style="width:40%" alt="nm01.png">
+
+```text
+这些包含可执行代码的段称为正文段。同样地，数据段包含了不可执行的信息或数据。另一种类型的段，称为 BSS 段，它包含以符号数据开头的块。对于 nm 命令列出的每个符号，它们的值使用十六进制来表示（缺省行为），并且在该符号前面加上了一个表示符号类型的编码字符。
+
+可以将目标文件中所包含的不同的部分划分为段。段可以包含可执行代码、符号名称、初始数据值和许多其他类型的数据。有关这些类型的数据的详细信息，可以阅读 UNIX 中 nm 的 man 页面，其中按照该命令输出中的字符编码分别对每种类型进行了描述。
+```
+
+#### 15.1 选项说明
+
+* -a或–debug-syms：显示所有的符号，包括debugger-only symbols。
+* -B：等同于–format=bsd，用来兼容MIPS的nm。
+* -C或–demangle：将低级符号名解析(demangle)成用户级名字。这样可以使得C++函数名具有可读性。
+* –no-demangle：默认的选项，不需要将低级符号名解析成用户级名。
+* -D或–dynamic：显示动态符号。该任选项仅对于动态目标(例如特定类型的共享库)有意义。
+* -f format：使用format格式输出。format可以选取bsd、sysv或posix，该选项在GNU的nm中有用。默认为bsd。
+* -g或–extern-only：仅显示外部符号。
+* -n、-v或–numeric-sort：按符号对应地址的顺序排序，而非按符号名的字符顺序。
+* -p或–no-sort：按目标文件中遇到的符号顺序显示，不排序。
+* -P或–portability：使用POSIX.2标准输出格式代替默认的输出格式。等同于使用任选项-f posix。
+* -s或–print-armap：当列出库中成员的符号时，包含索引。索引的内容包含：哪些模块包含哪些名字的映射。
+* -r或–reverse-sort：反转排序的顺序(例如，升序变为降序)。
+* –size-sort：按大小排列符号顺序。该大小是按照一个符号的值与它下一个符号的值进行计算的。
+* –target=bfdname：指定一个目标代码的格式，而非使用系统的默认格式。
+* -u或–undefined-only：仅显示没有定义的符号(那些外部符号)。
+* –defined-only:仅显示定义的符号。
+* -l或–line-numbers：对每个符号，使用调试信息来试图找到文件名和行号。
+* -V或–version：显示nm的版本号。
+* –help：显示nm的选项。
+
+#### 15.2 符号说明
+
+```text
+对于每一个符号来说，其类型如果是小写的，则表明该符号是local的；大写则表示该符号是global（external）的。
+```
+
+* A 该符号的值是绝对的，在以后的链接过程中，不允许进行改变。这样的符号值，常常出现在中断向量表中，例如用符号来表示各个中断向量函数在中断向量表中的位置。
+* B 该符号的值出现在非初始化数据段(bss)中。例如，在一个文件中定义全局static int test。则该符号test的类型为b，位于bss
+  section中。其值表示该符号在bss段中的偏移。一般而言，bss段分配于RAM中。
+* C 该符号为common。common symbol是未初始话数据段。该符号没有包含于一个普通section中。只有在链接过程中才进行分配。符号的值表示该符号需要的字节数。例如在一个c文件中，定义int
+  test，并且该符号在别的地方会被引用，则该符号类型即为C。否则其类型为B。
+* D 该符号位于初始化数据段中。一般来说，分配到data section中。
+  例如：定义全局int baud_table[5] = {9600, 19200, 38400, 57600, 115200}，会分配到初始化数据段中。
+* G 该符号也位于初始化数据段中。主要用于small object提高访问small data object的一种方式。
+* I 该符号是对另一个符号的间接引用。
+* N 该符号是一个debugging符号。
+* R 该符号位于只读数据区。
+    * 例如定义全局const int test[] = {123, 123};则test就是一个只读数据区的符号。
+    * 值得注意的是，如果在一个函数中定义const char *test = “abc”, const char test_int = 3。使用nm都不会得到符号信息，但是字符串”abc”分配于只读存储器中，test在rodata
+      section中，大小为4。
+* S 符号位于非初始化数据区，用于small object。
+* T 该符号位于代码区text section。
+* U 该符号在当前文件中是未定义的，即该符号的定义在别的文件中。
+  例如，当前文件调用另一个文件中定义的函数，在这个被调用的函数在当前就是未定义的；但是在定义它的文件中类型是T。但是对于全局变量来说，在定义它的文件中，其符号类型为C，在使用它的文件中，其类型为U。
+* V 该符号是一个weak object。
+* W The symbol is a weak symbol that has not been specifically tagged as a weak object symbol.
+* ? 该符号类型没有定义
+
+```text
+库或对象名如果指定了-A选项，则nm命令只报告与该文件有关的或者库或者对象名。
+```
+
+#### 15.3 示例
+
+##### 1.寻找特殊标识
+
+```text
+有时会碰到一个编译了但没有链接的代码，那是因为它缺失了标识符；这种情况，可以用nm和objdump、readelf命令来查看程序的符号表；所有这些命令做的工作基本一样；
+
+比如连接器报错有未定义的标识符；大多数情况下，会发生在库的缺失或企图链接一个错误版本的库的时候；浏览目标代码来寻找一个特殊标识符的引用:
+```
+
+```shell
+nm -uCA *.o | grep foo
+```
+
+```text
+-u选项限制了每个目标文件中未定义标识符的输出。
+-A选项用于显示每个标识符的文件名信息；对于C++代码，常用的还有-C选项，它可以解码这些标识符。
+```
+
+```text
+objdump、readelf可以完成同样的任务：
+objdump -t
+readelf -s
+```
+
+##### 2.列出a.out对象文件的静态和外部符
+
+```shell
+nm -e a.out
+```
+
+##### 3.以十六进制显示符号大小和值并且按值排序符号
+
+```shell
+nm -xv a.out
+```
+
+##### 4.显示libc.a中所有64位对象符号，忽略所有32位对象
+
+```shell
+nm -X64 /usr/lib/libc.a
+```
+
+### 16.size查看程序内存映像大小
+
+```text
+作用：查看程序被映射到内存中的映像所占用的大小信息。
+```
+
+**程序映像到内存中，从弟弟知道高地址以此为下列段：**
+
+* 代码段：只读、可共享；代码段（code segment/text
+  segment）通常是指用来存放程序执行代码的一块内存区域。这部分区域的大小在程序运行前就已经确定，并且内存区域通常属于只读，某些架构叶云代码段为可写，即允许修改程序。在代码段中，也有可能包含一些只读的常量变量，例如字符串常量等。
+* 数据段：储存已被初始化了的静态数据。数据段（data segment）通常是指用来存放程序中已初始化的全局变量的一块内存区域。数据段属于静态内存分配。
+* BSS段：未初始化的数据段。BSS段（bss segment）通常是指用来存放程序中未初始化的全局变量的一块内存区域。BSS的英文Block Started by
+  Symbol的简称。BSS段属于静态内存分配。
+* 堆（heap ）： 堆是用于存放进程运行中被动态分配的内存段，它的大小并不固定，可动态扩张或缩减。当进程调用malloc
+  等函数分配内存时，新分配的内存就被动态添加到堆上（堆被扩张）；当利用free 等函数释放内存时，被释放的内存从堆中被剔除（堆被缩减）
+* 栈(stack) ：栈又称堆栈，是用户存放程序临时创建的局部变量，也就是说我们函数括弧“{} ”中定义的变量（但不包括static 声明的变量，static
+  意味着在数据段中存放变量）。除此以外，在函数被调用时，其参数也会被压入发起调用的进程栈中，并且待到调用结束后，函数的返回值也会被存放回栈中。由于栈的后进先出特点，所以栈特别方便用来保存/
+  恢复调用现场。从这个意义上讲，我们可以把堆栈看成一个寄存、交换临时数据的内存区。
+
+```text
+另外，在高地址还存储了命令行参数及环境变量。
+
+因为内存程序映像中的各段可能位于不同的地址空间中, 它们不一定位于连续的内存块中. 操作系统将程序映像映射到地址空间时, 通常将内存程序映像划分为大小相同的块(也就是page, 页). 只有该页被引用时, 它才被加载到内存中. 不过对于程序员来说, 
+可以视内存程序映像在逻辑上是连续的。
+```
+
+```shell
+size hello
+```
+
+<img src="./img/size.png" style="width:40%" alt="size.png"/>
+
+### 17.wget文件下载
+
+```text
+Linux系统中的wget是一个下载文件的工具，他用在命令行下。对于Linux用户是必不可少的工具，我们经常要下载一些软件或从远程服务器恢复备份到本地服务器。wget支持HTTP，HTTPS和FTP协议，可以使用HTTP代理。
+
+wget可以跟踪HTML页面上的链接依次下载来创建远程服务器的本地版本，完全重建原始站点的目录结构。这有常称作“递归下载”。在递归下载的时候，wget遵循Robot Exclusion标准（/robots.txt）.
+wget可以在下载的同时，将链接转换只想本地文件，以方便离线浏览。
+
+wget非常稳定，他在宽带很窄的情况下和不稳定网络中有很强的适应性。如果是由于完了过的原下载失败，wget会不断地尝试，直到整个文件下载完成。如果服务器打断下载过程，它会在此联到服务器上从停止的地方继续下载。这对从那些限定了链接时间的服务器上下载大文件非常有用。
+```
+
+#### 命令格式
+
+```shell
+wget [参数][URL地址]
+```
+
+#### 命令参数
+
+##### 启动参数
+
+* -V, –version 显示wget的版本后退出
+* -h, –help 打印语法帮助
+* -b, –background 启动后转入后台执行
+* -e, –execute=COMMAND 执行'.wgetrc'格式的命令，wgetrc格式参见/etc/wgetrc或~/.wgetrc
+
+##### 记录和输入文件参数
+
+* -o, –output-file=FILE 把记录写到FILE文件中
+* -a, –append-output=FILE 把记录追加到FILE文件中
+* -d, –debug 打印调试输出
+* -q, –quiet 安静模式(没有输出)
+* -v, –verbose 冗长模式(这是缺省设置)
+* -nv, –non-verbose 关掉冗长模式，但不是安静模式
+* -i, –input-file=FILE 下载在FILE文件中出现的URLs
+* -F, –force-html 把输入文件当作HTML格式文件对待
+* -B, –base=URL 将URL作为在-F -i参数指定的文件中出现的相对链接的前缀
+
+```text
+–sslcertfile=FILE 可选客户端证书 –sslcertkey=KEYFILE 可选客户端证书的KEYFILE –egd-file=FILE 指定EGD socket的文件名。
+```
+
+##### 下载参数
+
+* -bind-address=ADDRESS 指定本地使用地址(主机名或IP，当本地有多个IP或名字时使用)
+* -t, –tries=NUMBER 设定最大尝试链接次数(0 表示无限制).
+* -O –output-document=FILE 把文档写到FILE文件中
+* -nc, –no-clobber 不要覆盖存在的文件或使用.#前缀
+* -c, –continue 接着下载没下载完的文件
+* -progress=TYPE 设定进程条标记
+* -N, –timestamping 不要重新下载文件除非比本地文件新
+* -S, –server-response 打印服务器的回应
+* -T, –timeout=SECONDS 设定响应超时的秒数
+* -w, –wait=SECONDS 两次尝试之间间隔SECONDS秒
+* -waitretry=SECONDS 在重新链接之间等待1…SECONDS秒
+* -random-wait 在下载之间等待0…2*WAIT秒
+* -Y, -proxy=on/off 打开或关闭代理
+* -Q, -quota=NUMBER 设置下载的容量限制
+* -limit-rate=RATE 限定下载输率
+
+##### HTTP选项参数
+
+* -http-user=USER 设定HTTP用户名为 USER.
+* -http-passwd=PASS 设定http密码为 PASS
+* -C, –cache=on/off 允许/不允许服务器端的数据缓存 (一般情况下允许)
+* -E, –html-extension 将所有text/html文档以.html扩展名保存
+* -ignore-length 忽略 'Content-Length'头域
+* -header=STRING 在headers中插入字符串 STRING
+* -proxy-user=USER 设定代理的用户名为 USER
+* proxy-passwd=PASS 设定代理的密码为 PASS
+* referer=URL 在HTTP请求中包含 'Referer: URL'头
+* -s, –save-headers 保存HTTP头到文件
+* -U, –user-agent=AGENT 设定代理的名称为 AGENT而不是 Wget/VERSION
+* no-http-keep-alive 关闭 HTTP活动链接 (永远链接)
+* cookies=off 不使用 cookies
+* load-cookies=FILE 在开始会话前从文件 FILE中加载cookie
+* save-cookies=FILE 在会话结束后将 cookies保存到 FILE文件中
+
+##### FTP选项参数
+
+* -nr, –dont-remove-listing 不移走 '.listing'文件
+* -g, –glob=on/off 打开或关闭文件名的 globbing机制
+* passive-ftp 使用被动传输模式 (缺省值).
+* active-ftp 使用主动传输模式
+* retr-symlinks 在递归的时候，将链接指向文件(而不是目录)
+
+##### 递归下载参数
+
+* -r, –recursive 递归下载－－慎用!
+* -l, –level=NUMBER 最大递归深度 (inf 或 0 代表无穷)
+* -delete-after 在现在完毕后局部删除文件
+* -k, –convert-links 转换非相对链接为相对链接
+* -K, –backup-converted 在转换文件X之前，将之备份为 X.orig
+* -m, –mirror 等价于 -r -N -l inf -nr
+* -p, –page-requisites 下载显示HTML文件的所有图片
+  递归下载中的包含和不包含(accept/reject)：
+* -A, –accept=LIST 分号分隔的被接受扩展名的列表
+* -R, –reject=LIST 分号分隔的不被接受的扩展名的列表
+* -D, –domains=LIST 分号分隔的被接受域的列表
+* -exclude-domains=LIST 分号分隔的不被接受的域的列表
+* -follow-ftp 跟踪HTML文档中的FTP链接
+* -follow-tags=LIST 分号分隔的被跟踪的HTML标签的列表
+* -G, –ignore-tags=LIST 分号分隔的被忽略的HTML标签的列表
+* -H, –span-hosts 当递归时转到外部主机
+* -L, –relative 仅仅跟踪相对链接
+* -I, –include-directories=LIST 允许目录的列表
+* -X, –exclude-directories=LIST 不被包含目录的列表
+* -np, –no-parent 不要追溯到父目录
+
+```text
+#不下载只显示过程
+wget -S –spider url
+```
+
+#### 使用实例
+
+##### 实例1：使用wget下载单个文件
+
+```shell
+wget https://github.com/redis/redis/archive/refs/tags/7.4.0.zip
+```
+
+```text
+说明：以上例子从网络上下载一个文件并保存在当前目录，在下载的过程中会显示进度条，包含（下载完成百分比、已经下载字节、当前下载速度、剩余下载时间）。
+```
+
+##### 实例2：使用wget -O 下载并以不同的文件名保存
+
+```shell
+wget -O newName.zip https://github.com/redis/redis/archive/refs/tags/7.4.0.zip
+```
+
+```text
+wget默认会议最后一个符合“/”的后面的字符来命名，对于动态链接的下载通常文件名会不正确。
+```
+
+##### 实例3：使用wget --limit-rate 限速下载
+
+```shell
+wget --limit-rate=300K https://github.com/redis/redis/archive/refs/tags/7.4.0.zip
+```
+
+```text
+当你执行wget的时候，它默认会占用全不可能的宽带下载。但是当你准备下载一个大文件，而你还需要下载其他文件时就有必要限速了。
+```
+
+##### 实例4：使用wget -c断点续传
+
+```shell
+wget -c https://github.com/redis/redis/archive/refs/tags/7.4.0.zip
+```
+
+```text
+使用wget -c重新启动下载中断的文件，对于我们下载大文件时突然由于网络终端非常有用，我们可以继续接着下载而不是重新下载一个新文件。需要继续中断的下载使可以使用-c参数。
+```
+
+##### 实例5：使用wget -b后台下载
+
+```shell
+wget -b https://github.com/redis/redis/archive/refs/tags/7.4.0.zip
+
+Continuing in background, pid 1840.
+Output will be written to 'wget-log'.
+```
+
+```text
+对于下载非常大的文件的时候，我们可以使用参数-b进行后台下载。
+
+可以使用以下命令来查看下载进度：
+tail -f wget-log
+```
+
+##### 实例6：伪装代理名称下载
+
+```shell
+wget --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" http://www.minjieren.com/wordpress-3.1-zh_CN.zip
+```
+
+```text
+有些网站能通过根据代理名称不是浏览器而拒绝你的下载请求。不过可以通过--user-agent参数伪装。
+```
+
+##### 实例7：使用wget -i下载多个文件
+
+```shell
+$cat >filelist.txt
+url1
+url2
+url3
+url4
+
+$wget -i filelist.txt
+```
+
+##### 实例8：使用wget --mirror镜像网站
+
+```shell
+$wget --mirror -p --convert-links -P ./LOCAL URL
+```
+
+###### 下载整个网站到本地
+
+* -miror:开户镜像下载
+* -p:下载所有为了html页面显示正常的文件
+* -convert-links:下载后，转换成本地的链接
+* -P ./LOCAL：保存所有文件和目录到本地指定目录
+
+##### 实例9：使用wget -r -A下载指定格式文件
+
+```shell
+$wget -r -A.pdf url
+```
+
+###### 可以在以下情况使用该功能
+
+* 下载一个网站的所有图片
+* 下载一个网站的所有视频
+* 下载一个网站的所有PDF文件
+
+#### 实例10：使用wget FTP下载
+
+```shell
+$wget ftp-url
+$wget --ftp-user=USERNAME --ftp-password=PASSWORD url
+```
+
+###### 可以使用wget来完成FTP链接的下载
+
+* 使用wget匿名ftp下载：wget ftp-url
+* 使用wget用户名和密码认证的ftp下载:wget --ftp-user=USERNAME --ftp-password=PASSWORD url
+
+### 编译安装
+
+```shell
+tar -zxvf wget-1.9.1.tar.gz
+cd wget-1.9.1
+./configure
+make
+make install
+```
