@@ -257,7 +257,7 @@ if ls /proc; then echo suss; else echo fail; fi
 #重定向
 
 #模板：
-#shell指令 > 标准正确输出文件 2> 标准错误输出文件 (2>：是这种写法)
+#shell指令 > 标准正确输出文件 2> 标准错误输出文件 (2> 是这种写法)
 
 #示例：将ls -al /roots 的列表输出,正确的话写入list文件中，错误的写入到error文件中
 ls -al /root2 > list 2> error
@@ -4938,4 +4938,397 @@ cd wget-1.9.1
 ./configure
 make
 make install
+```
+
+### 18.scp跨机远程拷贝
+
+```text
+scp是secure copy的简写，用于在Linux下进行远程拷贝文件的命令，和他类似的命令有cp，不过cp只是在本机进行拷贝不能跨服务器，而且scp传输是加密的。当你服务器硬盘变为只读read only system时，用scp可以帮你把文件移出来。
+```
+
+```text
+类似的工具有rsyns；scp消耗资源少，不会提高多少系统负荷，在这一点上rsync就远远不及他了。rsync比scp会快一点，担当小文件多的情况下，rsync会导致硬盘I/O非常高，而scp基本不会影响到系统正常使用。
+```
+
+#### 18.1 命令格式
+
+```text
+scp [参数][原路径][目标路径]     #原路径->目标路径
+```
+
+#### 18.2 命令参数
+
+* -1 强制scp命令使用协议ssh1
+* -2 强制scp命令使用协议ssh2
+* -4 强制scp命令只使用IPv4寻址
+* -6 强制scp命令只使用IPv6寻址
+* -B 使用批处理模式（传输过程中不询问传输口令或短语）
+* -C 允许压缩。（将-C标志传递给ssh，从而打开压缩功能）
+* -p 留原文件的修改时间，访问时间和访问权限。
+* -q 不显示传输进度条。
+* -r 递归复制整个目录。
+* -v 详细方式显示输出。scp和ssh(1)会显示出整个过程的调试信息。这些信息用于调试连接，验证和配置问题。
+* -c cipher 以cipher将数据传输进行加密，这个选项将直接传递给ssh。
+* -F ssh_config 指定一个替代的ssh配置文件，此参数直接传递给ssh。
+* -i identity_file 从指定文件中读取传输时使用的密钥文件，此参数直接传递给ssh。
+* -l limit 限定用户所能使用的带宽，以Kbit/s为单位。
+* -o ssh_option 如果习惯于使用ssh_config(5)中的参数传递方式，
+* -P port 注意是大写的P, port是指定数据传输用到的端口号
+* -S program 指定加密传输时所使用的程序。此程序必须能够理解ssh(1)的选项。
+
+#### 18.3 使用说明
+
+##### 从本地服务器复制到远程服务器
+
+###### 复制文件
+
+```shell
+scp local_file remote_username@remote_ip:remote_folder    #文件到文件夹里
+scp local_file remote_username@remote_ip:remote_file      #文件到文件
+scp local_file remote_ip:remote_folder                    #文件到文件夹里
+scp local_file remote_ip:remote_file                      #文件到文件
+```
+
+```text
+指定了用户名，命令执行后需要输入用户密码；如果不指定用户名，命令执行后需要输入用户名和密码。
+```
+
+###### 赋值文件夹
+
+```shell
+scp -r local_folder remote_username@remote_ip:remote_folder
+scp -r local_folder remote_ip:remote_folder
+```
+
+```text
+第一个指定了用户名，命令执行后需要输入密码；第二个没有指定用户信息，命令执行后需要输入用户名和密码。
+```
+
+```text
+从远处复制到本地的scp命令与上面的命令一样，只是将从本地复制到远程的命令后面2个参数互换顺序就可以了。
+```
+
+#### 18.4 使用示例
+
+##### 示例1：从远处复制文件到本地目录
+
+```shell
+scp root@10.6.12.123:/opt/soft/demo.tar /opt/soft
+```
+
+```text
+说明：从10.6.12.123机器上的/opt/soft/的目录中下载demo.tar文件到本地的/opt/soft/目录下
+```
+
+##### 示例2：从远处复制文件夹到本地(递归复制所有的文件及文件夹)
+
+```shell
+scp -r root@10.6.12.123:/opt/soft/test /opt/soft
+```
+
+```text
+说明：从10.6.12.123机器上的/opt/soft/中下载test目录及其子目录到本地的/opt/soft目录中
+```
+
+##### 示例3：上传本地文件到远程服务器指定目录
+
+```shell
+scp /opt/soft/demo.tar root@10.6.12.123:/opt/soft
+```
+
+```text
+说明：将本地/opt/soft/目录下的demo.tar文件上传到远程服务器10.6.12.123的/opt/soft目录下
+```
+
+##### 示例4：上传本地目录到远程机器的指定目录下(递归所有的文件及子文件夹)
+
+```shell
+scp -r /opt/soft/demo root@10.6.12.123:/opt/soft
+```
+
+```text
+说明：将本地/opt/soft/目录下的demo文件夹上传到远程服务器10.6.12.123的/opt/soft目录下
+```
+
+### 19.crontab定时任务
+
+```text
+通过crontab命令，我们可以在固定的间隔时间执行指定的系统指令或shell script脚本。时间间隔的单位可以是分钟、小时、日、月、周以及以上的任意组合。这个命令非常适合周期性的日志分析或数据备份等工作。
+```
+
+#### 19.1 命令格式
+
+```text
+crontab [-u user] file
+crontab [-u user] [-e | -l | -r]
+```
+
+#### 19.2 命令参数
+
+* -u user：用来设定某个用户的crontab服务；
+* file：file是命令文件的名字，表示将file作为crontab的任务列表文件载入crontab。如果在命令行中没有指定这个文件，crontab命令将接受标准输入（键盘）上键入的命令，并将它们载入crontab。
+* -e：编辑某个用户的crontab文件内容。如果不指定用户则表示编辑当前用户的crontab文件。
+* -l：显示某个用户的crontab文件内容。如果不指定用户名，则表示显示当前用户的crontab文件内容。
+* -r：从/var/spool/cron目录删除某个用户的crontab文件内容。如果不指定用户，则默认删除当前用户的crontab文件。
+* -i：在删除用户的crontab文件内容是给出确认提示。
+
+#### 19.3 crontab的文件格式
+
+```text
+分 时 日 月 星期 要运行的命令
+```
+
+* 第1列分钟0～59
+* 第2列小时0～23（0表示子夜）
+* 第3列日1～31
+* 第4列月1～12
+* 第5列星期0～7（0和7表示星期天）
+* 第6列要运行的命令
+
+<img src="./img/crontab.png" style="width:40%" alt="crontab.png"/>
+
+#### 19.4 常用方法
+
+##### 创建一个新的crontab文件
+
+```text
+向cron进程提交一个crontab文件之前，首先要设置环境变量EDITOR。cron进程根据他来确定使用哪个编辑器编辑crontab文件。99%的UNIX和LINUX用户都使用vi，如果你也是这样，那么你就编辑$HOME目录下的.profile文件，在其中加入这样一行：
+```
+
+```shell
+EDITOR=vi; export EDITOR
+```
+
+```text
+然后保存并退出。不妨创建一个名为<user> cron的文件，其中<user>是用户名，例如， davecron。在该文件中加入如下的内容。
+```
+
+```shell
+# 文件名称：davecron
+# (put your own initials here)echo the date to the console every
+# 15minutes between 6pm and 6am
+0,15,30,45 18-06 * * * /bin/echo 'date' >/dev/console
+
+#注：表示在18点到6点的0分、15分、30分、45分执行操作
+```
+
+```text
+保存并退出。注意前面5个域用空格分隔。
+
+在上面的例子中，系统将每隔1 5分钟向控制台输出一次当前时间。如果系统崩溃或挂起，从最后所显示的时间就可以一眼看出系统是什么时间停止工作的。在有些系统中，用tty1来表示控制台，可以根据实际情况对上面的例子进行相应的修改。为了提交你刚刚创建的crontab文件，可以把这个新创建的文件作为cron命令的参数:
+```
+
+```shell
+crontab davecron
+```
+
+```text
+现在该文件已经提交给cron进程，它将每隔1 5分钟运行一次。同时，新创建文件的一个副本已经被放在/var/spool/cron目录中，文件名就是用户名(即dave)。
+```
+
+##### 列出crontab文件
+
+```text
+使用-l参数列出crontab文件（会列出那些定时任务）
+```
+
+```shell
+crontab -l
+0,15,30,45 18-06 * * * /bin/echo 'date' >/dev/console
+```
+
+```text
+可以使用这种方法在$HOME目录中对crontab文件做一份备份
+```
+
+```shell
+crontab -l >$HOME/mycron
+```
+
+```text
+注：这样，一旦不小心误删了crontab文件，可以用上一节所讲述的方法迅速恢复。
+```
+
+##### 编辑crontab文件
+
+```text
+如果希望添加、删除或编辑crontab文件中的条目，而EDITOR环境变量又设置为vi，那么就可以用vi来编辑crontab文件:
+```
+
+```shell
+crontab -e
+```
+
+```text
+可以像使用vi编辑其他任何文件那样修改crontab文件并退出。如果修改了某些条目或添加了新的条目，那么在保存该文件时， cron会对其进行必要的完整性检查。如果其中的某个域出现了超出允许范围的值，它会提示你。 我们在编辑crontab文件时，没准会加入新的条目。例如，加入下面的一条：
+```
+
+```shell
+# DT:delete core files,at 3.30am on 1,7,14,21,26,26 days of each month
+30 3 1,7,14,21,26 * * /bin/find -name 'core' -exec rm {} \;
+```
+
+```text
+最好在crontab文件的每一个条目之上加入一条注释，这样就可以知道它的功能、运行时间，更为重要的是，知道这是哪位用户的定时作业。
+```
+
+##### 删除crontab文件
+
+```shell
+crontab -r
+```
+
+#### 19.5 使用示例
+
+##### 示例1：每1分钟执行一次myCommand
+
+```shell
+* * * * * mycron
+```
+
+##### 示例2：每小时的第3和第15分钟执行
+
+```shell
+3,15 * * * * mycron
+```
+
+##### 示例3：在上午8点到11点的第3和第15分钟执行
+
+```shell
+3,15 8-11 * * * mycron
+```
+
+##### 示例4：每隔两天的上午8点到11点的第3和第15分钟执行
+
+```shell
+3,15 8-11 */2 * * mycron
+```
+
+##### 示例5：每周一上午8点到11点的第3和第15分钟执行
+
+```shell
+3,15 8-11 * * 1 mycron
+```
+
+##### 示例6：每晚的21:30重启smb
+
+```shell
+30 21 * * * /etc/init.d/smb restart
+```
+
+##### 示例7：每月1、10、22日的4 : 45重启smb
+
+```shell
+45 4 1,10,22 * * /etc/init.d/smb restart
+```
+
+##### 示例8：每周六、周日的1:10重启smb
+
+```shell
+10 1 * * 6,0 /etc/init.d/smb restart
+```
+
+##### 示例9：每天18 : 00至23 : 00之间每隔30分钟重启smb
+
+```shell
+0,30 18-23 * * * /etc/init.d/smb restart
+```
+
+##### 示例10：每星期六的晚上11 : 00 pm重启smb
+
+```shell
+0 23 * * 6 /etc/init.d/smb restart
+```
+
+##### 示例11：每一小时重启smb
+
+```shell
+0 */1 * * * /bin/smb restart
+```
+
+##### 示例12：晚上11点到早上7点之间，每隔一小时重启smb
+
+```shell
+0 23-7 * * * /bin/smb restart
+```
+
+#### 19.6 使用注意事项
+
+##### 注意环境变量问题
+
+```text
+有时我们创建了一个crontab，但是这个任务却无法自动执行，而手动执行这个任务却没有问题，这种情况一般是由于在crontab文件中没有配置环境变量引起的。
+
+在crontab文件中定义多个调度任务时，需要特别注环境变量的设置，因为我们手动执行某个任务时，是在当前shell环境下进行的，程序当然能找到环境变量，而系统自动执行任务调度时，是不会加载任何环境变量的，因此，就需要在crontab文件中指定任务运行所需的所有环境变量，这样，系统执行任务调度时就没有问题了。
+
+不要假定cron知道所需要的特殊环境，它其实并不知道。所以你要保证在shelll脚本中提供所有必要的路径和环境变量，除了一些自动设置的全局变量。所以注意如下3点：
+```
+
+1. 脚本中涉及文件路径时写全局路径；
+2. 脚本只需要用到Java或其他环境变量时，通过source命令引入环境变量，如：
+
+```shell
+cat start_cbp.sh
+!/bin/sh
+source /etc/profile
+export RUN_CONF=/home/d139/conf/platform/cbp/cbp_jboss.conf
+/usr/local/jboss-4.0.5/bin/run.sh -c mev &
+```
+
+3. 当手动执行脚本OK，但是crontab死活不执行时，很可能是环境变量的原因，可以尝试在crontab中直接引入环境变量解决问题。如：
+
+```shell
+#/etc/profile就是环境变量直接引入
+0 * * * * . /etc/profile
+/bin/sh /var/www/java/audit_no_count/bin/restart_audit.sh
+```
+
+##### 注意清理系统用户的邮件日志
+
+```text
+每条任务调度执行完毕，系统都会将任务输出信息通过电子邮件的形式发送给当前系统用户，这样日积月累，日志信息会非常大，可能会影响系统的正常运行，因此，将每条任务进行重定向处理非常重要。 例如，可以在crontab文件中设置如下形式，忽略日志输出:
+```
+
+```shell
+#使用/usr/local/apache2/apachectl脚本重启Apache服务器，并将标准输出和错误输出都重定向到/dev/null，即丢弃所有输出。
+#标准正确输出输出到 /dev/null；&1表示将标准错误输出的位置和标准正确输出的位置一致/dev/null;而/dev/null丢弃输出，所以最后两者的输出不会被记录
+0 */3 * * * /usr/local/apache2/apachectl restart >/dev/null 2>&1
+```
+
+```text
+“/dev/null 2>&1”表示先将标准输出重定向到/dev/null，然后将标准错误重定向到标准输出，由于标准输出已经重定向到了/dev/null，因此标准错误也会重定向到/dev/null，这样日志输出问题就解决了。
+```
+
+##### 系统级任务调度与用户级任务调度
+
+```text
+系统级任务调度主要完成系统的一些维护操作，用户级任务调度主要完成用户自定义的一些任务，可以将用户级任务调度放到系统级任务调度来完成（不建议这么做），但是反过来却不行，root用户的任务调度操作可以通过”crontab –uroot –e”来设置，也可以将调度任务直接写入/etc/crontab文件，需要注意的是，如果要定义一个定时重启系统的任务，就必须将任务放到/etc/crontab文件，即使在root用户下创建一个定时重启系统的任务也是无效的。
+```
+
+##### 其他注意事项
+
+```text
+新创建的cron job，不会马上执行，至少要过2分钟才执行。如果重启cron则马上执行。
+
+当crontab失效时，可以尝试/etc/init.d/crond restart解决问题。或者查看日志看某个job有没有执行/报错tail -f /var/log/cron。
+
+千万别乱运行crontab -r。它从Crontab目录（/var/spool/cron）中删除用户的Crontab文件。删除了该用户的所有crontab都没了。
+
+在crontab中%是有特殊含义的，表示换行的意思。如果要用的话必须进行转义%，如经常用的date ‘+%Y%m%d’在crontab里是不会执行的，应该换成date ‘+%Y%m%d’。
+```
+
+**更新系统时区后需要重启cron**
+
+```shell
+service cron restart
+
+systemctl restart cron
+```
+
+**启动、停止和重启cron**
+
+```shell
+$sudo /etc/init.d/cron start
+$sudo /etc/init.d/cron stop
+$sudo /etc/init.d/cron restart
 ```
