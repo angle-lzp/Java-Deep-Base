@@ -28,7 +28,7 @@ public class ForkAndJoinDemo {
 
         println();
         ForkJoinPool forkJoinPool2 = new ForkJoinPool();
-        Fibonacci task = new Fibonacci(3);
+        Fibonacci task = new Fibonacci(2);
         int result2 = forkJoinPool2.invoke(task);
         System.out.println("斐波那契数列的第10项为： " + result2);
         println();

@@ -3,6 +3,8 @@ package com.angelo.gitapplication.feature;
 import android.annotation.SuppressLint;
 import android.os.Build;
 
+import org.apache.poi.ss.usermodel.DataFormat;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -20,7 +22,7 @@ public class LocalDateTimeDemo {
     public static void main(String[] args) throws ParseException {
         LocalDate localDate = LocalDate.now();
         System.out.printf("LocalDate：%s%n", localDate);
-        LocalTime localTime = LocalTime.now().withNano(0);
+        LocalTime localTime = LocalTime.now().withNano(0);//withNano(0)：表示将纳秒置为0
         System.out.printf("LocalTime：%s%n", localTime);
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -47,13 +49,14 @@ public class LocalDateTimeDemo {
 
         LocalDateTime localDateTime1 = LocalDateTime.now();
         LocalDateTime localDateTime2 = localDateTime1.plusDays(1);//日期时间往后加一个小时
+        LocalDateTime minus = localDateTime1.minus(1, ChronoUnit.MONTHS);//日期时间往前一个月
         //加年月日时分秒毫秒星期同上：是LocalDate和LocalTime plusXXX的集合
 
         //判断两个时间相隔的数据
         LocalDateTime beginDateTime = LocalDateTime.of(2019, 2, 23, 12, 23, 45);
         LocalDateTime endDateTime = LocalDateTime.of(2019, 12, 20, 11, 23, 35);
         Period period = Period.between(beginDateTime.toLocalDate(), endDateTime.toLocalDate());
-        //表示相差0年9月27天：period.getDays()这个天是值除去月份不足整月剩余的天
+        //表示相差0年9月27天（后面的时分秒不参与计算）：period.getDays()这个天是值除去月份不足整月剩余的天
         System.out.printf("Year：%s  Month：%s    Day：%s%n", period.getYears(), period.getMonths(), period.getDays());
         //要求相差总天数：
         System.out.printf("Total days difference：%s%n", endDateTime.toLocalDate().toEpochDay() - beginDateTime.toLocalDate().toEpochDay());
@@ -64,7 +67,7 @@ public class LocalDateTimeDemo {
         System.out.printf("Day：%s  Hour：%s    Minute：%s Second：%s%n", duration.toDays(), duration.toHours(), duration.toMinutes(),
                 duration.getSeconds());
 
-        //Duration好像不是使用LocalDate就是不能使用日期类型的数据，可以使用日期时间、时间
+        //Duration好像不能使用LocalDate，其实就是不能使用日期类型的数据，但是可以使用日期时间、时间
         //Duration duration1 = Duration.between(beginDateTime.toLocalDate(), endDateTime.toLocalDate());
         //System.out.println("Days：" + duration1.toDays());
 

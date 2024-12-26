@@ -2,6 +2,12 @@
 
 ### 1.基础指令
 
+* 查看拉取镜像使用的时间
+
+```shell
+time docker pull node:latest
+```
+
 * 查看镜像
 
 ```shell
