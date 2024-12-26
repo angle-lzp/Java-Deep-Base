@@ -149,6 +149,22 @@ cat 文件名.tar | docker import-镜像用户/镜像名:Tag  #Tag:镜像版本�
 cat file.tar | docker import - my_user/my_image:latest
 ```
 
+* 将一台服务器上的镜像上传到另外的服务器上
+```shell
+#1.在A服务器打包镜像(-o：用于指定输出文件的路径和名称（out）)
+docker save -o imageFile.tar 镜像名称:Tag
+
+#2.通过上传工具将打包的镜像文件上传到B服务器
+
+#3.在B服务器上加载镜像(如果不在imageFile.tar的当前目录下执行该指令需要使用完整路径)
+# (-i:用于指定输入文件的路径和名称（in）)
+docker load -i imageFile.tar
+
+#4.使用镜像
+docker run -d -p 8099:8099 imageFile --name myImageFile
+
+```
+
 * 安装vim
 
 ```shell
