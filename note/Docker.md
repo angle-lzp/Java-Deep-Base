@@ -2,7 +2,66 @@
 
 ### 1.基础指令
 
+
+* 安装
+
+```shell
+
+#需要先卸载旧版本Docker（如果有的话）
+
+#yum安装gcc相关
+yum -y install gcc
+yum -y install gcc-c++
+#安装需要的软件包
+yum install -y yum-utils
+#添加yum仓库地址（用于加速下载对应的镜像进行安装操作）用于加速Docker CE(Community Edition)的安装过程（和后面拉取Docker镜像没有关系主要用于更新、安装Docker）
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+#更新yum软件包索引
+yum makecache fast
+#安装Docker CE
+yum -y install docker-ce docker-ce-cli containerd.io
+#启动
+systemctl start docker
+#测试
+docker version
+```
+
+* 查看Linux系统版本
+
+```shell
+cat /etc/os-release
+```
+
 * 查看拉取镜像使用的时间
+
+```shell
+time docker pull node:latest
+```
+
+* 搜索镜像
+
+```shell
+docker search node:latest
+# --limit 20 只展示前20个， 默认25
+```
+
+* 拉取镜像
+
+```shell
+docker pull node:latest
+```
+
+* 查看拉取镜像使用的时间
+
+```shell
+time docker pull node:latest
+```
+
+* 查看镜像、容器、数据卷占用的空间
+
+```shell
+docker system df
+```
 
 ```shell
 time docker pull node:latest
@@ -12,6 +71,7 @@ time docker pull node:latest
 
 ```shell
 docker images
+# -a：展示所有镜像；-q：只展示镜像ID
 ```
 
 * 删除镜像
@@ -145,7 +205,7 @@ docker export 容器ID>文件名.tar
 ```shell
 cat 文件名.tar | docker import-镜像用户/镜像名:Tag  #Tag:镜像版本号
 
-#示例
+#示例（此时导入后的是一个镜像，不是一个容器）
 cat file.tar | docker import - my_user/my_image:latest
 ```
 
@@ -204,6 +264,10 @@ docker tag newUbuntu:1.3.4 127.0.0.1:5000/newUbuntu:1.3.4
 
 #5，修改docker配置文件，使它支持http
 vim /etc/docker/daemon.json
+
+#不起效果重启docker
+systemctl daemon-reload
+systemctl restart docker
 
 #在aliyun的配置下一行添加："insecure-registries": [你的ip:5000"]；例如："insecure-registries": ["127.0.0.1:5000"]
 #注：docker默认不允许使用http推送镜像，通过配置选项来取消这个限制。（如果修改完后不生效，建议重启docker）
