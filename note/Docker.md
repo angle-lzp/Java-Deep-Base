@@ -478,3 +478,13 @@ docker exec -it 容器ID /bin/bash
 #5，开启redis客户端
 > redis-cli
 ```
+
+### 2.实战经验
+* 1.在使用docker-compose.yml的时候
+```shell
+#配置
+volumes:
+      - 'mongodb_data:/bitnami'
+
+#容器卷文件夹名称：mongodb；宿主机的文件目录：/var/lib/docker/volumes/mongodb
+```
