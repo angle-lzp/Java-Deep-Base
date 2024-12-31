@@ -2,7 +2,6 @@
 
 ### 1.基础指令
 
-
 * 安装
 
 ```shell
@@ -210,6 +209,7 @@ cat file.tar | docker import - my_user/my_image:latest
 ```
 
 * 将一台服务器上的镜像上传到另外的服务器上
+
 ```shell
 #1.在A服务器打包镜像(-o：用于指定输出文件的路径和名称（out）)
 docker save -o imageFile.tar 镜像名称:Tag
@@ -239,6 +239,33 @@ apt-get -y install vim
 
 ```shell
 docker commit -m="add vim" -a="angelo.luo" 容器ID 要创建的目标镜像ID:[Tag]
+```
+
+* 查看docker-compose(docker compose、podman-compose(如果是这中方式直接替换就可以))中的信息
+
+```shell
+#启动docker compose
+docker-compose up -d
+
+#停止docker compose
+docker-compose down
+
+#查看指定镜像的log信息（-f：实时读取；容器ID：docker-compose.yml中services下面的镜像别名）
+docker-compose logs -f 容器ID
+
+```
+
+* 查看volume（容器卷）列表
+
+```shell
+docker volume ls
+
+```
+
+* 查看指定volume（容器卷）信息
+
+```shell
+docker volume inspect volumeName
 ```
 
 * 构建自己的镜像私服
@@ -477,4 +504,35 @@ docker exec -it 容器ID /bin/bash
 
 #5，开启redis客户端
 > redis-cli
+```
+
+#### 3.实战常见知识
+
+* docker-compose.yml中volumes的默认位置
+
+```shell
+#docker-compose.yml
+version: "3"
+
+services:
+  db:
+    image: mariadb
+    command: --max-allowed-packet=64MB
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=Pas3W0rd
+    env_file:
+      - ./db.env
+      
+      
+#db:/var/lib/mysql中db的默认位置一般在/var/lib/docker/volumes/db
+#如果不在可以使用[查看volume（容器卷）列表][查看指定volume（容器卷）信息]查看
+```
+
+* volume的名称一般是由当前docker-compose.yml文件所在目录的相对路径加上volume的名称组成
+```shell
+#当前文件夹matomo，volume名称db，那么容器卷名称为matomo_db
+
 ```
