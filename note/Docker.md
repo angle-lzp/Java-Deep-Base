@@ -519,8 +519,7 @@ services:
     image: mariadb
     command: --max-allowed-packet=64MB
     restart: always
-    volumes:
-      - db:/var/lib/mysql
+    volumes: - db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=Pas3W0rd
     env_file:
