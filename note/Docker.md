@@ -268,6 +268,12 @@ docker volume ls
 docker volume inspect volumeName
 ```
 
+* 删除指定volume（容器卷）（当你手动删除容器卷目录的话，那么volume也要被删除）
+
+```shell
+docker volume rm volumeName
+```
+
 * 构建自己的镜像私服
 
 ```shell
