@@ -2,6 +2,15 @@
 
 ### 1，使用命令帮助
 
+#### 1.0，查看系统信息
+```shell
+uname -a #显示系统信息
+
+cat /etc/os-release #显示系统版本信息
+ 
+cat /etc/redhat-release #显示系统版本信息
+```
+
 #### 1.1，whatis 简要说明命令的作用
 
 ```shell
