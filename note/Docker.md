@@ -244,7 +244,7 @@ docker commit -m="add vim" -a="angelo.luo" 容器ID 要创建的目标镜像ID:[
 * docker compose指令
 
 ```shell
-# Compose常用命令
+# Compose常用命令(docker-compose -> docker compose)
 docker-compose -h                           # 查看帮助
 docker-compose up                           # 启动所有docker-compose服务
 docker-compose up -d                        # 启动所有docker-compose服务并后台运行
