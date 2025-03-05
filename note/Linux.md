@@ -194,6 +194,9 @@ head -10 a.log   #(-n 10 简写成：-10)
 #显示文件后五行数据
 tail -n 5 a.log (tail -5 a.log)
 
+#动态显示文件后五行数据
+tail -n 5 -f a.log (tail -5 -f a.log)
+
 #查看两个文件之间的差别
 diff file1.log file2.log
 
@@ -1925,9 +1928,9 @@ chomd userMark(+|-)PermissionsMark
 > a：所有用户
 >
 > PermissionsMark取值：  
-> r：读  
-> w：写  
-> x：执行1
+> r：读   4
+> w：写   2
+> x：执行 1
 
 ```shell
 #对所有用户给为你教案main增加可执行权限
