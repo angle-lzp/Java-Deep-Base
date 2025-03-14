@@ -62,3 +62,18 @@ npm install vue-router@4 --save-dev
 #构建打包
 npm run build
 ```
+
+* 查看运行时依赖
+
+```shell
+#构建打包
+npm ls --prod
+```
+
+* 查看开发时依赖
+
+```shell
+#构建打包
+npm ls --dev
+
+```
