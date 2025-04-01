@@ -9,6 +9,8 @@ uname -a #显示系统信息
 cat /etc/os-release #显示系统版本信息
  
 cat /etc/redhat-release #显示系统版本信息
+
+lscpu #查看处理器(cup)信息
 ```
 
 #### 1.1，whatis 简要说明命令的作用
@@ -1242,6 +1244,45 @@ cat data.txt | tr -d '[:space:]' | fold -w1 #(1：是数字1，不是L)
 ### 4，磁盘管理
 
 #### 4.1，查看磁盘空间
+
+
+```shell
+# 1. fdisk 命令（查看物理磁盘总容量）
+# 作用：显示物理硬盘的分区信息及总容量（需 root 权限）
+sudo fdisk -l | grep Disk
+# 输出示例：
+Disk /dev/sda: 21.5 GB, 21474836480 bytes  # 硬盘总大小为21.5GB
+Disk /dev/sdb: 100 GiB, 107374182400 bytes
+# 直接显示物理硬盘（如 /dev/sda）的总大小，适用于未分区或需查看原始磁盘容量的场景 
+
+
+# 2. lsblk 命令（查看块设备总大小）
+# 作用：以树形结构列出所有块设备（包括磁盘和分区）的容量。
+lsblk
+# 输出示例：
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  21.5G  0 disk 
+└─sda1   8:1    0  20.5G  0 part /
+sdb      8:16   0   100G  0 disk 
+└─sdb1   8:17   0   100G  0 part /data
+# SIZE 列显示磁盘或分区的总容量 
+
+
+# 3. smartctl 命令（查看硬盘详细参数）
+# 作用：读取硬盘的 S.M.A.R.T 信息，包含精确的物理容量（需安装 smartmontools）
+sudo smartctl -i /dev/sda | grep "User Capacity"
+# 输出示例：
+User Capacity:    1,000,204,886,016 bytes [1.00 TB]
+# 显示硬盘的原始字节容量，适合精确计算 
+
+
+# 5. hdparm 命令（查看 IDE/SATA 硬盘信息）
+# 作用：获取 IDE 或 SATA 硬盘的详细参数，包括容量（需 root 权限）。
+sudo hdparm -I /dev/sda | grep "device size"
+# 输出示例：
+device size with M = 1024*1024:  238475 MBytes
+# 显示以 MB 为单位的硬盘总大小 
+```
 
 ```shell
 #查看磁盘空间利用大小

@@ -53,17 +53,17 @@ docker pull node:latest
 * 查看拉取镜像使用的时间
 
 ```shell
-time docker pull node:latest
+time docker pull node:latest  #查看拉取镜像使用的时间
 ```
 
 * 查看镜像、容器、数据卷占用的空间
 
 ```shell
-docker system df
+docker system df  #查看镜像、容器、数据卷占用的空间
 ```
 
 ```shell
-time docker pull node:latest
+time docker pull node:latest  #查看拉取镜像使用的时间
 ```
 
 * 查看镜像
@@ -156,6 +156,22 @@ docker run -d unbuntu
 ```shell
 docker ps
 docker ps -a    #(查看所有的容器包括已经停止的容器)
+```
+* 启动容器的options
+
+```text
+
+--name="容器新名字"   为容器指定一个名称
+
+-d：后台运行容器并返回容器ID，也即启动守护式容器（后台运行）
+
+-i：以交互模式运行容器，通常与 -t 同时使用；
+-t：为容器重新分配一个伪输入终端，通常与 -i 同时使用；
+也即启动交互式容器(前台有伪终端，等待交互)；
+ 
+-P：随机端口映射，大写P
+-p：指定端口映射，小写p
+
 ```
 
 * 以前台交互方式进入ubuntu
