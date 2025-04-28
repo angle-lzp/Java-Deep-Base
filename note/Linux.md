@@ -5387,6 +5387,14 @@ $sudo /etc/init.d/cron restart
 ```
 
 ## Linux实战指令
+### 0.开发中常用指令
+```shell
+# 1.查询指定名称的RPM包(q：查询，a：所有的，-i：显示包的信息（如版本、安装时间、描述等），l：列出包安装的所有文件路径)
+rpm -qa | grep -i python
+
+
+```
+
 ### 1.注册Linux系统服务（基于systemd）
 1.将python脚本注册为Linux系统服务的详细步骤（基于systemd）
 ```shell
