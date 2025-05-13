@@ -157,6 +157,7 @@ docker run -d unbuntu
 docker ps
 docker ps -a    #(查看所有的容器包括已经停止的容器)
 ```
+
 * 启动容器的options
 
 ```text
@@ -549,7 +550,7 @@ docker exec -it 容器ID /bin/bash
 
 #### 3.实战常见知识
 
-* docker-compose.yml中volumes的默认位置
+##### docker-compose.yml中volumes的默认位置
 
 ```shell
 #docker-compose.yml
@@ -571,8 +572,50 @@ services:
 #如果不在可以使用[查看volume（容器卷）列表][查看指定volume（容器卷）信息]查看
 ```
 
-* volume的名称一般是由当前docker-compose.yml文件所在目录的相对路径加上volume的名称组成
+##### volume的名称一般是由当前docker-compose.yml文件所在目录的相对路径加上volume的名称组成
+
 ```shell
 #当前文件夹matomo，volume名称db，那么容器卷名称为matomo_db
+
+```
+
+##### Docker默认容器存储的路径
+
+```shell
+/var/lib/docker/containers/<容器ID>/<容器ID>-json.log
+```
+
+##### 获取容器内
+
+```shell
+/var/lib/docker/containers/<容器ID>/<容器ID>-json.log
+```
+
+##### 获取容器内用户UID
+
+```shell
+docker exec 容器ID id -u 用户名
+#例如
+docker exec telegraf id -u telegraf
+            容器名称        容器内用户名称
+```
+
+##### 检查容器启动后的状态
+
+```shell
+docker inspect -f '{{.State.Health.Status}}' emqx 
+```
+
+##### 查看容器内监控状态的指令市什么
+```shell
+docker inspect --format='{{json .Config.Healthcheck}}' emqx # 查看你emqx的健康检查的指令
+
+```
+
+##### 查看资源监控
+
+```shell
+docker stats emqx --no-stream # 查看单个服务emqx
+docker stats --no-stream      #  查看所有服务
 
 ```

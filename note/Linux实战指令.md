@@ -24,6 +24,18 @@ lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
 # 7.直接显示磁盘的物理总容量，无需挂载即可查看（但还是使用lsblk好使）
 fdisk -l | grep Disk
 
+# 8.查看系统启动时间
+uptime
+who -b
+cat /proc/uptime
+last reboot | head -1
+
+# 9.查看主机名
+hostnamectl
+
+# 10.修改主机名
+hostnamectl set-hostname your_hostname
+
 ```
 
 ### 1.注册Linux系统服务（基于systemd）
