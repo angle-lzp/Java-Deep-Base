@@ -36,6 +36,22 @@ hostnamectl
 # 10.修改主机名
 hostnamectl set-hostname your_hostname
 
+# 11.查看文件或文件夹的创建、访问(cat、less)、修改(vim、echo)、状态改变时间(元数据改变如权限、所有权、文件名)内容变动
+# 访问时间
+stat
+ls -lu
+
+# 修改时间
+stat
+ls -l
+
+# 状态改变时间
+stat
+ls -lc
+
+# 创建时间
+stat # 依赖文件系统支持
+
 ```
 
 ### 1.注册Linux系统服务（基于systemd）
