@@ -52,6 +52,12 @@ ls -lc
 # 创建时间
 stat # 依赖文件系统支持
 
+# 12.查看当前目录及子文件使用的总大小
+du -sh .  # du 表示磁盘使用情况;-s 表示汇总;-h 表示以易读格式（如 KB、MB、GB）显示大小;. 表示当前目录
+
+# CSR文件生成
+openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
+
 ```
 
 ### 1.注册Linux系统服务（基于systemd）
