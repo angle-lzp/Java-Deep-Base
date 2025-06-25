@@ -68,6 +68,10 @@ nc -vz 127.0.0.1 1883
 sudo firewall-cmd --permanent --add-port=18083/tcp
 sudo firewall-cmd --reload
 
+# 关闭端口
+sudo firewall-cmd --permanent --remove-port=18083/tcp
+sudo firewall-cmd --reload
+
 # 查看以开放的端口
 sudo firewall-cmd --list-ports
 
