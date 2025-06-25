@@ -58,6 +58,28 @@ du -sh .  # du 表示磁盘使用情况;-s 表示汇总;-h 表示以易读格式
 # CSR文件生成
 openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
 
+# 13.检查端口连通性
+telnet 127.0.0.1 1883
+或
+nc -vz 127.0.0.1 1883
+
+# 14.开发查看端口
+# 开放端口
+sudo firewall-cmd --permanent --add-port=18083/tcp
+sudo firewall-cmd --reload
+
+# 查看以开放的端口
+sudo firewall-cmd --list-ports
+
+# 查看所有监听端口(系统级别)
+ss -tuln
+或
+netstat -tuln
+
+# 15.查询笔记本外部 IP(公网IP)
+curl ipinfo.io/ip
+或
+curl ifconfig.me
 ```
 
 ### 1.注册Linux系统服务（基于systemd）
