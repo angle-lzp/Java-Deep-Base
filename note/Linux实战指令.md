@@ -76,9 +76,11 @@ sudo firewall-cmd --reload
 sudo firewall-cmd --list-ports
 
 # 查看所有监听端口(系统级别)
-ss -tuln
+ss -tuln  # 比 netstat 更快更现代
+ss -tuln | grep 18083 # 单独查询某个端口被监听情况
 或
 netstat -tuln
+netstat -tuln | grep 18083  # 单独查询某个端口被监听情况
 
 # 15.查询笔记本外部 IP(公网IP)
 curl ipinfo.io/ip
@@ -145,4 +147,37 @@ KillMode=process  # 防止systemd误杀子进程
 MemoryLimit=500M
 CPUQuota=80%
 
+```
+
+### 生成自签名证书（https）
+```shell
+# 假设你的 IP 是 10.148.36.201
+
+# 1.1 创建 OpenSSL 配置文件（如 nifi_cert.cnf）
+[ req ]
+default_bits       = 2048
+distinguished_name = req_distinguished_name
+req_extensions     = v3_req
+prompt             = no
+
+[ req_distinguished_name ]
+C  = CN
+ST = Test
+L  = Test
+O  = Test
+CN = 10.148.36.201
+
+[ v3_req ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+IP.1 = 10.148.36.201
+DNS.1 = 10.148.36.201
+
+# 1.2 生成私钥和证书(生成后会得到 nifi.key（私钥）和 nifi.crt（证书）)
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+  -keyout nifi.key -out nifi.crt -config nifi_cert.cnf -extensions v3_req
+  
+# 1.3 生成 PKCS12 文件（NiFi 推荐）(会提示输入导出密码，记住这个密码)
+openssl pkcs12 -export -in nifi.crt -inkey nifi.key -out nifi.p12 -name nifi-cert
 ```
