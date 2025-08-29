@@ -56,7 +56,35 @@ stat # 依赖文件系统支持
 du -sh .  # du 表示磁盘使用情况;-s 表示汇总;-h 表示以易读格式（如 KB、MB、GB）显示大小;. 表示当前目录
 
 # CSR文件生成
+# 方式一：需要手动输入后面的值
 openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
+
+# 方式二：将要输入的值写入到配置文件中
+[ req ]
+default_bits       = 2048
+distinguished_name = req_distinguished_name
+req_extensions     = v3_req
+prompt             = no
+
+[ req_distinguished_name ]
+C  = CN
+ST = Beijing
+L  = Beijing
+O  = TTI
+CN = cnsiotdp01.cn.globaltti.net
+
+[ v3_req ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+IP.1 = 10.64.20.100
+DNS.1 = cnsiotdp01.cn.globaltti.net
+
+# 生成CSR文件
+openssl req -newkey rsa:2048 -keyout cnsiotdp01.key -out cnsiotdp01.csr -config cnsiotdp01.cnf -nodes
+
+# 生成PKCS12文件（按需执行，pkcs12用于Nifi中）
+openssl pkcs12 -export -in vnsiotdp01.crt -inkey vnsiotdp01.key -out nifi.p12 -name "nifi-cert" -password pass:Y87XcfEfuW0
 
 # 13.检查端口连通性
 telnet 127.0.0.1 1883
@@ -75,6 +103,18 @@ sudo firewall-cmd --reload
 # 查看以开放的端口
 sudo firewall-cmd --list-ports
 
+# 查看当前运行时配置
+sudo firewall-cmd --list-all
+
+# 查看永久配置
+sudo firewall-cmd --list-all --permanent
+
+# 开放预定义服务（如果存在）
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+
+
+
 # 查看所有监听端口(系统级别)
 ss -tuln  # 比 netstat 更快更现代
 ss -tuln | grep 18083 # 单独查询某个端口被监听情况
@@ -86,6 +126,41 @@ netstat -tuln | grep 18083  # 单独查询某个端口被监听情况
 curl ipinfo.io/ip
 或
 curl ifconfig.me
+
+# 16.重启
+sudo shutdown -r now
+
+# 17.关机
+sudo shutdown -h now
+
+# 18查找文件中的指定内容
+# 1. 使用grep命令（推荐）
+grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
+
+# 2. 如果需要显示行号
+grep -n "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
+
+# 3. 如果需要显示匹配行的上下文
+# 显示匹配行及前后各3行
+grep -C 3 "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
+
+# 只显示匹配行及前3行
+grep -B 3 "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
+
+# 只显示匹配行及后3行
+grep -A 3 "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
+
+# 4. 如果需要忽略大小写
+grep -i "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
+
+#5. 使用awk命令
+awk '/id=57b665c1-7044-3320-3e03-d31a1ac33db4/ {print}' a.txt
+
+#6. 如果文件很大，可以使用cat配合grep
+cat a.txt | grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4"
+
+#最常用和推荐的是第一种方法，简单直接。如果需要更多上下文信息，可以使用带 -C、-B 或 -A 参数的grep命令。
+
 ```
 
 ### 1.注册Linux系统服务（基于systemd）
@@ -180,4 +255,50 @@ openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
   
 # 1.3 生成 PKCS12 文件（NiFi 推荐）(会提示输入导出密码，记住这个密码)
 openssl pkcs12 -export -in nifi.crt -inkey nifi.key -out nifi.p12 -name nifi-cert
+```
+
+### 下载jdk21rpm包、手动安装jdk21rpm包
+```shell
+# 1.创建安装目录
+sudo mkdir -p /opt/java
+sudo chown $(whoami):$(whoami) /opt/java
+cd /opt/java
+
+# 2.下载 Oracle JDK 21 RPM 包
+wget https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.rpm
+
+# 3.验证下载完整性（可选）
+sha256sum jdk-21_linux-x64_bin.rpm
+# 对比输出与Oracle官网提供的SHA256校验值
+
+
+# 4.1使用 yum 本地安装（会自动解决依赖关系）（网络问题情况下会出现：all mirrors were already tried without success）
+sudo yum localinstall jdk-21_linux-x64_bin.rpm
+
+# 4.2或者使用 rpm 命令安装(有一些还是使用这个rpm的方式好)
+sudo rpm -ivh jdk-21_linux-x64_bin.rpm
+
+
+# 5.检查安装的Java版本
+java -version
+
+# 6.检查JDK位置
+which java
+readlink -f $(which java)
+
+# 7.列出安装的文件
+rpm -ql jdk-21
+
+# 8.在/etc/profile.d/下创建java.sh
+sudo tee /etc/profile.d/java.sh <<'EOF'
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+export PATH=$JAVA_HOME/bin:$PATH
+EOF
+
+# 9.使配置生效
+source /etc/profile.d/java.sh
+
+# 10验证环境变量
+echo $JAVA_HOME
+echo $PATH
 ```
