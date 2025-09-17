@@ -162,18 +162,165 @@ cat a.txt | grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4"
 #最常用和推荐的是第一种方法，简单直接。如果需要更多上下文信息，可以使用带 -C、-B 或 -A 参数的grep命令。
 
 ```
+### 安装Oracle Instant Client
 
-### 1.注册Linux系统服务（基于systemd）
-
-1.将python脚本注册为Linux系统服务的详细步骤（基于systemd）
-
+#### 1.创建目录
 ```shell
-# 1.新建service文件
-sudo vim /etc/systemd/system/python_script.service
-
-# 2.编写服务配置（示例模板）
+sudo mkdir /opt/oracle && cd /opt/oracle
 ```
 
+#### 2.下载并解压Oracle Instant Client
+```shell
+sudo wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linux.x64-19.3.0.0.0dbru.zip
+
+# 如果地址不可用在Oracle官网查看
+# https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html
+```
+![](./img/Linux_ac01.png)
+
+#### 3.解压文件
+```shell
+sudo unzip instantclient-basic-linux.x64-19.3.0.0.0dbru.zip
+```
+
+#### 4.设置环境变量
+```shell
+# 临时设置
+export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_3:$LD_LIBRARY_PATH
+
+# 永久设置
+echo 'export LD_LIBRARY_PATH=/opt/oracle/instantclient_19_3:$LD_LIBRARY_PATH' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### 5.安装依赖
+```shell
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install libaio1
+
+# CentOS/RHEL/Fedora
+sudo yum install libaio
+# 或者对于较新版本
+sudo dnf install libaio
+
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install libaio1
+
+# CentOS/RHEL/Fedora
+sudo yum install libaio
+# 或者对于较新版本
+sudo dnf install libaio # 推荐使用这个，dnf是最新的
+```
+
+#### 6.配置系统库路径
+```shell
+# 创建ldconfig配置文件
+sudo vim /etc/ld.so.conf.d/oracle.conf
+
+# 添加如下内容
+/opt/oracle/instantclient_19_3
+
+# 更新ldconfig缓存
+sudo ldconfig
+```
+
+#### 7.检查是否完整安装
+```shell
+# 检查 libaio
+ldconfig -p | grep libaio
+
+# 检查 Oracle 客户端库
+ls -la /opt/oracle/instantclient_19_3/libclntsh*
+```
+### 手动本地下载rpm
+
+#### 清理并重建 yum 缓存
+```shell
+# 清理现有缓存
+sudo yum clean all
+
+# 重建缓存
+sudo yum makecache
+
+# 再次尝试下载
+sudo yumdownloader libaio
+```
+
+#### 2.使用dnf替代yum（ehel8/9推荐）
+```shell
+# 清理缓存
+sudo dnf clean all
+
+# 更新缓存
+sudo dnf makecache
+
+# 下载 libaio
+sudo dnf download libaio
+
+# 下载开发包（可选）
+sudo dnf download libaio-devel
+```
+
+### 本地安装rpm
+
+#### 1.解决方案
+
+#### 1.1.禁用订阅管理仓库，只使用本地 RPM 文件安装
+```shell
+sudo rpm -ivh libaio-*.rpm --nodeps
+
+# 或者使用 --force 强制安装
+sudo rpm -ivh --force libaio-*.rpm
+```
+
+#### 1.2.直接安装 RPM 包，跳过依赖检查
+```shell
+sudo rpm -ivh libaio-*.rpm --nodeps --force
+```
+
+#### 1.3.使用 dnf 进行本地安装（推荐使用）
+```shell
+sudo dnf install ./libaio-*.rpm --assumeyes
+```
+
+#### 1.4.临时配置本地仓库
+```shell
+# 创建本地仓库目录
+sudo mkdir -p /tmp/localrepo
+
+# 复制 RPM 文件到本地仓库
+sudo cp libaio-*.rpm /tmp/localrepo/
+
+# 创建仓库元数据
+sudo createrepo /tmp/localrepo/
+
+# 创建仓库配置文件
+sudo tee /etc/yum.repos.d/local.repo << EOF
+[local]
+name=Local Repository
+baseurl=file:///tmp/localrepo
+enabled=1
+gpgcheck=0
+EOF
+```
+
+### 检查libaio rpm是否完整安装
+```shell
+ldconfig -p | grep libaio
+```
+
+### 注册Linux系统服务（基于systemd）
+
+#### 1.将python脚本注册为Linux系统服务的详细步骤（基于systemd）
+
+##### 1.1.新建service文件
+```shell
+sudo vim /etc/systemd/system/python_script.service
+```
+
+##### 1.2.编写服务配置（示例模板）
 ```
 [Unit]
 Description=My Python Service      # 服务描述
