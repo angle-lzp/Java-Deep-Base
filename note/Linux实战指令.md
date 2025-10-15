@@ -133,7 +133,7 @@ sudo shutdown -r now
 # 17.关机
 sudo shutdown -h now
 
-# 18查找文件中的指定内容
+# 18.查找文件中的指定内容
 # 1. 使用grep命令（推荐）
 grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
 
@@ -160,6 +160,18 @@ awk '/id=57b665c1-7044-3320-3e03-d31a1ac33db4/ {print}' a.txt
 cat a.txt | grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4"
 
 #最常用和推荐的是第一种方法，简单直接。如果需要更多上下文信息，可以使用带 -C、-B 或 -A 参数的grep命令。
+
+
+# 19.journalctl的使用
+
+# 查看服务执行的日志信息
+journalctl -u nifi.service --since "2 day ago"
+
+# 检查系统日志中的内存不足信息
+sudo journalctl -k --since "2025-10-12 08:30:00" --until "2025-10-12 08:35:00" | grep -i "oom\|memory"
+
+# 检查是否有进程被系统终止
+sudo journalctl --since "2025-10-12 08:30:00" --until "2025-10-12 08:35:00" | grep -i "kill\|terminate"
 
 ```
 ### 安装Oracle Instant Client
