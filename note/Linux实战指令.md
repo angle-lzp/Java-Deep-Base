@@ -89,7 +89,7 @@ openssl pkcs12 -export -in vnsiotdp01.crt -inkey vnsiotdp01.key -out nifi.p12 -n
 # 13.检查端口连通性
 telnet 127.0.0.1 1883
 或
-nc -vz 127.0.0.1 1883
+nc -vz 127.0.0.1 1883tel
 
 # 14.开发查看端口
 # 开放端口
