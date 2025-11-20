@@ -86,12 +86,8 @@ openssl req -newkey rsa:2048 -keyout cnsiotdp01.key -out cnsiotdp01.csr -config 
 # 生成PKCS12文件（按需执行，pkcs12用于Nifi中）
 openssl pkcs12 -export -in vnsiotdp01.crt -inkey vnsiotdp01.key -out nifi.p12 -name "nifi-cert" -password pass:Y87XcfEfuW0
 
-# 13.检查端口连通性
-telnet 127.0.0.1 1883
-或
-nc -vz 127.0.0.1 1883tel
 
-# 14.开发查看端口
+# 13.开发查看端口
 # 开放端口
 sudo firewall-cmd --permanent --add-port=18083/tcp
 sudo firewall-cmd --reload
@@ -113,9 +109,12 @@ sudo firewall-cmd --list-all --permanent
 sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --reload
 
+# 14.1.检查端口连通性
+telnet 127.0.0.1 1883
+或
+nc -vz 127.0.0.1 1883tel
 
-
-# 查看所有监听端口(系统级别)
+# 14.2.查看所有监听端口(系统级别)
 ss -tuln  # 比 netstat 更快更现代
 ss -tuln | grep 18083 # 单独查询某个端口被监听情况
 或
