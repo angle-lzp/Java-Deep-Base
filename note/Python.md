@@ -1,3 +1,22 @@
+## Python基础指令
+
+```shell
+# 1.显示Python版本
+python -V
+
+# 2.查看所有依赖和依赖版本
+pip list
+
+# 3.查看特定依赖版本
+pip show <package_name>
+pip show 
+
+# 4.查看包的详细信息
+pip show --verbose <package_name>
+pip show --verbose fastapi
+
+```
+
 ## Python开发实战
 
 ### 1.无网络情况下下载pip

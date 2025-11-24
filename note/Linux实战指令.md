@@ -110,16 +110,26 @@ sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --reload
 
 # 14.1.检查端口连通性
+# netcat（网络猫）
 telnet 127.0.0.1 1883
 或
 nc -vz 127.0.0.1 1883tel
 
+-v: verbose模式，显示详细信息
+-z: 扫描模式，只扫描端口而不发送数据
+
 # 14.2.查看所有监听端口(系统级别)
+# socket statistics（套接字统计）
 ss -tuln  # 比 netstat 更快更现代
 ss -tuln | grep 18083 # 单独查询某个端口被监听情况
 或
 netstat -tuln
 netstat -tuln | grep 18083  # 单独查询某个端口被监听情况
+
+-t: 显示TCP套接字
+-u: 显示UDP套接字
+-l: 仅显示监听状态的套接字
+-n: 不解析服务名称，直接显示端口号
 
 # 15.查询笔记本外部 IP(公网IP)
 curl ipinfo.io/ip
