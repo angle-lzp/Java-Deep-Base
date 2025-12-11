@@ -29,6 +29,7 @@ uptime
 who -b
 cat /proc/uptime
 last reboot | head -1
+last | grep reboot  
 
 # 9.查看主机名
 hostnamectl
@@ -113,7 +114,7 @@ sudo firewall-cmd --reload
 # netcat（网络猫）
 telnet 127.0.0.1 1883
 或
-nc -vz 127.0.0.1 1883tel
+nc -vz 127.0.0.1 1883
 
 -v: verbose模式，显示详细信息
 -z: 扫描模式，只扫描端口而不发送数据
@@ -180,8 +181,13 @@ journalctl -u nifi.service --since "2 day ago"
 sudo journalctl -k --since "2025-10-12 08:30:00" --until "2025-10-12 08:35:00" | grep -i "oom\|memory"
 
 # 检查是否有进程被系统终止
-sudo journalctl --since "2025-10-12 08:30:00" --until "2025-10-12 08:35:00" | grep -i "kill\|terminate"
+sudo journalctl --since "2025-11-23 08:30:00" --until "2025-12-10 08:35:00" | grep -i "kill\|terminate"
 
+# 查看 systemd 对该 unit 的完整 journal（包含 ExecStart stderr） -o：--output简写；cat：一种输出模式，提供简单日志条目视图，仅显示日志消息内容
+sudo journalctl -u nifi.service --since "2025-12-07 22:24:00" --until "2025-12-07 22:26:00" -o cat
+
+# 查看指定时间内的系统日志信息
+journalctl --since "2025-11-23" --until "2025-12-07
 ```
 ### 安装Oracle Instant Client
 
@@ -365,6 +371,9 @@ sudo systemctl daemon-reload
 
 # 4.启动服务和设置开机自启
 sudo systemctl enable python_script.service
+# 禁止服务自启
+sudo systemctl disable python_script.service
+# 启动服务
 sudo systemctl start python_script.service
 
 # 5.常用操作命令
