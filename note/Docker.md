@@ -145,7 +145,12 @@ docker top 容器ID
 docker inspect 容器ID
 ```
 
-* 以后台的方式进入ubuntu
+* 查看容器的资源使用情况
+```shell
+docker stats iot-fastapi-auth(容器名称或容器ID)
+```
+
+* 以后台的方式进入ubuntudocker inspect <container_name_or_id> | jq '.[0].NetworkSettings.IPAddress'
 
 ```shell
 docker run -d unbuntu
@@ -156,6 +161,20 @@ docker run -d unbuntu
 ```shell
 docker ps
 docker ps -a    #(查看所有的容器包括已经停止的容器)
+```
+
+* 查看容器的IP
+```shell
+# 信息简单
+docker inspect <container_name_or_id> | grep IPAddress
+
+# 使用 docker inspect 和 jq（详细）查看特定网络的 IP 地址
+docker inspect <container_name_or_id> | jq '.[0].NetworkSettings.Networks'
+
+# 在容器内部查看IP
+hostname -I
+# 或者
+ip addr show
 ```
 
 * 启动容器的options

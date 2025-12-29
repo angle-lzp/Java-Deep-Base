@@ -18,6 +18,11 @@ cat /etc/redhat-release
 # 5.查看处理器(cup)信息
 lscpu
 
+# 5.1在容器内部查看IP
+hostname -I
+# 5.2或者
+ip addr show
+
 # 6.查看物理磁盘大小信息（SIZE 列显示磁盘或分区的总大小；TYPE 列标识设备类型（disk 表示物理磁盘，part 表示分区））
 lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
 
@@ -478,4 +483,10 @@ source /etc/profile.d/java.sh
 # 10验证环境变量
 echo $JAVA_HOME
 echo $PATH
+
+# 验证用户环境变量
+cat ~/.bashrc
+
+# 使用户的环境变量配置生效
+source ~/.bashrc
 ```
