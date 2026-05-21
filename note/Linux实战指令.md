@@ -2,47 +2,67 @@
 
 ### 0.开发中常用指令
 
+#### 1.查询指定名称的RPM包(q：查询，a：所有的，-i：显示包的信息（如版本、安装时间、描述等），l：列出包安装的所有文件路径)
 ```shell
-# 1.查询指定名称的RPM包(q：查询，a：所有的，-i：显示包的信息（如版本、安装时间、描述等），l：列出包安装的所有文件路径)
 rpm -qa | grep -i python
+```
 
-# 2.显示系统信息
+#### 2.显示系统信息
+```shell
 uname -a
+```
 
-# 3.显示系统版本信息
+#### 3.显示系统版本信息
+```shell
 cat /etc/os-release
+```
 
-# 4.显示系统版本信息
+#### 4.显示系统版本信息
+```shell
 cat /etc/redhat-release
+```
 
-# 5.查看处理器(cup)信息
+#### 5.查看处理器(cup)信息
+```shell
 lscpu
 
 # 5.1在容器内部查看IP
 hostname -I
 # 5.2或者
 ip addr show
+```
 
-# 6.查看物理磁盘大小信息（SIZE 列显示磁盘或分区的总大小；TYPE 列标识设备类型（disk 表示物理磁盘，part 表示分区））
+#### 6.查看物理磁盘大小信息（SIZE 列显示磁盘或分区的总大小；TYPE 列标识设备类型（disk 表示物理磁盘，part 表示分区））
+```shell
 lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+```
 
-# 7.直接显示磁盘的物理总容量，无需挂载即可查看（但还是使用lsblk好使）
+#### 7.直接显示磁盘的物理总容量，无需挂载即可查看（但还是使用lsblk好使）
+```shell
 fdisk -l | grep Disk
+```
 
-# 8.查看系统启动时间
+#### 8.查看系统启动时间
+```shell
 uptime
 who -b
 cat /proc/uptime
 last reboot | head -1
 last | grep reboot  
+```
 
-# 9.查看主机名
+#### 9.查看主机名
+```shell
 hostnamectl
+```
 
-# 10.修改主机名
+#### 10.修改主机名
+```shell
 hostnamectl set-hostname your_hostname
+```
 
-# 11.查看文件或文件夹的创建、访问(cat、less)、修改(vim、echo)、状态改变时间(元数据改变如权限、所有权、文件名)内容变动
+#### 11.查看文件或文件夹的创建、访问(cat、less)、修改(vim、echo)、状态改变时间(元数据改变如权限、所有权、文件名)内容变动
+```shell
 # 访问时间
 stat
 ls -lu
@@ -57,11 +77,15 @@ ls -lc
 
 # 创建时间
 stat # 依赖文件系统支持
+```
 
-# 12.查看当前目录及子文件使用的总大小
+#### 12.查看当前目录及子文件使用的总大小
+```shell
 du -sh .  # du 表示磁盘使用情况;-s 表示汇总;-h 表示以易读格式（如 KB、MB、GB）显示大小;. 表示当前目录
+```
 
-# CSR文件生成
+#### CSR文件生成
+```shell
 # 方式一：需要手动输入后面的值
 openssl req -new -newkey rsa:2048 -nodes -keyout server.key -out server.csr
 
@@ -91,9 +115,11 @@ openssl req -newkey rsa:2048 -keyout cnsiotdp01.key -out cnsiotdp01.csr -config 
 
 # 生成PKCS12文件（按需执行，pkcs12用于Nifi中）
 openssl pkcs12 -export -in vnsiotdp01.crt -inkey vnsiotdp01.key -out nifi.p12 -name "nifi-cert" -password pass:Y87XcfEfuW0
+```
 
 
-# 13.开发查看端口
+#### 13.开发查看端口
+```shell
 # 开放端口
 sudo firewall-cmd --permanent --add-port=18083/tcp
 sudo firewall-cmd --reload
@@ -114,8 +140,10 @@ sudo firewall-cmd --list-all --permanent
 # 开放预定义服务（如果存在）
 sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --reload
+```
 
-# 14.1.检查端口连通性
+#### 14.1.检查端口连通性
+```shell
 # netcat（网络猫）
 telnet 127.0.0.1 1883
 或
@@ -123,8 +151,10 @@ nc -vz 127.0.0.1 1883
 
 -v: verbose模式，显示详细信息
 -z: 扫描模式，只扫描端口而不发送数据
+```
 
-# 14.2.查看所有监听端口(系统级别)
+#### 14.2.查看所有监听端口(系统级别)
+```shell
 # socket statistics（套接字统计）
 ss -tuln  # 比 netstat 更快更现代
 ss -tuln | grep 18083 # 单独查询某个端口被监听情况
@@ -136,19 +166,27 @@ netstat -tuln | grep 18083  # 单独查询某个端口被监听情况
 -u: 显示UDP套接字
 -l: 仅显示监听状态的套接字
 -n: 不解析服务名称，直接显示端口号
+```
 
-# 15.查询笔记本外部 IP(公网IP)
+#### 15.查询笔记本外部 IP(公网IP)
+```shell
 curl ipinfo.io/ip
 或
 curl ifconfig.me
+```
 
-# 16.重启
+#### 16.重启
+```shell
 sudo shutdown -r now
+```
 
-# 17.关机
+#### 17.关机
+```shell
 sudo shutdown -h now
+```
 
-# 18.查找文件中的指定内容
+#### 18.查找文件中的指定内容
+```shell
 # 1. 使用grep命令（推荐）
 grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4" a.txt
 
@@ -175,9 +213,12 @@ awk '/id=57b665c1-7044-3320-3e03-d31a1ac33db4/ {print}' a.txt
 cat a.txt | grep "id=57b665c1-7044-3320-3e03-d31a1ac33db4"
 
 #最常用和推荐的是第一种方法，简单直接。如果需要更多上下文信息，可以使用带 -C、-B 或 -A 参数的grep命令。
+```
 
-
-# 19.journalctl的使用
+#### 19.journalctl的使用
+```shell
+# 实时查看日志
+sudo journalctl -u your_script.service -f  # 类似tail -f
 
 # 查看服务执行的日志信息
 journalctl -u nifi.service --since "2 day ago"
@@ -194,6 +235,30 @@ sudo journalctl -u nifi.service --since "2025-12-07 22:24:00" --until "2025-12-0
 # 查看指定时间内的系统日志信息
 journalctl --since "2025-11-23" --until "2025-12-07
 ```
+
+#### 20.删除当前目录下除了a.txt和abc文件的所有文件
+```shell
+find . -mindepth 1 -maxdepth 1 \( ! -name "dist.zip" ! -name "dist_2" ! -name "dist.zip.2" \) -exec rm -rf {} +
+```
+
+#### 21.查看服务器重启情况
+```shell
+last reboot
+```
+
+#### 22.图形化界面切换
+```shell
+sudo systemctl set-default multi-user.target  # 切换到纯命令行模式
+sudo reboot
+
+sudo systemctl isolate multi-user.target  # 立即切换到命令行界面（会话保持）
+
+sudo systemctl set-default graphical.target # 切换到图形界面模式
+sudo reboot
+
+sudo systemctl start graphical.target # 立即切换到图形界面
+```
+
 ### 安装Oracle Instant Client
 
 #### 1.创建目录
