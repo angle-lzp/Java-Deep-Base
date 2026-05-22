@@ -259,6 +259,15 @@ sudo reboot
 sudo systemctl start graphical.target # 立即切换到图形界面
 ```
 
+#### 23.统计当前目录下文件个数
+```shell
+# 递归统计当前目录及其子目录下所有普通文件个数
+find . -type f | wc -l
+
+# 若需包含隐藏文件，find 默认会包含（因为 . 包括隐藏目录）。如果不想递归子目录，加 -maxdepth 1
+find . -maxdepth 1 -type f | wc -l
+```
+
 ### 安装Oracle Instant Client
 
 #### 1.创建目录
