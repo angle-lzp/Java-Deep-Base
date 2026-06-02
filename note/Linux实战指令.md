@@ -44,11 +44,27 @@ fdisk -l | grep Disk
 
 #### 8.查看系统启动时间
 ```shell
-uptime
+# 显示具体启动时间点
+uptime  
+
+# 显示系统启动时间（最简洁、直接）
 who -b
-cat /proc/uptime
+
+cat /proc/uptime  
+
 last reboot | head -1
+
 last | grep reboot  
+
+# 列出所有启动会话（能看到更多历史重启点）
+journalctl --list-boots
+
+# IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY                 
+#   0 f7ac3bf49caf462ca41fb97eaf5165b3 Tue 2026-06-02 00:39:26 +07 Tue 2026-06-02 13:34:57 +07
+# 时间范围：这次启动是从 2026-06-02 00:39:26 开始，一直持续到你查询的时间 13:34:57（且仍在运行中，因为 IDX 是 0，代表当前会话）。
+
+# 查看指定时间段内的重启日志
+journalctl --since "2025-01-01" | grep "reboot"
 ```
 
 #### 9.查看主机名
