@@ -284,6 +284,39 @@ find . -type f | wc -l
 find . -maxdepth 1 -type f | wc -l
 ```
 
+#### 24.切换wifi
+```shell
+# 如果WiFi隐藏
+nmcli dev wifi connect "TTiDG-EM" password "123456" hidden yes
+
+# 如果WiFi不隐藏
+nmcli dev wifi connect "TTiDG-EM" password "123456"
+
+# 如果显示NOT FOUND
+# 第一步：打开WiFi
+nmcli radio wifi on
+
+# 第二步：重新扫描WiFi
+nmcli dev wifi rescan
+
+# 第三步：显示WiFi列表
+nmcli dev wifi list 
+
+# 第四步：连接WiFi
+nmcli dev wifi connect "TTiDG-EM" password "123456"
+```
+
+#### 25.查看WiFi密码
+```shell
+sudo nmcli connection show "你的WiFi名称" --show-secrets | grep psk
+```
+
+#### 26.通过systemctl status查看服务不进行分页
+```shell
+sudo systemctl status docker --no-pager
+# 在安装文档或脚本里常用 --no-pager，因为它更适合复制命令、记录日志、自动化执行，不会卡在分页界面等待你按 q
+```
+
 ### 安装Oracle Instant Client
 
 #### 1.创建目录

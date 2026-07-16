@@ -383,16 +383,23 @@ docker pull 127.0.0.1:5000/newUbuntu:1.3.4
 docker run -d -p 8898:8898 --privileged=true -v /home/making/data:/etc/data:ro ubuntu
 ```
 
-* 容器卷的继承
-
+* 查看Docker的数据目录
 ```shell
-#1，首先创建一个父类容器卷挂载，以ubuntu为例
-docker run -d -p --privileged=true 8989:8989 -v /home/making/data:/etc/data --name u1 ubuntu
+docker info | grep "Docker Root Dir"
+```
 
-#2，再创建一个子类容器卷继承父类容器卷
-docker run -d -p --privileged=true 8899:8899 --volumes-from u1 --name u2 ubuntu
+* 新增用户给用户设置管理员权限
+```shell
+sudo adduser williamphan
 
-#我们之前创建了u1 ubuntu，相当于用来备份的硬盘A，现在我们又创建了u2 ubuntu硬盘B，继承自硬盘A，哪怕A挂了，B照样能同步数据，等硬盘A复活，A照样有挂掉这期间的数据，相当于一主二从。
+# 确认是否有管理员权限
+groups williamphan
+
+# 设置管理员权限
+sudo usermod -aG sudo williamphan
+
+# 移除管理员权限
+sudo deluser williamphan sudo
 ```
 
 ### 2.实战操作
