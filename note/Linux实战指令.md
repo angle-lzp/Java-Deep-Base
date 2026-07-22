@@ -317,6 +317,20 @@ sudo systemctl status docker --no-pager
 # 在安装文档或脚本里常用 --no-pager，因为它更适合复制命令、记录日志、自动化执行，不会卡在分页界面等待你按 q
 ```
 
+#### 27.新增用户给用户设置管理员权限
+```shell
+sudo adduser williamphan
+
+# 确认是否有管理员权限
+groups williamphan
+
+# 设置管理员权限
+sudo usermod -aG sudo williamphan
+
+# 移除管理员权限
+sudo deluser williamphan sudo
+```
+
 ### 安装Oracle Instant Client
 
 #### 1.创建目录
