@@ -1,3 +1,9 @@
+<!--
+ * @Author: Angelo
+ * @Date: 2025-09-10 16:22:29
+ * @version: 
+ * @Descripttion: 
+-->
 ## Python基础指令
 
 ```shell
@@ -50,6 +56,84 @@ source venv/bin/activate
 
 步骤 4：安装缺失的 paho-mqtt 库
 pip3 install paho-mqtt
+```
+
+### 2.AGX Orin安装ultralytics相关依赖运行Yolo，同时使用设备GPU
+
+#### 1. 创建虚拟环境，包冲突 
+```shell
+# 创建虚拟环境（会使用系统包）
+python3 -m venv --system-site-packages /opt/venvs/python_env
+
+# 虚拟环境卸载的包（opencv-python-headless和opencv-contrib-python不存在）
+python -m pip uninstall -y \
+  opencv-python \
+  opencv-python-headless \
+  opencv-contrib-python
+
+# 包降级 NumPy 2.5.1 -> 1.26.4（因为当前虚拟环境的numpy和主机的Matplotlib会继续版本冲突）
+python -m pip install \
+  --force-reinstall \
+  "numpy==1.26.4"
+```
+
+#### 2.离线安装torch
+```shell
+# 保留当前环境快照
+python -m pip freeze > /tmp/python_env_before_torch_change.txt
+
+# 应该可以在虚拟环境中回滚上一个版本
+
+# 手动安装包（适配Jetpack7.2）
+# 下载地址：https://github.com/Shattered217/Jetson-Orin-Wheels
+torch-2.12.0-cp312-cp312-linux_aarch64.whl 
+torchvision-0.27.0+78839c2-cp312-cp312-linux_aarch64.whl
+
+# 执行指令
+python -m pip install \
+  /opt/packages/torch-2.12.0-cp312-cp312-linux_aarch64.whl
+
+
+python -m pip install \
+  "/opt/packages/torchvision-0.27.0+78839c2-cp312-cp312-linux_aarch64.whl"
+
+
+# 验证是否可以使用GPU，是否适配当前AGX Orin Jetpack7.2 sm_8.7
+python - <<'PY'
+import torch
+import torch.nn as nn
+
+assert torch.cuda.is_available(), "CUDA unavailable"
+
+print("GPU:", torch.cuda.get_device_name(0))
+print("Capability:", torch.cuda.get_device_capability(0))
+print("Architectures:", torch.cuda.get_arch_list())
+
+model = nn.Sequential(
+    nn.Conv2d(3, 32, kernel_size=3, padding=1),
+    nn.ReLU(),
+    nn.MaxPool2d(2),
+    nn.Conv2d(32, 64, kernel_size=3, padding=1),
+    nn.ReLU(),
+).cuda().eval()
+
+x = torch.randn(1, 3, 640, 640, device="cuda")
+
+with torch.inference_mode():
+    y = model(x)
+
+torch.cuda.synchronize()
+
+print("Convolution test OK")
+print("Output shape:", y.shape)
+print("Output device:", y.device)
+PY
+
+
+# output is ok
+Convolution test OK
+Output device: cuda:0
+
 ```
 
 ## Python开发实战

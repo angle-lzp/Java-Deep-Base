@@ -1,3 +1,9 @@
+<!--
+ * @Author: Angelo
+ * @Date: 2026-03-12 11:49:02
+ * @version: 
+ * @Descripttion: 
+-->
 ### 训练步骤
 * 1.train       训练
 * 2.test        测试
@@ -7,12 +13,12 @@
 ```shell
 # 在 YOLO 的分类任务中，data 参数不需要 .yaml 配置文件，而是直接指向数据集的根目录。
 # YOLO 会自动根据目录结构（即您提供的 train/empty, train/occupied 等）来识别类别。
-# 分类模型训练
+# 分类模型训练（使用CPU训练）
 yolo classify train \
     model=yolo11s-cls.pt \
-    data=dock_cls.yaml \
+    data=/home/jeffzhou/apps/dock_cls_project_yolo11s/dock_cls_dataset \
     epochs=100 \
-    imgsz=640 \
+    imgsz=384 \
     batch=16 \
     workers=4 \
     device=cpu \
@@ -21,6 +27,23 @@ yolo classify train \
     patience=10 \
     optimizer=AdamW \
     lr0=0.001
+
+
+# 分类模型训练（使用GPU训练）- 离线训练建议的指令
+yolo classify train \
+    model=/home/jeffzhou/apps/dock_yolo11s_train/yolo11s-cls.pt \
+    data=/home/jeffzhou/apps/dock_yolo11s_train/dock_cls_dataset \
+    epochs=100 \
+    imgsz=384 \
+    batch=16 \
+    workers=4 \
+    device=0 \
+    project=./ \
+    name=dock_gpu_v1 \
+    patience=30 \
+    optimizer=AdamW \
+    lr0=0.001
+    amp=False
 
 # 参数详解：
 #         model=yolo11s-cls.pt: 指定使用 YOLO11s 分类模型。如果本地没有，它会自动下载。
@@ -31,6 +54,11 @@ yolo classify train \
 #         workers=8: 数据加载线程数。
 #         patience=10: 早停机制，如果验证集指标 10 个 epoch 没提升则停止。
 #         optimizer=AdamW: 优化器，分类任务常用。
+#         lr0=0.001: 初始学习率。
+#         project=./runs/classify: 训练结果保存路径。
+#         name=dock_v1: 训练结果保存的文件夹名称。
+#         device=0: 使用 GPU 训练。
+#         amp=False: 是否使用自动混合精度训练。（false就不会连接网络进行AMP兼容性检查，适合无网训练）
 
 # 分类模型测试
 yolo classify predict model=./runs/classify/dock_v1/weights/best.pt source=path/to/your/image.jpg
