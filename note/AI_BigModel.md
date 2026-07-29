@@ -30,20 +30,38 @@ yolo classify train \
 
 
 # 分类模型训练（使用GPU训练）- 离线训练建议的指令
+# 针对现在“有 GPU、但没有网络”的情况，建议用下面这条离线训练命令：
 yolo classify train \
-    model=/home/jeffzhou/apps/dock_yolo11s_train/yolo11s-cls.pt \
-    data=/home/jeffzhou/apps/dock_yolo11s_train/dock_cls_dataset \
-    epochs=100 \
-    imgsz=384 \
-    batch=16 \
-    workers=4 \
-    device=0 \
-    project=./ \
-    name=dock_gpu_v1 \
-    patience=30 \
-    optimizer=AdamW \
-    lr0=0.001
-    amp=False
+  model=/home/jeffzhou/apps/dock_yolo11s_train/yolo11s-cls.pt \
+  data=/home/jeffzhou/apps/dock_yolo11s_train/dock_cls_dataset \
+  epochs=100 \
+  imgsz=384 \
+  batch=32 \
+  workers=6 \
+  device=0 \
+  project=./ \
+  name=dock_gpu_v0729 \
+  patience=30 \
+  optimizer=AdamW \
+  lr0=0.001 \
+  amp=False
+
+# 如果你想让它更“稳妥”一点，尤其是离线环境，建议再加上：cache=False
+yolo classify train \
+  model=/home/jeffzhou/apps/dock_yolo11s_train/yolo11s-cls.pt \
+  data=/home/jeffzhou/apps/dock_yolo11s_train/dock_cls_dataset \
+  epochs=100 \
+  imgsz=384 \
+  batch=32 \
+  workers=6 \
+  device=0 \
+  project=./ \
+  name=dock_gpu_v072902 \
+  patience=30 \
+  optimizer=AdamW \
+  lr0=0.001 \
+  amp=False \
+  cache=False
 
 # 参数详解：
 #         model=yolo11s-cls.pt: 指定使用 YOLO11s 分类模型。如果本地没有，它会自动下载。

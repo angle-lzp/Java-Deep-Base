@@ -47,15 +47,18 @@ python dock_occupancy.py
 sudo apt update
 sudo apt install -y python3.12-venv python3-pip
 
-步骤 2：重新创建虚拟环境
+# 步骤 2：重新创建虚拟环境
 python3 -m venv venv
 
-步骤 3：激活虚拟环境
+# 步骤 3：激活虚拟环境
 source venv/bin/activate
-激活成功后终端前缀会出现 (venv) 标识。
+# 激活成功后终端前缀会出现 (venv) 标识。
 
-步骤 4：安装缺失的 paho-mqtt 库
+# 步骤 4：安装缺失的 paho-mqtt 库
 pip3 install paho-mqtt
+
+# 退出虚拟环境
+deactivate
 ```
 
 ### 2.AGX Orin安装ultralytics相关依赖运行Yolo，同时使用设备GPU
@@ -64,6 +67,9 @@ pip3 install paho-mqtt
 ```shell
 # 创建虚拟环境（会使用系统包）
 python3 -m venv --system-site-packages /opt/venvs/python_env
+
+# 启动虚拟环境
+source /opt/venvs/python_env/bin/activate
 
 # 虚拟环境卸载的包（opencv-python-headless和opencv-contrib-python不存在）
 python -m pip uninstall -y \
