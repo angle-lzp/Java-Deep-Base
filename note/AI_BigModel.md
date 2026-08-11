@@ -49,14 +49,14 @@ yolo classify train \
 # 如果你想让它更“稳妥”一点，尤其是离线环境，建议再加上：cache=False
 yolo classify train \
   model=/home/jeffzhou/apps/dock_yolo11s_train/yolo11s-cls.pt \
-  data=/home/jeffzhou/apps/dock_yolo11s_train/dock_cls_dataset \
+  data=/home/jeffzhou/apps/dock_yolo11s_train/train0730/dock_cls_dataset \
   epochs=100 \
   imgsz=384 \
   batch=32 \
   workers=6 \
   device=0 \
   project=./ \
-  name=dock_gpu_v072902 \
+  name=dock_gpu_v0730 \
   patience=30 \
   optimizer=AdamW \
   lr0=0.001 \

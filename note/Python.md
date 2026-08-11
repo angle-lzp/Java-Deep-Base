@@ -4,8 +4,9 @@
  * @version: 
  * @Descripttion: 
 -->
-## Python基础指令
+## 1.Python基础指令
 
+### 1.查看Python版本
 ```shell
 # 1.显示Python版本
 python -V
@@ -22,6 +23,14 @@ pip show --verbose <package_name>
 pip show --verbose fastapi
 
 ```
+### 2.记录当前依赖版本
+```shell
+pip3 freeze > requirements_backup.txt
+# 同理
+pip freeze > requirements_backup.txt
+```
+
+## 2.Python实操
 
 ### 1.Python创建虚拟环境
 ```shell
