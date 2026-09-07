@@ -116,3 +116,4 @@
 :set number       " 显示绝对行号
 :set nu           " 简写
 :set nonumber     " 关闭行号
+:set nonu         " 简写

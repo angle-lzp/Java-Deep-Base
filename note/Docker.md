@@ -194,10 +194,64 @@ ip addr show
 
 ```
 
-* 以前台交互方式进入ubuntu
+* docker run 的三种常见启动方式
 
 ```shell
-docker run -it ubuntu /bin/bash
+# 1. 前台运行容器
+# 容器启动后直接占用当前终端，日志会直接输出到终端。
+# 只要容器的主进程还在运行，容器就不会退出；按 Ctrl+C 通常会停止容器。
+docker run --name my-nginx -p 8080:80 nginx
+
+# 2. 后台运行容器
+# -d 表示 detached mode，容器在后台运行，命令执行后返回容器ID。
+# 适合 nginx、mysql、redis 这类长期运行的服务。
+docker run -d --name my-nginx -p 8080:80 nginx
+
+# 3. 进入可交互界面运行容器
+# -i 保持标准输入打开，-t 分配一个伪终端。
+# 通常用于进入 ubuntu、centos 这类系统镜像的 shell 环境。
+docker run -it --name my-ubuntu ubuntu /bin/bash
+
+# 4. 一次性运行容器，退出后自动删除
+# --rm 表示容器停止后自动删除容器记录，适合临时测试命令。
+docker run --rm ubuntu cat /etc/os-release
+
+# 5. 后台运行，并设置容器自动重启
+# --restart=always 表示 Docker 启动后自动拉起该容器，容器异常退出也会重启。
+docker run -d --restart=always --name my-nginx -p 8080:80 nginx
+
+# 6. 启动时传入环境变量
+# -e 用于设置容器内的环境变量，常用于 MySQL、Redis、应用服务配置。
+docker run -d --name mysql5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
+
+# 7. 启动时挂载目录或文件
+# -v 主机路径:容器路径，将主机目录挂载到容器内，常用于保存数据和配置文件。
+docker run -d --name my-nginx -p 8080:80 -v /home/making/html:/usr/share/nginx/html nginx
+
+# 8. 指定容器网络
+# --network 用于指定容器加入哪个 Docker 网络，多个容器之间可以通过容器名通信。
+docker run -d --name my-nginx --network my-net nginx
+
+# 9. 使用宿主机网络模式
+# --network host 表示容器直接使用宿主机网络，不再使用 -p 做端口映射。Linux 上常用。
+docker run -d --name my-nginx --network host nginx
+
+# 10. 指定容器启动后执行的命令
+# 镜像名后面的内容会覆盖镜像默认启动命令。
+docker run --rm ubuntu echo "hello docker"
+```
+
+```text
+前台运行：适合临时查看容器启动日志、调试服务启动过程。当前终端会被容器占用。
+后台运行：适合正式启动长期服务。容器在后台运行，可以用 docker logs、docker exec 查看或进入。
+交互式运行：适合进入容器内部执行命令。退出 shell 时，如果 shell 是容器主进程，容器通常也会停止。
+一次性运行：适合临时执行命令或测试镜像，配合 --rm 可以避免产生很多已停止的容器。
+自动重启：适合希望服务随 Docker 自动启动，或者异常退出后自动恢复的场景。
+环境变量：适合在启动时传入密码、端口、运行环境等配置。
+挂载目录：适合保存数据库数据、服务配置、静态文件，避免容器删除后数据丢失。
+指定网络：适合多个容器组成一套服务，例如 Web 服务连接 MySQL、Redis。
+宿主机网络：适合需要直接使用宿主机端口和网络的场景，但容器网络隔离会变弱。
+指定命令：适合临时覆盖镜像默认启动命令，执行完命令后容器通常就会退出。
 ```
 
 * 退出容器，但不停止容器
@@ -217,6 +271,41 @@ docker exec -it 容器ID /bin/bash #（推荐）
 ```text
 方式一：docker exec -it 容器ID /bin/bash 会在容器中启动一个新的进程，并且可以启动新的进程，用exit退出，容器不会停止。
 方式二：docker attach 容器ID 直接进入容器启动的命令终端，不会启动新进行，用exit退出，容器会停止。
+```
+
+* 使用 docker exec -it 在宿主机执行容器内命令
+
+```shell
+# 基本格式
+docker exec -it 容器ID或容器名称 容器内命令 参数
+
+# 进入容器的 bash 交互界面
+docker exec -it my-ubuntu /bin/bash
+
+# 如果容器内没有 bash，可以使用 sh
+docker exec -it my-ubuntu /bin/sh
+
+# 不进入容器，直接在宿主机执行容器内命令
+docker exec -it my-ubuntu ls /app
+
+# 查看容器内系统版本
+docker exec -it my-ubuntu cat /etc/os-release
+
+# 查看容器内当前用户
+docker exec -it my-ubuntu whoami
+
+# 进入 Redis 客户端
+docker exec -it redis6.0.8 redis-cli
+
+# 进入 MySQL 客户端
+docker exec -it mysql5.7 mysql -uroot -p123456
+```
+
+```text
+进入交互界面：docker exec -it 容器ID /bin/bash，适合进入容器后连续执行多条命令。
+直接执行命令：docker exec -it 容器ID 命令 参数，适合只执行一条命令，不需要进入容器 shell。
+区别：两者都是在已经运行的容器中新建进程，不会像 docker attach 一样附着到容器主进程。
+注意：如果只是执行普通命令，不需要交互输入，可以省略 -it，例如 docker exec my-ubuntu ls /app。
 ```
 
 * 从容器内拷贝文件到主机

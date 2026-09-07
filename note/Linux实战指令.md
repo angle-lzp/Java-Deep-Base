@@ -331,6 +331,22 @@ sudo usermod -aG sudo williamphan
 sudo deluser williamphan sudo
 ```
 
+#### 28.手动同步系统时间（无网的情况下）
+```shell
+# 关闭自动时间同步
+sudo timedatectl set-ntp false
+
+# 手动设置时间
+sudo timedatectl set-time "2026-08-31 13:13:07"
+
+# 将当前系统时间写入RTC
+sudo hwclock --systohc
+
+# 查看时间是否生效
+timedatectl
+sudo hwclock --show
+```
+
 ### 安装Oracle Instant Client
 
 #### 1.创建目录
