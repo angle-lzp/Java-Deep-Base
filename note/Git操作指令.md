@@ -40,6 +40,21 @@
     - [2.11 处理远程已有 initial commit](#211-处理远程已有-initial-commit)
     - [2.12 常见连接和权限错误](#212-常见连接和权限错误)
     - [2.13 完整执行示例](#213-完整执行示例)
+- [3. 实战案例2：Commit 回滚操作指南](#3-git-commit-回滚操作指南)
+    - [3.1 场景说明](#31-场景说明)
+    - [3.2 撤销 Commit，但保留暂存区（推荐）](#32-撤销-commit但保留暂存区推荐)
+    - [3.3 撤销-commit并取消暂存保留代码](#33-撤销-commit并取消暂存保留代码)        
+    - [3.4 撤销 Commit 并删除所有修改（危险操作）](#34-撤销-commit-并删除所有修改危险操作)
+    - [3.5 已 Push 到远程仓库后的回滚](#35-已-push-到远程仓库后的回滚)
+    - [3.3 撤销-commit并取消暂存保留代码](#33-撤销-commit并取消暂存保留代码)
+    - [3.6 方法一：使用 Revert 回滚（推荐）](#36-方法一使用-revert-回滚推荐)
+    - [3.7 方法二：强制删除远程 Commit（谨慎）](#37-方法二强制删除远程-commit谨慎)
+    - [3.8 查看提交记录](#38-查看提交记录)
+    - [3.9 回退到指定 Commit](#39-回退到指定-commit)
+    - [3.10 HEAD 说明](#310-head-说明)
+    - [3.11 常用命令速查](#311-常用命令速查)
+    - [3.12 推荐使用方式](#312-推荐使用方式)
+    - [3.13 Git 回滚原理示意图](#313-git-回滚原理示意图)
 
 目标组织仓库地址：
 
@@ -872,280 +887,289 @@ git push -u origin main
 - 如果 `git fetch origin` 失败，先解决账号、权限或 SSO 问题，再继续推送。
 - 如果远程已有独立提交，按照第 2.11 节处理，不要直接强制推送。
 
-## 3.实战项目：Git 撤销 Commit 指南
+## 3. Git Commit 回滚操作指南
 
-本文说明如何撤销已经执行的 `git commit`。
+### 3.1 场景说明
 
-> ⚠️ 本文适用于 **尚未 Push 到远程仓库（GitHub/GitLab）** 的情况。
-
----
-
-## 场景说明
-
-假设刚刚执行了：
+当执行以下命令后：
 
 ```bash
-git add .
-git commit -m "Initial commit"
+git commit -m "提交说明"
 ```
 
-现在发现：
+发现本次提交存在问题，例如：
 
-- Commit 信息写错了
-- 提交了不应该提交的文件
-- 想重新整理后再提交
+- Commit 信息填写错误
+- 漏提交文件
+- 提交了错误文件
+- 代码需要继续修改
+- 需要彻底撤销本次修改
 
-可以根据实际需求选择下面的方法。
+此时可以根据实际情况选择不同的回滚方式。
 
 ---
 
-### 方法一：撤销 Commit，但保留已暂存状态（推荐）
+### 3.2 撤销 Commit，但保留暂存区（推荐）
 
-#### 命令
+#### 3.2.1 使用场景
+
+适用于：
+
+- Commit 信息写错
+- 漏提交文件
+- 需要重新提交
+
+#### 3.2.2 操作命令
 
 ```bash
 git reset --soft HEAD~1
 ```
 
-#### 效果
-
-撤销：
-
-```bash
-git commit
-```
-
-保留：
-
-```bash
-git add
-```
+#### 3.2.3 执行效果
 
 执行后：
 
 ```text
-Commit 被删除
-文件仍然处于 Staged 状态
+√ Commit 被删除
+√ 代码保留
+√ 暂存区保留
 ```
 
-相当于回到了：
-
-```bash
-git add .
-```
-
-之后的状态。
-
----
-
-#### 示例
-
-执行前：
-
-```text
-Changes
-↓
-git add .
-↓
-git commit
-```
-
-执行：
-
-```bash
-git reset --soft HEAD~1
-```
-
-执行后：
-
-```text
-Changes
-↓
-git add .
-```
-
-可以重新提交：
-
-```bash
-git commit -m "New Commit Message"
-```
-
----
-
-#### 查看状态
+当前状态：
 
 ```bash
 git status
 ```
 
-结果类似：
+输出类似：
 
 ```text
-Changes to be committed:
+Changes to be committed
 ```
 
-说明文件仍然在暂存区。
+#### 3.2.4 重新提交
+
+```bash
+git commit -m "新的提交说明"
+```
 
 ---
 
-### 方法二：撤销 Commit 和 Add，但保留代码修改
+### 3.3 撤销 Commit，并取消暂存（保留代码）
 
-#### 命令
+#### 3.3.1 使用场景
+
+适用于：
+
+- 想重新选择提交文件
+- 想重新执行 git add
+- 修改部分文件后重新提交
+
+#### 3.3.2 操作命令
 
 ```bash
 git reset HEAD~1
 ```
 
-或
+或：
 
 ```bash
 git reset --mixed HEAD~1
 ```
 
----
-
-#### 效果
-
-撤销：
-
-```bash
-git commit
-git add
-```
-
-保留：
-
-```text
-本地代码修改
-```
+#### 3.3.3 执行效果
 
 执行后：
 
 ```text
-Commit 被删除
-暂存区被清空
-代码修改仍然存在
+√ Commit 被删除
+√ 代码保留
+√ 暂存区清空
 ```
 
----
-
-#### 示例
-
-执行前：
-
-```text
-Changes
-↓
-git add .
-↓
-git commit
-```
-
-执行：
-
-```bash
-git reset HEAD~1
-```
-
-执行后：
-
-```text
-Changes
-```
-
-回到最初修改文件但尚未 add 的状态。
-
----
-
-#### 查看状态
+查看状态：
 
 ```bash
 git status
 ```
 
-结果类似：
+输出类似：
 
 ```text
-modified:
+Changes not staged for commit
 ```
 
-说明文件只保留了修改内容。
-
----
-
-### 方法三：彻底删除 Commit 和代码修改（危险）
-
-#### 命令
+#### 3.3.4 重新提交
 
 ```bash
-git reset --hard HEAD~1
-```
-
----
-
-#### 效果
-
-撤销：
-
-```bash
-git commit
-git add
-代码修改
-```
-
-执行后：
-
-```text
-Commit 被删除
-暂存区清空
-代码修改被删除
-```
-
----
-
-#### 示例
-
-执行前：
-
-```text
-Changes
-↓
 git add .
-↓
-git commit
+git commit -m "新的提交说明"
 ```
 
-执行：
+---
+
+### 3.4 撤销 Commit 并删除所有修改（危险操作）
+
+#### 3.4.1 使用场景
+
+适用于：
+
+- 本次提交完全不要
+- 代码修改全部丢弃
+- 需要恢复到提交前状态
+
+#### 3.4.2 操作命令
 
 ```bash
 git reset --hard HEAD~1
 ```
 
+#### 3.4.3 执行效果
+
 执行后：
 
 ```text
-回到上一个 Commit 状态
+√ Commit 被删除
+√ 代码被删除
+√ 暂存区清空
 ```
 
-所有未提交修改都会丢失。
+#### 3.4.4 注意事项
 
----
+⚠️ 此操作不可恢复。
 
-#### 注意事项
-
-⚠️ 此操作不可恢复（除非通过 reflog 找回）。
-
-执行前建议确认：
+执行前建议先查看提交记录：
 
 ```bash
-git status
+git log --oneline
 ```
 
 ---
 
-### 特殊情况：仓库只有一次 Commit
+### 3.5 已 Push 到远程仓库后的回滚
 
-查看提交：
+#### 3.5.1 场景说明
+
+如果已经执行：
+
+```bash
+git push origin main
+```
+
+说明提交已经同步至远程仓库。
+
+此时推荐使用以下两种方式。
+
+---
+
+### 3.6 方法一：使用 Revert 回滚（推荐）
+
+#### 3.6.1 使用场景
+
+适用于：
+
+- 已 Push 到远程仓库
+- 团队协作项目
+- 不想破坏提交历史
+
+#### 3.6.2 操作命令
+
+```bash
+git revert HEAD
+```
+
+然后推送：
+
+```bash
+git push origin main
+```
+
+#### 3.6.3 执行效果
+
+Git 会自动创建一个新的反向提交：
+
+```text
+Commit A
+↓
+Commit B（用于撤销 Commit A）
+```
+
+#### 3.6.4 优点
+
+```text
+√ 不修改提交历史
+√ 团队协作安全
+√ Git 官方推荐
+```
+
+---
+
+### 3.7 方法二：强制删除远程 Commit（谨慎）
+
+#### 3.7.1 使用场景
+
+适用于：
+
+- 个人项目
+- 尚未有人拉取代码
+- 需要完全删除该提交
+
+#### 3.7.2 回退本地提交
+
+```bash
+git reset --hard HEAD~1
+```
+
+#### 3.7.3 强制推送到远程
+
+```bash
+git push --force origin main
+```
+
+推荐更安全方式：
+
+```bash
+git push --force-with-lease origin main
+```
+
+#### 3.7.4 注意事项
+
+⚠️ 不推荐在以下场景使用：
+
+- Main 分支
+- Master 分支
+- 多人协作项目
+- 已被其他成员同步的提交
+
+---
+
+### 3.8 查看提交记录
+
+#### 3.8.1 查看最近 5 条提交
+
+```bash
+git log --oneline -5
+```
+
+输出示例：
+
+```text
+3f8a2c1 Fix login bug
+8d7e5f2 Update README
+6b3c4d5 Initial Commit
+```
+
+#### 3.8.2 查看完整提交记录
+
+```bash
+git log
+```
+
+---
+
+### 3.9 回退到指定 Commit
+
+#### 3.9.1 查看 Commit ID
 
 ```bash
 git log --oneline
@@ -1154,13 +1178,126 @@ git log --oneline
 例如：
 
 ```text
-8a5f2d1 Initial commit
+3f8a2c1 Fix login bug
+8d7e5f2 Update README
+6b3c4d5 Initial Commit
 ```
 
-如果这是仓库的第一次提交：
+#### 3.9.2 保留代码回退
+
+```bash
+git reset --soft 8d7e5f2
+```
+
+#### 3.9.3 删除代码回退
+
+```bash
+git reset --hard 8d7e5f2
+```
+
+---
+
+### 3.10 HEAD 说明
+
+#### 3.10.1 HEAD 含义
 
 ```text
-没有 HEAD~1
+HEAD       当前提交
+HEAD~1     上一次提交
+HEAD~2     上两次提交
+HEAD~3     上三次提交
+```
+
+#### 3.10.2 示例
+
+撤销最近两次提交：
+
+```bash
+git reset --soft HEAD~2
+```
+
+撤销最近三次提交：
+
+```bash
+git reset --soft HEAD~3
+```
+
+---
+
+### 3.11 常用命令速查
+
+#### 3.11.1 查看提交记录
+
+```bash
+git log --oneline -5
+```
+
+#### 3.11.2 撤销 Commit（保留暂存）
+
+```bash
+git reset --soft HEAD~1
+```
+
+#### 3.11.3 撤销 Commit（保留代码）
+
+```bash
+git reset HEAD~1
+```
+
+#### 3.11.4 撤销 Commit（删除代码）
+
+```bash
+git reset --hard HEAD~1
+```
+
+#### 3.11.5 已 Push 的安全回滚
+
+```bash
+git revert HEAD
+git push origin main
+```
+
+#### 3.11.6 已 Push 的强制回滚
+
+```bash
+git reset --hard HEAD~1
+git push --force-with-lease origin main
+```
+
+---
+
+### 3.12 推荐使用方式
+
+对于日常开发场景：
+
+- VS Code 项目开发
+- Python 项目开发
+- IoT-AI 项目开发
+- GitHub 仓库管理
+
+如果刚刚 Commit 且尚未 Push，推荐使用：
+
+```bash
+git reset --soft HEAD~1
+```
+
+推荐等级：
+
+```text
+★★★★★ git reset --soft HEAD~1
+★★★★☆ git reset HEAD~1
+★★★☆☆ git revert HEAD
+★☆☆☆☆ git reset --hard HEAD~1
+```
+
+---
+
+### 3.13 Git 回滚原理示意图
+
+原始状态：
+
+```text
+A → B → C(HEAD)
 ```
 
 执行：
@@ -1169,98 +1306,38 @@ git log --oneline
 git reset --soft HEAD~1
 ```
 
-可能报错：
+结果：
 
 ```text
-fatal: ambiguous argument 'HEAD~1'
+A → B(HEAD)
+
+C 的代码仍在暂存区
 ```
 
----
-
-#### 解决方案1：删除 Git 仓库重新初始化
-
-Windows PowerShell：
-
-```powershell
-Remove-Item -Recurse -Force .git
-```
-
-然后重新创建：
+执行：
 
 ```bash
-git init
+git reset HEAD~1
 ```
 
----
-
-#### 解决方案2：删除首次 Commit
-
-```bash
-git update-ref -d HEAD
-```
-
-执行后：
+结果：
 
 ```text
-Commit History 被清空
-文件保留
+A → B(HEAD)
+
+C 的代码仍在工作区
 ```
 
-效果类似回到 Git 初始化后但尚未 Commit 的状态。
-
----
-
-### 已经 Push 到 GitHub 怎么办？
-
-如果已经执行：
+执行：
 
 ```bash
-git push origin main
+git reset --hard HEAD~1
 ```
 
-不要直接使用上述命令。
+结果：
 
-需要根据情况选择：
+```text
+A → B(HEAD)
 
-```bash
-git revert
+C 的代码已彻底删除
 ```
-
-或
-
-```bash
-git reset + force push
-```
-
-因为这会影响远程仓库历史。
-
----
-
-### 快速选择
-
-| 需求 | 命令 |
-|--------|--------|
-| 撤销 Commit，保留 Add | `git reset --soft HEAD~1` |
-| 撤销 Commit 和 Add，保留代码 | `git reset HEAD~1` |
-| 撤销 Commit、Add 和代码 | `git reset --hard HEAD~1` |
-| 删除首次 Commit | `git update-ref -d HEAD` |
-| 删除整个 Git 仓库重新开始 | `Remove-Item -Recurse -Force .git` |
-
----
-
-### 推荐使用
-
-大部分情况下建议使用：
-
-```bash
-git reset --soft HEAD~1
-```
-
-原因：
-
-- 最安全
-- 不丢代码
-- 不需要重新 Add
-- 可以直接重新 Commit
-
-适用于绝大多数误提交场景。
