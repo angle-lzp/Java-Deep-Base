@@ -55,6 +55,19 @@
     - [3.11 常用命令速查](#311-常用命令速查)
     - [3.12 推荐使用方式](#312-推荐使用方式)
     - [3.13 Git 回滚原理示意图](#313-git-回滚原理示意图)
+- [4. 实战案例3：Git 暂存除指定文件以外的所有文件](#4-git-暂存除指定文件以外的所有文件)
+    - [4.1 暂存除 a.txt 以外的所有文件](#41-暂存除-atxt-以外的所有文件)
+    - [4.2 检查暂存结果](#42-检查暂存结果)
+    - [4.3 排除子目录中的指定文件](#43-排除子目录中的指定文件)
+    - [4.4 排除多个指定文件](#44-排除多个指定文件)
+    - [4.5 排除某种类型的所有文件](#45-排除某种类型的所有文件)
+    - [4.6 排除整个目录](#46-排除整个目录)
+    - [4.7 a.txt 已经被加入暂存区时的处理方法](#47-atxt-已经被加入暂存区时的处理方法)
+    - [4.8 提交除 a.txt 之外的文件](#48-提交除-atxt-之外的文件)
+    - [4.9 仅本次排除与永久忽略的区别](#49-仅本次排除与永久忽略的区别)
+    - [4.10 查看暂存区中即将提交的文件](#410-查看暂存区中即将提交的文件)
+    - [4.11 常用命令汇总](#411-常用命令汇总)
+    - [4.12 推荐的安全操作流程](#412-推荐的安全操作流程)
 
 目标组织仓库地址：
 
@@ -1341,3 +1354,532 @@ A → B(HEAD)
 
 C 的代码已彻底删除
 ```
+
+### 4. Git 暂存除指定文件以外的所有文件
+
+在使用 Git 提交代码时，有时需要暂存当前目录中的所有变更，但排除某个不希望提交的文件。
+
+例如，当前目录中包含以下文件：
+
+```text
+a.txt
+b.txt
+c.txt
+config.json
+```
+
+如果需要暂存除 `a.txt` 以外的所有文件，可以使用 Git 的排除路径语法。
+
+#### 4.1 暂存除 a.txt 以外的所有文件
+
+执行以下命令：
+
+```bash
+git add . -- ':!a.txt'
+```
+
+也可以使用完整的 `exclude` 写法：
+
+```bash
+git add . -- ':(exclude)a.txt'
+```
+
+以上两条命令的效果基本相同：
+
+- 暂存当前目录及其子目录中的其他变更。
+- 排除项目根目录下的 `a.txt`。
+- `a.txt` 的修改仍然保留在工作区中。
+- 后续执行 `git commit` 时，不会提交未暂存的 `a.txt`。
+
+命令各部分含义如下：
+
+```text
+git add .
+```
+
+表示添加当前目录及其子目录中的变更。
+
+```text
+--
+```
+
+表示 Git 命令选项结束，后面的参数均按路径规则处理。
+
+```text
+':!a.txt'
+```
+
+表示从本次 `git add` 操作中排除 `a.txt`。
+
+> 建议保留单引号，避免某些 Shell 将 `!` 识别为历史命令展开符。
+
+#### 4.2 检查暂存结果
+
+执行暂存命令后，使用以下命令检查 Git 状态：
+
+```bash
+git status
+```
+
+预期结果类似：
+
+```text
+Changes to be committed:
+    modified:   b.txt
+    modified:   c.txt
+    modified:   config.json
+
+Changes not staged for commit:
+    modified:   a.txt
+```
+
+其中：
+
+- `b.txt`、`c.txt` 和 `config.json` 已经进入暂存区。
+- `a.txt` 仍然保留在工作区中。
+- 后续执行 `git commit` 时不会提交 `a.txt`。
+
+#### 4.3 排除子目录中的指定文件
+
+如果需要排除的文件位于子目录中，例如：
+
+```text
+config/a.txt
+```
+
+可以执行：
+
+```bash
+git add . -- ':!config/a.txt'
+```
+
+也可以使用完整写法：
+
+```bash
+git add . -- ':(exclude)config/a.txt'
+```
+
+执行后，Git 会暂存其他文件，但不会暂存：
+
+```text
+config/a.txt
+```
+
+#### 4.4 排除多个指定文件
+
+如果需要同时排除多个文件，例如：
+
+```text
+a.txt
+config.json
+logs/app.log
+```
+
+可以执行：
+
+```bash
+git add . -- ':!a.txt' ':!config.json' ':!logs/app.log'
+```
+
+也可以使用完整的 `exclude` 写法：
+
+```bash
+git add . -- \
+  ':(exclude)a.txt' \
+  ':(exclude)config.json' \
+  ':(exclude)logs/app.log'
+```
+
+执行后，Git 会暂存其他变更，但不会暂存以下文件：
+
+```text
+a.txt
+config.json
+logs/app.log
+```
+
+#### 4.5 排除某种类型的所有文件
+
+如果需要排除当前目录及其子目录中的所有 `.txt` 文件，可以执行：
+
+```bash
+git add . -- ':(glob,exclude)**/*.txt'
+```
+
+例如，以下文件都不会被暂存：
+
+```text
+a.txt
+docs/readme.txt
+config/example.txt
+```
+
+其他类型的文件仍然会正常进入暂存区。
+
+如果只需要排除项目根目录中的 `.txt` 文件，可以执行：
+
+```bash
+git add . -- ':(glob,exclude)*.txt'
+```
+
+需要注意：
+
+- `*.txt` 主要匹配当前路径层级。
+- `**/*.txt` 可以匹配不同目录层级中的 `.txt` 文件。
+
+#### 4.6 排除整个目录
+
+如果需要排除整个 `logs` 目录及目录中的所有文件，可以执行：
+
+```bash
+git add . -- ':!logs/'
+```
+
+也可以使用完整写法：
+
+```bash
+git add . -- ':(exclude)logs/**'
+```
+
+例如，项目中存在以下文件：
+
+```text
+src/main.js
+src/config.js
+logs/app.log
+logs/error.log
+```
+
+执行：
+
+```bash
+git add . -- ':!logs/'
+```
+
+Git 会暂存：
+
+```text
+src/main.js
+src/config.js
+```
+
+但不会暂存：
+
+```text
+logs/app.log
+logs/error.log
+```
+
+如果 `logs` 目录不在项目根目录，需要填写相对于 Git 仓库根目录的路径。
+
+例如，要排除：
+
+```text
+backend/logs/
+```
+
+可以执行：
+
+```bash
+git add . -- ':!backend/logs/'
+```
+
+#### 4.7 a.txt 已经被加入暂存区时的处理方法
+
+如果 `a.txt` 已经通过以下命令进入暂存区：
+
+```bash
+git add .
+```
+
+此时再执行：
+
+```bash
+git add . -- ':!a.txt'
+```
+
+通常不会自动把已经暂存的 `a.txt` 从暂存区移除。
+
+应该先取消暂存：
+
+```bash
+git restore --staged a.txt
+```
+
+然后检查状态：
+
+```bash
+git status
+```
+
+`git restore --staged a.txt` 只会将 `a.txt` 从暂存区移除，不会：
+
+- 删除本地的 `a.txt`。
+- 撤销 `a.txt` 中的修改。
+- 将 `a.txt` 恢复为之前的版本。
+
+执行后，`a.txt` 的修改仍然保留在工作区中。
+
+然后可以重新暂存其他文件：
+
+```bash
+git add . -- ':!a.txt'
+```
+
+完整操作流程如下：
+
+```bash
+git restore --staged a.txt
+git add . -- ':!a.txt'
+git status
+```
+
+如果已经暂存了多个不应该提交的文件，可以一次取消暂存：
+
+```bash
+git restore --staged a.txt config.json logs/app.log
+```
+
+#### 4.8 提交除 a.txt 之外的文件
+
+确认暂存结果正确后，可以执行提交：
+
+```bash
+git commit -m "提交除 a.txt 之外的文件"
+```
+
+推荐的完整操作流程如下：
+
+```bash
+git add . -- ':!a.txt'
+git status
+git commit -m "提交除 a.txt 之外的文件"
+```
+
+如果 `a.txt` 已经被误加入暂存区，则执行：
+
+```bash
+git restore --staged a.txt
+git add . -- ':!a.txt'
+git status
+git commit -m "提交除 a.txt 之外的文件"
+```
+
+执行 `git commit` 后，只有暂存区中的文件会被提交，工作区中未暂存的 `a.txt` 不会进入本次提交。
+
+#### 4.9 仅本次排除与永久忽略的区别
+
+执行以下命令：
+
+```bash
+git add . -- ':!a.txt'
+```
+
+只会在本次 `git add` 操作中排除 `a.txt`。
+
+下一次如果直接执行：
+
+```bash
+git add .
+```
+
+`a.txt` 仍然可能进入暂存区。
+
+如果希望 Git 长期忽略 `a.txt`，可以在项目根目录的 `.gitignore` 文件中添加：
+
+```gitignore
+a.txt
+```
+
+如果希望忽略某个子目录中的文件，可以添加：
+
+```gitignore
+config/a.txt
+```
+
+如果希望忽略整个目录，可以添加：
+
+```gitignore
+logs/
+```
+
+修改 `.gitignore` 后，可以检查状态：
+
+```bash
+git status
+```
+
+需要注意，如果 `a.txt` 已经被 Git 跟踪，仅在 `.gitignore` 中添加 `a.txt` 不会停止跟踪。
+
+此时需要执行：
+
+```bash
+git rm --cached a.txt
+```
+
+然后提交 `.gitignore` 和索引变更：
+
+```bash
+git add .gitignore
+git commit -m "停止跟踪 a.txt"
+```
+
+`git rm --cached a.txt` 的作用是：
+
+- 从 Git 索引中移除 `a.txt`。
+- 停止 Git 对 `a.txt` 的版本跟踪。
+- 不会删除本地磁盘中的 `a.txt`。
+
+如果需要停止跟踪整个目录，可以执行：
+
+```bash
+git rm -r --cached logs/
+```
+
+然后提交：
+
+```bash
+git add .gitignore
+git commit -m "停止跟踪 logs 目录"
+```
+
+#### 4.10 查看暂存区中即将提交的文件
+
+使用以下命令查看已经暂存的文件名称：
+
+```bash
+git diff --cached --name-only
+```
+
+示例输出：
+
+```text
+b.txt
+c.txt
+config.json
+```
+
+如果输出中没有 `a.txt`，说明 `a.txt` 不会进入下一次提交。
+
+如果需要查看暂存区中的具体修改内容，可以执行：
+
+```bash
+git diff --cached
+```
+
+如果需要查看工作区中尚未暂存的修改，可以执行：
+
+```bash
+git diff
+```
+
+推荐在提交前依次执行：
+
+```bash
+git status
+git diff --cached --name-only
+git diff --cached
+```
+
+这样可以确认：
+
+- 哪些文件已经进入暂存区。
+- 哪些文件将进入本次提交。
+- 每个文件具体修改了什么内容。
+
+#### 4.11 常用命令汇总
+
+暂存除 `a.txt` 以外的所有文件：
+
+```bash
+git add . -- ':!a.txt'
+```
+
+使用完整的排除语法：
+
+```bash
+git add . -- ':(exclude)a.txt'
+```
+
+排除子目录中的指定文件：
+
+```bash
+git add . -- ':!config/a.txt'
+```
+
+同时排除多个文件：
+
+```bash
+git add . -- ':!a.txt' ':!config.json' ':!logs/app.log'
+```
+
+排除所有目录层级中的 `.txt` 文件：
+
+```bash
+git add . -- ':(glob,exclude)**/*.txt'
+```
+
+排除整个 `logs` 目录：
+
+```bash
+git add . -- ':!logs/'
+```
+
+取消已经暂存的 `a.txt`：
+
+```bash
+git restore --staged a.txt
+```
+
+检查 Git 状态：
+
+```bash
+git status
+```
+
+查看暂存区中的文件：
+
+```bash
+git diff --cached --name-only
+```
+
+查看暂存区中的具体修改：
+
+```bash
+git diff --cached
+```
+
+提交已经暂存的文件：
+
+```bash
+git commit -m "提交除 a.txt 之外的文件"
+```
+
+#### 4.12 推荐的安全操作流程
+
+如果 `a.txt` 当前还没有进入暂存区，推荐执行：
+
+```bash
+git add . -- ':!a.txt'
+git status
+git diff --cached --name-only
+git commit -m "提交除 a.txt 之外的文件"
+```
+
+如果不确定 `a.txt` 是否已经进入暂存区，推荐执行：
+
+```bash
+git restore --staged a.txt
+git add . -- ':!a.txt'
+git status
+git diff --cached --name-only
+git commit -m "提交除 a.txt 之外的文件"
+```
+
+其中，以下命令是提交前最重要的检查步骤：
+
+```bash
+git diff --cached --name-only
+```
+
+只有该命令列出的文件会进入下一次提交。
