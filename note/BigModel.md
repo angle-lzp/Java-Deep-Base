@@ -152,12 +152,56 @@ $$
 \operatorname{Total VRAM} \approx \text{模型权重显存} + \text{KV Cache 显存} + \text{框架/驱动预留(1 到 3GB)}
 $$
 
-## 2. `1 PFLOP FP4` 与 `2070 TOPS`
+## 2. `1 PFLOP FP4` 与 `2070 TOPS` 与 `1.3 TFLOPS`
 
 ### 2.1 单位对齐
 
 - **1 PFLOP FP4**：每秒约 $10^{15}$ 次 FP4 浮点运算。
 - **2070 TOPS**：每秒约 $2.07 \times 10^{15}$ 次整数或 AI 操作。TOPS 中的 T 通常表示 tera，即 $10^{12}$，所以 `2070 TOPS = 2.07 × 10^15 ops/s`。
+- **1.3 TFLOPS**：每秒最多执行约 $1.3 \times 10^{12}$ 次浮点运算。
+
+### 2.2 `1.3 TFLOPS` 的含义
+
+`1.3 TFLOPS` 可以拆开理解：
+
+- **T** = Tera = $10^{12}$，万亿
+- **FLOPS** = Floating Point Operations Per Second，浮点运算每秒
+- **1.3 TFLOPS** = $1.3 \times 10^{12}$ 次浮点运算/秒
+
+也就是说：
+
+$$
+1.3\ \text{TFLOPS} = 1.3\ \text{TOPS}
+$$
+
+但这个等式只在“单位数量级”上成立，不代表实际计算能力完全等价。
+
+### 2.3 FLOPS 和 TOPS 的关系
+
+| 单位 | 全称 | 通常表示 | 常见数据类型 |
+|---|---|---|---|
+| FLOPS | Floating Point Operations Per Second | 浮点运算能力 | FP32、FP16、BF16、FP8、FP4 |
+| TOPS | Tera Operations Per Second | 每秒万亿次操作 | INT8、INT4、NPU/AI 加速操作，也可能泛指 AI ops |
+
+### 2.4 怎么对比
+
+关键要看指标后面的 **数据类型、计算口径和硬件路径**。
+
+| 指标 | 能否直接比 | 说明 |
+|---|---|---|
+| 1.3 TFLOPS FP32 vs 1.3 TOPS INT8 | 不能直接比 | 一个是 32-bit 浮点，一个是 8-bit 整数 |
+| 1.3 TFLOPS FP16 vs 1.3 TOPS INT8 | 不能直接比 | 精度、硬件单元、模型支持都不同 |
+| 1.3 TFLOPS FP4 vs 1.3 TOPS INT4 | 勉强可做粗略量级比较 | 但仍要看硬件实现和稀疏性 |
+| 1.3 TFLOPS FP32 vs 2.6 TFLOPS FP32 | 可以直接比 | 同架构/同精度下，2.6 理论上约 2 倍 |
+| 100 TOPS INT8 vs 200 TOPS INT8 | 可以直接比 | 同精度、同计算口径下，200 理论上约 2 倍 |
+
+> 简单说：只有在相同精度、相同计算口径、相同硬件路径下，TFLOPS / TOPS 的数字才适合公平比较。
+
+### 2.5 一句话总结
+
+**TFLOPS 和 TOPS 在数学单位上都表示“每秒多少万亿次操作”，但 TFLOPS 通常指浮点运算，TOPS 通常指整数或 AI 加速操作。只有在相同精度、相同计算口径、相同硬件路径下，才能公平对比。**
+
+### 2.6 `1 PFLOP FP4` 与 `2070 TOPS` 的数字规模
 
 只看数字大小：
 
@@ -171,7 +215,7 @@ $$
 
 因此，**2070 TOPS 的理论操作次数大约是 1 PFLOP 的 2.07 倍**。
 
-### 2.2 为什么不能直接比较
+### 2.7 为什么不能直接比较
 
 不能简单地说 Jetson Thor 一定比 DGX/RTX Spark 更强，因为两者统计口径和适用场景不同。
 
@@ -182,7 +226,7 @@ $$
 | 更适合 | 大模型推理、低精度 Transformer、LLM | 边缘 AI、机器人、多传感器感知、视觉推理 |
 | 是否能直接比较 | 不完全能 | 不完全能 |
 
-### 2.3 结论
+### 2.8 结论
 
 如果只按每秒操作次数的峰值数字看，**2070 TOPS 比 1 PFLOP FP4 大，约为 2.07 倍**。
 
