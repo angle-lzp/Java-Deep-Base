@@ -347,6 +347,67 @@ timedatectl
 sudo hwclock --show
 ```
 
+#### 29.修改密码
+
+```shell
+# Linux 修改密码
+
+## 1. 修改当前用户密码
+
+passwd
+
+# 按提示依次输入：
+
+# 当前密码
+# 新密码
+# 再次输入新密码
+
+# 成功后会看到类似提示：
+
+passwd: password updated successfully
+
+## 2. 修改其他用户密码
+
+# 需要 `sudo` 权限：
+
+sudo passwd 用户名
+
+# 示例：
+
+sudo passwd angelo
+
+## 3. 使用 root 用户修改密码
+
+# 如果已经是 `root` 用户：
+
+passwd 用户名
+
+# 示例：
+
+passwd angelo
+
+## 4. 强制用户下次登录修改密码
+
+sudo chage -d 0 用户名
+
+# 示例：
+
+sudo chage -d 0 angelo
+
+## 5. 查看用户密码状态
+
+sudo passwd -S 用户名
+
+# 示例：
+
+sudo passwd -S angelo
+
+## 注意
+
+- 输入密码时终端不会显示字符，这是正常现象。
+- 建议使用包含大小写字母、数字和特殊字符的强密码。
+```
+
 ### 安装Oracle Instant Client
 
 #### 1.创建目录
