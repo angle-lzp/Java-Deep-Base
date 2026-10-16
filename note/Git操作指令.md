@@ -944,7 +944,7 @@ git reset --soft HEAD~1
 
 ```text
 √ Commit 被删除
-√ 代码保留
+√ 代码保留（git add . 的操作会保存，reset到指定的commit）
 √ 暂存区保留
 ```
 
