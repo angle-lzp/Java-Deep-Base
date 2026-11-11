@@ -347,6 +347,9 @@ timedatectl
 sudo hwclock --show
 ```
 
+##### 28.1. 直接配置 NTP Server 到 systemd-timesyncd中
+<img src="./img/timesyncd-NTP.png" style="width:100%" alt="htop.png"/>
+
 #### 29.修改密码
 
 ```shell
