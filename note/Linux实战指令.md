@@ -319,7 +319,7 @@ sudo systemctl status docker --no-pager
 
 #### 27.新增用户给用户设置管理员权限
 ```shell
-sudo adduser williamphan
+sudo adduser williamphan  #然后会要求输入密码
 
 # 确认是否有管理员权限
 groups williamphan
